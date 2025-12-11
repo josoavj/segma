@@ -101,7 +101,8 @@ class SettingsPage extends ConsumerWidget {
                 _SettingsTile(
                   title: 'Espace utilisé',
                   subtitle: '234 MB / 2 GB',
-                  trailing: Expanded(
+                  trailing: SizedBox(
+                    width: 100,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
