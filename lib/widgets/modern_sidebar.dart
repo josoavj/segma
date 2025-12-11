@@ -32,6 +32,7 @@ class ModernSidebar extends ConsumerWidget {
           ),
           child: SafeArea(
             child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
                 // Header avec logo/titre
                 Padding(
@@ -83,6 +84,8 @@ class ModernSidebar extends ConsumerWidget {
                       horizontal: 12,
                       vertical: 16,
                     ),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
                       ...NavigationPage.values.map((page) {
                         final isSelected = currentPage == page;
