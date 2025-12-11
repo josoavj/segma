@@ -8,7 +8,7 @@ import 'package:segma/screens/settings_page.dart';
 import 'package:segma/screens/logs_page.dart';
 import 'package:segma/screens/about_page.dart';
 import 'package:segma/services/log_service.dart';
-import 'package:segma/widgets/navigation_sidebar.dart';
+import 'package:segma/widgets/modern_sidebar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,12 +39,33 @@ class MainLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPage = ref.watch(currentPageProvider);
+    final isVisible = ref.watch(sidebarVisibleProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Tooltip(
+            message: isVisible ? 'Masquer le menu' : 'Afficher le menu',
+            child: IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                ref.read(sidebarVisibleProvider.notifier).state = !isVisible;
+              },
+            ),
+          ),
+        ),
+        title: Text(
+          currentPage.label,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Colors.transparent,
+      ),
       body: Row(
         children: [
-          // Sidebar de navigation
-          const NavigationSidebar(),
+          // Sidebar de navigation moderne
+          const ModernSidebar(),
           // Contenu principal
           Expanded(child: _buildPage(currentPage)),
         ],

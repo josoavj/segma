@@ -17,6 +17,10 @@ final currentPageProvider = StateProvider<NavigationPage>((ref) {
   return NavigationPage.home;
 });
 
+final sidebarVisibleProvider = StateProvider<bool>((ref) {
+  return true;
+});
+
 final isDarkThemeProvider = StateProvider<bool>((ref) {
   return false;
 });
