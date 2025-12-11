@@ -9,152 +9,271 @@ class ModernSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPage = ref.watch(currentPageProvider);
     final isDarkTheme = ref.watch(themeNotifierProvider);
-    final isVisible = ref.watch(sidebarVisibleProvider);
+    final isCollapsed = ref.watch(sidebarCollapsedProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      width: isVisible ? 280 : 0,
-      child: AnimatedOpacity(
-        opacity: isVisible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
+      width: isCollapsed ? 80 : 280,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey[900]
+              : Colors.white,
+          border: Border(
+            right: BorderSide(
+              color: Colors.grey.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // Header
+              if (!isCollapsed)
+                _buildExpandedHeader(context, ref)
+              else
+                _buildCollapsedHeader(context, ref),
+
+              const Divider(height: 1),
+
+              // Navigation items
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCollapsed ? 4 : 12,
+                    vertical: 16,
+                  ),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    ...NavigationPage.values.map((page) {
+                      final isSelected = currentPage == page;
+                      return isCollapsed
+                          ? _buildCollapsedNavItem(
+                              context,
+                              page: page,
+                              isSelected: isSelected,
+                              onTap: () {
+                                ref.read(currentPageProvider.notifier).state =
+                                    page;
+                              },
+                            )
+                          : _buildNavItem(
+                              context,
+                              page: page,
+                              isSelected: isSelected,
+                              onTap: () {
+                                ref.read(currentPageProvider.notifier).state =
+                                    page;
+                              },
+                            );
+                    }),
+                  ],
+                ),
+              ),
+
+              const Divider(height: 1),
+
+              // Footer
+              if (!isCollapsed)
+                _buildExpandedFooter(context, ref)
+              else
+                _buildCollapsedFooter(context, ref),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedHeader(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue[400]!, Colors.blue[600]!],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.image_search,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'SEGMA',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Image Segmentation',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[500],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCollapsedHeader(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[400]!, Colors.blue[600]!],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.image_search, color: Colors.white, size: 24),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedNavItem(
+    BuildContext context, {
+    required NavigationPage page,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final IconData icon = _getSelectedIcon(page);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Tooltip(
+        message: page.label,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey[900]
-                : Colors.white,
-            border: Border(
-              right: BorderSide(
-                color: Colors.grey.withValues(alpha: 0.1),
-                width: 1,
+            color: isSelected
+                ? Colors.blue.withValues(alpha: 0.2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(
+                    color: Colors.blue.withValues(alpha: 0.3),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  icon,
+                  color: isSelected ? Colors.blue : Colors.grey,
+                  size: 24,
+                ),
               ),
             ),
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                // Header avec logo/titre
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.blue[400]!, Colors.blue[600]!],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.image_search,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'SEGMA',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Image Segmentation',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedFooter(BuildContext context, WidgetRef ref) {
+    final isDarkTheme = ref.watch(themeNotifierProvider);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Theme toggle
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                ref.read(themeNotifierProvider.notifier).toggleTheme();
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-
-                const Divider(height: 1),
-
-                // Navigation items
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 16,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      isDarkTheme ? Icons.light_mode : Icons.dark_mode,
+                      size: 16,
+                      color: Theme.of(context).primaryColor,
                     ),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      ...NavigationPage.values.map((page) {
-                        final isSelected = currentPage == page;
-                        return _buildNavItem(
-                          context,
-                          page: page,
-                          isSelected: isSelected,
-                          onTap: () {
-                            ref.read(currentPageProvider.notifier).state = page;
-                          },
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-
-                const Divider(height: 1),
-
-                // Footer avec options
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // Theme toggle
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            isDarkTheme ? Icons.light_mode : Icons.dark_mode,
-                            size: 20,
-                          ),
-                          title: Text(
-                            isDarkTheme ? 'Mode clair' : 'Mode sombre',
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                          onTap: () {
-                            ref
-                                .read(themeNotifierProvider.notifier)
-                                .toggleTheme();
-                          },
-                        ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        isDarkTheme ? 'Mode clair' : 'Mode sombre',
+                        style: const TextStyle(fontSize: 13),
                       ),
-                      const SizedBox(height: 12),
-                      // Version
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'v1.0.0',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Version
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(
+              'v1.0.0',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCollapsedFooter(BuildContext context, WidgetRef ref) {
+    final isDarkTheme = ref.watch(themeNotifierProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Tooltip(
+        message: isDarkTheme ? 'Mode clair' : 'Mode sombre',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              ref.read(themeNotifierProvider.notifier).toggleTheme();
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                isDarkTheme ? Icons.light_mode : Icons.dark_mode,
+                size: 20,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
           ),
         ),

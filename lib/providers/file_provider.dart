@@ -3,7 +3,7 @@ import 'package:segma/models/models.dart';
 import 'package:segma/services/file_service.dart';
 
 final selectedFolderPathProvider = StateProvider<String>((ref) {
-  return '/home'; // Chemin par défaut - À configurer
+  return '/home/shadowcraft/Documents'; // Chemin par défaut - Dossier Documents
 });
 
 final folderStructureProvider = FutureProvider<FolderModel>((ref) async {

@@ -25,6 +25,11 @@ class FileService {
       final entities = await directory.list().toList();
 
       for (final entity in entities) {
+        // Ignorer les répertoires problématiques
+        if (_shouldIgnoreDirectory(entity.path)) {
+          continue;
+        }
+
         if (entity is Directory) {
           final subfolder = FolderModel(
             id: entity.path.hashCode.toString(),
@@ -58,6 +63,35 @@ class FileService {
     final extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
     final lowerPath = path.toLowerCase();
     return extensions.any((ext) => lowerPath.endsWith(ext));
+  }
+
+  /// Vérifie si un répertoire doit être ignoré
+  static bool _shouldIgnoreDirectory(String path) {
+    // Ignorer les répertoires Wine/Proton et système
+    final ignoredPatterns = [
+      '.wine',
+      '.proton',
+      '.steam',
+      '.cache',
+      '.config',
+      '.local',
+      '.mozilla',
+      'snap',
+    ];
+
+    // Vérifier chaque segment du chemin
+    for (final segment in path.split('/')) {
+      if (ignoredPatterns.contains(segment)) {
+        return true;
+      }
+    }
+
+    // Ignorer les chemins récursifs Wine
+    if (path.contains('.wine/dosdevices/z:')) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Charge les fichiers d'un dossier spécifique (non-récursif)

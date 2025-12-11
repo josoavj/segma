@@ -21,6 +21,10 @@ final sidebarVisibleProvider = StateProvider<bool>((ref) {
   return true;
 });
 
+final sidebarCollapsedProvider = StateProvider<bool>((ref) {
+  return false;
+});
+
 final isDarkThemeProvider = StateProvider<bool>((ref) {
   return false;
 });
