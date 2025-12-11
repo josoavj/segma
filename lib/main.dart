@@ -29,6 +29,7 @@ class MyApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme(),
       themeMode: isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       home: const MainLayout(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -39,7 +40,7 @@ class MainLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPage = ref.watch(currentPageProvider);
-    final isVisible = ref.watch(sidebarVisibleProvider);
+    final isCollapsed = ref.watch(sidebarCollapsedProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -47,11 +48,12 @@ class MainLayout extends ConsumerWidget {
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Tooltip(
-            message: isVisible ? 'Masquer le menu' : 'Afficher le menu',
+            message: isCollapsed ? 'Développer' : 'Réduire',
             child: IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(isCollapsed ? Icons.unfold_more : Icons.unfold_less),
               onPressed: () {
-                ref.read(sidebarVisibleProvider.notifier).state = !isVisible;
+                ref.read(sidebarCollapsedProvider.notifier).state =
+                    !isCollapsed;
               },
             ),
           ),
