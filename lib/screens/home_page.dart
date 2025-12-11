@@ -15,10 +15,6 @@ class HomePage extends ConsumerWidget {
     final selectedImage = ref.watch(selectedImageProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SEGMA - Image Segmentation'),
-        backgroundColor: Colors.blue,
-      ),
       body: folderStructureAsync.when(
         data: (folderStructure) {
           return Row(
@@ -26,19 +22,21 @@ class HomePage extends ConsumerWidget {
               // Colonne 1: Arborescence des dossiers
               Container(
                 width: 250,
-                color: Colors.grey[100],
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[900]
+                    : Colors.grey[50],
                 child: Column(
                   children: [
                     Container(
-                      color: Colors.blue,
+                      color: Theme.of(context).primaryColor,
                       padding: const EdgeInsets.all(12),
-                      child: const Text(
+                      child: Text(
                         'Dossiers',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ),
                     Expanded(
@@ -64,11 +62,11 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     children: [
                       Container(
-                        color: Colors.blue,
+                        color: Theme.of(context).primaryColor,
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.folder_open,
                               color: Colors.white,
                               size: 20,
@@ -78,20 +76,22 @@ class HomePage extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Images',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
                                   Text(
                                     selectedFolder.path,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(color: Colors.white70),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -117,11 +117,15 @@ class HomePage extends ConsumerWidget {
               else
                 Expanded(
                   child: Container(
-                    color: Colors.grey[100],
-                    child: const Center(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[900]
+                        : Colors.grey[50],
+                    child: Center(
                       child: Text(
                         'Sélectionnez un dossier pour voir les images',
-                        style: TextStyle(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                       ),
                     ),
                   ),
