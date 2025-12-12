@@ -20,7 +20,6 @@ class FolderTreeWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isSelected = selectedFolder?.id == folder.id;
     final isExpanded = ref.watch(expandedFoldersProvider(folder.id));
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -107,7 +106,7 @@ class FolderTreeWidget extends ConsumerWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        color: Theme.of(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -115,7 +114,9 @@ class FolderTreeWidget extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
                         ),
                       ),
                     ),
