@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/file_provider.dart';
 import 'package:segma/services/folder_paths_service.dart';
+import 'package:segma/services/file_service.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
 import 'package:segma/widgets/image_grid_widget.dart';
@@ -16,7 +16,6 @@ class HomePage extends ConsumerWidget {
     final folderStructureAsync = ref.watch(folderStructureProvider);
     final selectedFolder = ref.watch(selectedFolderProvider);
     final selectedImage = ref.watch(selectedImageProvider);
-    final currentPath = ref.watch(selectedFolderPathProvider);
 
     return Scaffold(
       body: folderStructureAsync.when(
@@ -80,9 +79,7 @@ class HomePage extends ConsumerWidget {
   ) {
     return Container(
       width: 280,
-      color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey[900]
-          : Colors.grey[50],
+      color: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
           // En-tête avec sélecteur de dossier
@@ -91,7 +88,7 @@ class HomePage extends ConsumerWidget {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.8),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -156,8 +153,11 @@ class HomePage extends ConsumerWidget {
         }
 
         final folders = snapshot.data!;
+        final customFolders = ref.watch(customFoldersProvider);
+
         return Column(
           children: [
+            // Dossiers standards
             _buildFolderButton(
               context,
               ref,
@@ -175,6 +175,38 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _buildFolderButton(context, ref, '🖥️ Bureau', folders['desktop']!),
+
+            // Dossiers personnalisés avec animation
+            if (customFolders.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+              const SizedBox(height: 12),
+            ],
+            ...customFolders.asMap().entries.map((entry) {
+              final index = entry.key;
+              final path = entry.value;
+              final folderName = path.split('/').last;
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: 1.0,
+                curve: Curves.easeInOut,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildCustomFolderDisplayButton(
+                    context,
+                    ref,
+                    '📁 $folderName',
+                    path,
+                    onRemove: () {
+                      ref.read(customFoldersProvider.notifier).state = [
+                        ...customFolders.sublist(0, index),
+                        ...customFolders.sublist(index + 1),
+                      ];
+                    },
+                  ),
+                ),
+              );
+            }).toList(),
           ],
         );
       },
@@ -192,7 +224,7 @@ class HomePage extends ConsumerWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 2,
               style: BorderStyle.solid,
             ),
@@ -232,12 +264,82 @@ class HomePage extends ConsumerWidget {
           width: 500,
           height: 400,
           child: FolderPickerWidget(
-            onFolderSelected: (path) {
-              ref.read(selectedFolderPathProvider.notifier).state = path;
-              ref.read(selectedFolderProvider.notifier).state = null;
+            onFolderSelected: (path) async {
+              // Charger directement le dossier sans changer selectedFolderPathProvider
+              final folder = await FileService.loadFolderStructure(path);
+              // Ajouter le nouveau dossier à la liste au lieu de le remplacer
+              final customFolders = ref.read(customFoldersProvider);
+              if (!customFolders.contains(path)) {
+                ref.read(customFoldersProvider.notifier).state = [
+                  ...customFolders,
+                  path,
+                ];
+              }
+              ref.read(selectedFolderProvider.notifier).state = folder;
               ref.read(selectedImageProvider.notifier).state = null;
               Navigator.pop(context);
             },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomFolderDisplayButton(
+    BuildContext context,
+    WidgetRef ref,
+    String label,
+    String path, {
+    required VoidCallback onRemove,
+  }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          // Charger directement le dossier sans changer selectedFolderPathProvider
+          final folder = await FileService.loadFolderStructure(path);
+          ref.read(selectedFolderProvider.notifier).state = folder;
+          ref.read(selectedImageProvider.notifier).state = null;
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: isDarkMode
+                ? Colors.grey[800]?.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.1),
+            border: Border.all(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.bookmark_outlined,
+                size: 18,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              GestureDetector(
+                onTap: onRemove,
+                child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+              ),
+            ],
           ),
         ),
       ),
@@ -255,9 +357,10 @@ class HomePage extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          ref.read(selectedFolderPathProvider.notifier).state = path;
-          ref.read(selectedFolderProvider.notifier).state = null;
+        onTap: () async {
+          // Charger directement le dossier sans changer selectedFolderPathProvider
+          final folder = await FileService.loadFolderStructure(path);
+          ref.read(selectedFolderProvider.notifier).state = folder;
           ref.read(selectedImageProvider.notifier).state = null;
         },
         borderRadius: BorderRadius.circular(8),
@@ -266,8 +369,8 @@ class HomePage extends ConsumerWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: isDarkMode
-                ? Colors.grey[800]?.withOpacity(0.5)
-                : Colors.white.withOpacity(0.5),
+                ? Colors.grey[800]?.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.1),
           ),
           child: Row(
             children: [
@@ -300,14 +403,14 @@ class HomePage extends ConsumerWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -319,7 +422,7 @@ class HomePage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -343,7 +446,7 @@ class HomePage extends ConsumerWidget {
                 Text(
                   selectedFolder.name,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white70,
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 11,
                   ),
                   maxLines: 1,
@@ -371,7 +474,7 @@ class HomePage extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Theme.of(context).primaryColor.withOpacity(0.15),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
                 ),
                 child: Icon(
                   Icons.folder_open_outlined,
