@@ -44,3 +44,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .vscode/settings.json
+backend/uploads/.segmentation_test/mask_1.bin
