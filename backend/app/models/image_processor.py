@@ -1,7 +1,12 @@
-import cv2
 import numpy as np
 from PIL import Image
 import logging
+
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
