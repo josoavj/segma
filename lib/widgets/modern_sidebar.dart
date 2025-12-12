@@ -8,7 +8,6 @@ class ModernSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPage = ref.watch(currentPageProvider);
-    final isDarkTheme = ref.watch(themeNotifierProvider);
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
 
     return AnimatedContainer(

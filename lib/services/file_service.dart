@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:segma/models/models.dart';
 
@@ -118,5 +119,76 @@ class FileService {
     }
 
     return images;
+  }
+
+  /// Crée le dossier de segmentation pour une image
+  static Future<Directory> _createSegmentationFolder(String imagePath) async {
+    final imageFile = File(imagePath);
+    final parentDir = imageFile.parent.path;
+    final imageNameWithoutExt = imageFile.path.split('/').last.split('.').first;
+
+    final segmentationDir = Directory(
+      '$parentDir/.segmentation/$imageNameWithoutExt',
+    );
+
+    if (!await segmentationDir.exists()) {
+      await segmentationDir.create(recursive: true);
+    }
+
+    return segmentationDir;
+  }
+
+  /// Sauvegarde un masque binaire pour une image
+  static Future<String> saveMask(
+    String imagePath,
+    Uint8List maskData,
+    String objectName,
+  ) async {
+    try {
+      final segmentationDir = await _createSegmentationFolder(imagePath);
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final maskPath = '${segmentationDir.path}/${objectName}_$timestamp.mask';
+
+      final maskFile = File(maskPath);
+      await maskFile.writeAsBytes(maskData);
+
+      return maskPath;
+    } catch (e) {
+      debugPrint('Erreur lors de la sauvegarde du masque: $e');
+      rethrow;
+    }
+  }
+
+  /// Charge un masque binaire
+  static Future<Uint8List> loadMask(String maskPath) async {
+    try {
+      final maskFile = File(maskPath);
+      if (!await maskFile.exists()) {
+        throw Exception('Fichier masque non trouvé: $maskPath');
+      }
+      return await maskFile.readAsBytes();
+    } catch (e) {
+      debugPrint('Erreur lors du chargement du masque: $e');
+      rethrow;
+    }
+  }
+
+  /// Supprime un masque et son dossier s'il est vide
+  static Future<void> deleteMask(String maskPath) async {
+    try {
+      final maskFile = File(maskPath);
+      if (await maskFile.exists()) {
+        await maskFile.delete();
+      }
+
+      // Vérifier si le dossier est vide et le supprimer
+      final parentDir = maskFile.parent;
+      final files = await parentDir.list().toList();
+      if (files.isEmpty) {
+        await parentDir.delete();
+      }
+    } catch (e) {
+      debugPrint('Erreur lors de la suppression du masque: $e');
+    }
   }
 }

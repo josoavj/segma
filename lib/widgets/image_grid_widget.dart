@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
+import 'package:segma/screens/segmentation_editor_page.dart';
 
 class ImageGridWidget extends ConsumerWidget {
   final String folderPath;
@@ -58,7 +59,15 @@ class ImageGridWidget extends ConsumerWidget {
             final isSelected = selectedImage?.id == image.id;
 
             return GestureDetector(
-              onTap: () => onImageSelected(image),
+              onTap: () {
+                onImageSelected(image);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SegmentationEditorPage(image: image),
+                  ),
+                );
+              },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: AnimatedScale(
