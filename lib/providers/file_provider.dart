@@ -26,6 +26,10 @@ final selectedImageProvider = StateProvider<ImageModel?>((ref) {
   return null;
 });
 
-final segmentationHistoryProvider = StateProvider<List<SegmentationResult>>(
-  (ref) => [],
-);
+final customFoldersProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
+
+final segmentationModeProvider = StateProvider<bool>((ref) {
+  return false; // true quand on est en mode segmentation
+});
