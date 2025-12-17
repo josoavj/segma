@@ -18,7 +18,11 @@ class SegmentedObjectsPage extends ConsumerWidget {
     if (sortBy == 'recent') {
       sortedHistory.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else if (sortBy == 'confidence') {
-      sortedHistory.sort((a, b) => b.confidence.compareTo(a.confidence));
+      sortedHistory.sort(
+        (a, b) => b.objects.isNotEmpty && a.objects.isNotEmpty
+            ? b.objects.first.confidence.compareTo(a.objects.first.confidence)
+            : 0,
+      );
     } else if (sortBy == 'name') {
       sortedHistory.sort(
         (a, b) =>
@@ -144,7 +148,15 @@ class _SegmentationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fileName = segmentation.imagePath.split('/').last;
-    final fileSize = (segmentation.maskData.length / 1024).toStringAsFixed(2);
+    final fileSize = segmentation.objects.isNotEmpty
+        ? (segmentation.objects.fold(
+                    0,
+                    (int sum, obj) => sum + obj.pixelsCount,
+                  ) *
+                  4 /
+                  1024)
+              .toStringAsFixed(2)
+        : '0';
     final aspectRatio = segmentation.width / segmentation.height;
 
     return Card(
@@ -209,7 +221,9 @@ class _SegmentationCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                '${(segmentation.confidence * 100).toStringAsFixed(1)}%',
+                                segmentation.objects.isNotEmpty
+                                    ? '${(segmentation.objects.first.confidence * 100).toStringAsFixed(1)}%'
+                                    : '0%',
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
                                       color: Colors.purple[700],
