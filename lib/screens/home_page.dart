@@ -35,8 +35,13 @@ class HomePage extends ConsumerWidget {
                         child: ImageGridWidget(
                           folderPath: selectedFolder.path,
                           onImageSelected: (image) {
-                            ref.read(selectedImageProvider.notifier).state =
-                                image;
+                            // Naviguer vers ImageViewerScreen au lieu d'afficher dans la colonne
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ImageViewerScreen(image: image),
+                              ),
+                            );
                           },
                           selectedImage: selectedImage,
                         ),
@@ -46,13 +51,6 @@ class HomePage extends ConsumerWidget {
                 )
               else
                 _buildEmptyState(context),
-
-              // Colonne 3: Visualisation de l'image
-              if (selectedImage != null)
-                Expanded(
-                  flex: 2,
-                  child: ImageViewerWidget(image: selectedImage),
-                ),
             ],
           );
         },

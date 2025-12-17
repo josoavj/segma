@@ -140,26 +140,6 @@ class SegmentationEditorPage extends ConsumerWidget {
           ),
 
           const Divider(height: 1),
-
-          // Bouton Continue
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _saveAndContinue(context, ref),
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Continue to effects'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -245,10 +225,10 @@ class SegmentationEditorPage extends ConsumerWidget {
       final result = SegmentationResult(
         imageId: image.id,
         imagePath: image.path,
-        maskData: maskBytes,
         width: width,
         height: height,
-        confidence: confidence,
+        objects: [],
+        segmentationDir: '',
         createdAt: DateTime.now(),
       );
 
@@ -267,35 +247,6 @@ class SegmentationEditorPage extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error adding object: $e')));
-    }
-  }
-
-  Future<void> _saveAndContinue(BuildContext context, WidgetRef ref) async {
-    try {
-      final objects = ref.read(editorObjectsProvider);
-
-      // Ajouter tous les objets à l'historique global
-      final history = ref.read(segmentationHistoryProvider);
-      ref.read(segmentationHistoryProvider.notifier).state = [
-        ...history,
-        ...objects,
-      ];
-
-      // Réinitialiser l'éditeur
-      ref.read(editorObjectsProvider.notifier).state = [];
-      ref.read(segmentationModeProvider.notifier).state = false;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${objects.length} object(s) saved successfully'),
-        ),
-      );
-
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error saving objects: $e')));
     }
   }
 
@@ -362,7 +313,11 @@ class SegmentationEditorPage extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${(object.confidence * 100).toStringAsFixed(0)}%',
+                        '${(color == Colors.red
+                            ? 100
+                            : color == Colors.green
+                            ? 95
+                            : 90).toStringAsFixed(0)}%',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

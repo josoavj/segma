@@ -13,13 +13,13 @@ from app.services.object_detector import get_object_detector
 
 logger = logging.getLogger(__name__)
 
-# Essayer d'importer SAM et le modèle
+# Importer SAM3 officiel
 try:
-    from app.models.sam_model import get_sam_model
-    SAM_AVAILABLE = True
-except ImportError:
-    SAM_AVAILABLE = False
-    logger.warning("SAM 3 non disponible - mode simulation")
+    from app.models.sam3_model import get_sam3_model
+    SAM3_AVAILABLE = True
+except ImportError as e:
+    SAM3_AVAILABLE = False
+    logger.error(f"SAM3 non disponible: {e}")
 
 
 class SegmentationService:
@@ -80,24 +80,17 @@ class SegmentationService:
             # Créer le répertoire
             seg_dir.mkdir(parents=True, exist_ok=True)
             
-            # Utiliser SAM 3 réel si disponible, sinon simulation
-            if SAM_AVAILABLE:
-                logger.info("🚀 Mode SAM 3 réel")
-                sam_model = get_sam_model()
-                if sam_model.is_model_loaded():
-                    objects_data = SegmentationService._segment_with_sam3(
-                        image, sam_model, prompt, confidence_threshold, seg_dir
-                    )
-                else:
-                    logger.warning("Modèle SAM3 non chargé, passage en simulation")
-                    objects_data = SegmentationService._simulate_segmentation(
-                        image, prompt, confidence_threshold, width, height, seg_dir
-                    )
-            else:
-                logger.info("📊 Mode simulation (SAM 3 non installé)")
-                objects_data = SegmentationService._simulate_segmentation(
-                    image, prompt, confidence_threshold, width, height, seg_dir
+            # Utiliser SAM3 réel
+            if not SAM3_AVAILABLE:
+                raise SegmentationException(
+                    "SAM3 non installé. Exécutez: pip install -r requirements.txt"
                 )
+            
+            logger.info("🚀 Utilisation SAM3 officiel")
+            sam3_model = get_sam3_model()
+            objects_data = SegmentationService._segment_with_sam3(
+                image, sam3_model, prompt, confidence_threshold, seg_dir, width, height
+            )
             
             logger.info(f"✓ Segmentation réussie: {len(objects_data)} objets détectés")
             
@@ -117,160 +110,81 @@ class SegmentationService:
             raise SegmentationException(f"Erreur interne: {str(e)}")
     
     @staticmethod
-    def _segment_with_sam3(image, sam_model, prompt, threshold, seg_dir):
-        """Segmentation réelle avec SAM 3 + labels YOLO"""
+    def _segment_with_sam3(image, sam3_model, prompt, threshold, seg_dir, width, height):
+        """Segmentation réelle avec SAM3 officiel"""
         try:
-            # Obtenir la segmentation du modèle
-            objects_raw = sam_model.segment_by_prompt(image, prompt)
+            logger.info(f"SAM3: Segmentation '{prompt}'")
+            
+            # Obtenir la segmentation SAM3
+            # Retourne une liste de dicts avec keys: object_id, label, confidence, bbox, mask, pixels_count
+            objects_raw = sam3_model.segment_by_text_prompt(
+                image, prompt, confidence_threshold=threshold
+            )
             
             if not objects_raw:
-                logger.warning("Aucun objet détecté par SAM 3")
+                logger.warning(f"SAM3: Aucun objet détecté pour '{prompt}'")
                 return []
             
-            # Normaliser les scores SAM
-            scores = [obj["confidence"] for obj in objects_raw]
-            min_score = min(scores) if scores else 0
-            max_score = max(scores) if scores else 1
-            score_range = max_score - min_score if max_score > min_score else 1
-            
-            # Préparer les bboxes pour la détection d'objets (normaliser le format)
+            # Préparer bboxes pour YOLO (optionnel si on veut affiner les labels)
             bboxes = []
             for obj in objects_raw:
                 bbox = obj["bbox"]
-                # Convertir de {"x": int, "y": int, "width": int, "height": int} 
-                # à {"x1": int, "y1": int, "x2": int, "y2": int}
-                if "x1" in bbox:
-                    bboxes.append(bbox)
-                else:
-                    # Format SAM: x, y, width, height
-                    bboxes.append({
-                        "x1": bbox["x"],
-                        "y1": bbox["y"],
-                        "x2": bbox["x"] + bbox["width"],
-                        "y2": bbox["y"] + bbox["height"]
-                    })
+                bboxes.append(bbox)
             
-            # Détecter les labels avec YOLO
+            # Optionnel: détecter labels avec YOLO pour plus de précision
             detector = get_object_detector()
-            detected_labels = detector.detect_labels(image, bboxes)
-            logger.debug(f"Labels détectés par YOLO: {detected_labels}")
+            detected_labels = detector.detect_labels(image, bboxes) if bboxes else {}
             
             objects = []
             for idx, obj in enumerate(objects_raw):
-                # Normaliser la confiance
-                normalized_confidence = (obj["confidence"] - min_score) / score_range if score_range > 0 else 0.5
-                normalized_confidence = max(0, min(1, normalized_confidence))
+                mask = obj["mask"]
                 
-                # Garder les objets avec une bonne zone de pixels (minimum 50 pixels)
-                if obj["pixels"] < 50:
-                    logger.debug(f"Objet ignoré (trop petit): {obj['pixels']} pixels")
+                # Convertir masque en format binaire (0-255)
+                if mask.dtype != np.uint8:
+                    mask = (mask.astype(bool).astype(np.uint8)) * 255
+                
+                # Filtrer les petites zones (bruit)
+                pixels = np.count_nonzero(mask)
+                if pixels < 50:
+                    logger.debug(f"SAM3: Objet #{obj['object_id']} ignoré (trop petit: {pixels} px)")
                     continue
                 
-                # Obtenir le label depuis YOLO
-                label = detected_labels.get(idx, f"object_{obj['id']}")
-                
-                # Normaliser la bbox SAM
-                bbox = obj["bbox"]
-                if "x1" not in bbox:
-                    normalized_bbox = {
-                        "x1": bbox["x"],
-                        "y1": bbox["y"],
-                        "x2": bbox["x"] + bbox["width"],
-                        "y2": bbox["y"] + bbox["height"]
-                    }
-                else:
-                    normalized_bbox = bbox
-                
-                mask = obj["mask"]
-                mask_filename = f"mask_{obj['id']}.bin"
+                # Sauvegarder le masque
+                object_id = obj["object_id"]
+                mask_filename = f"mask_{object_id}.bin"
                 mask_path = seg_dir / mask_filename
                 
                 try:
                     mask.tofile(str(mask_path))
-                    logger.debug(f"Masque SAM3 sauvegardé: {mask_path}")
+                    logger.debug(f"SAM3: Masque sauvegardé #{object_id} ({pixels} px)")
                 except Exception as e:
-                    logger.error(f"Erreur sauvegarde masque: {e}")
+                    logger.error(f"SAM3: Erreur sauvegarde masque: {e}")
                     continue
                 
+                # Label: préférer YOLO si disponible, sinon utiliser concept SAM3
+                label = detected_labels.get(idx, obj.get("label", f"object_{object_id}"))
+                
+                # Bounding box - s'assurer qu'elle est dans les limites
+                bbox = obj["bbox"]
+                bbox_dict = {
+                    "x1": int(max(0, bbox["x1"])),
+                    "y1": int(max(0, bbox["y1"])),
+                    "x2": int(min(width, bbox["x2"])),
+                    "y2": int(min(height, bbox["y2"]))
+                }
+                
                 objects.append({
-                    "object_id": obj["id"],
-                    "label": label,  # Label YOLO en anglais
-                    "confidence": round(normalized_confidence, 4),
-                    "bbox": normalized_bbox,
+                    "object_id": object_id,
+                    "label": label,
+                    "confidence": float(round(float(obj["confidence"]), 4)),
+                    "bbox": bbox_dict,
                     "mask_path": str(mask_path),
-                    "pixels_count": int(obj["pixels"])
+                    "pixels_count": int(pixels)
                 })
             
-            logger.info(f"Après normalisation et labels: {len(objects)} objets conservés")
+            logger.info(f"SAM3: {len(objects)} objet(s) détecté(s)")
             return objects
+        
         except Exception as e:
-            logger.error(f"Erreur SAM3: {e}", exc_info=True)
-            raise
-    
-    @staticmethod
-    def _simulate_segmentation(image, prompt, threshold, width, height, seg_dir):
-        """
-        Simulation: génère des masques binaires pour la démo
-        En production, ce code sera remplacé par SAM 3
-        """
-        objects = []
-        
-        # Simulation de 3 objets détectés
-        simulated_detections = [
-            {
-                "id": 1,
-                "label": "person",
-                "confidence": 0.95,
-                "bbox": {"x1": 50, "y1": 50, "x2": 300, "y2": 300},
-                "region": (50, 50, 250, 250)  # (y1, x1, y2, x2)
-            },
-            {
-                "id": 2,
-                "label": "dog",
-                "confidence": 0.87,
-                "bbox": {"x1": 320, "y1": 100, "x2": 550, "y2": 350},
-                "region": (100, 320, 250, 550)
-            },
-            {
-                "id": 3,
-                "label": "cat",
-                "confidence": 0.72,
-                "bbox": {"x1": 200, "y1": 350, "x2": 450, "y2": 550},
-                "region": (350, 200, 400, 450)
-            }
-        ]
-        
-        for detection in simulated_detections:
-            if detection["confidence"] < threshold:
-                continue
-            
-            # Créer masque binaire
-            mask = np.zeros((height, width), dtype=np.uint8)
-            y1, x1, y2, x2 = detection["region"]
-            mask[y1:y2, x1:x2] = 255
-            
-            # Sauvegarder masque
-            mask_filename = f"mask_{detection['id']}.bin"
-            mask_path = seg_dir / mask_filename
-            
-            try:
-                mask.tofile(str(mask_path))
-                logger.debug(f"Masque sauvegardé: {mask_path}")
-                pixels = np.count_nonzero(mask)
-            except Exception as e:
-                logger.error(f"Erreur sauvegarde masque: {e}")
-                continue
-            
-            # Calculer boîte englobante
-            bbox = detection["bbox"]
-            
-            objects.append({
-                "object_id": detection["id"],
-                "label": detection["label"],
-                "confidence": round(detection["confidence"], 4),
-                "bbox": bbox,
-                "mask_path": str(mask_path),
-                "pixels_count": int(pixels)
-            })
-        
-        return objects
+            logger.error(f"SAM3 segmentation error: {e}", exc_info=True)
+            raise SegmentationException(f"Erreur SAM3: {str(e)}")

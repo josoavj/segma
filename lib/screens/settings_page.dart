@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/navigation_provider.dart';
+import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/config/app_config.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -97,16 +100,7 @@ class SettingsPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  _SettingsTile(
-                    title: 'Vérifier la connexion',
-                    subtitle: 'Tester la connexion au serveur',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Connexion établie ✓')),
-                      );
-                    },
-                  ),
+                  _HealthCheckTile(),
                 ],
               ),
               const SizedBox(height: 24),
@@ -115,49 +109,9 @@ class SettingsPage extends ConsumerWidget {
               _SettingsSection(
                 title: 'Modèle SAM',
                 children: [
-                  _SettingsTile(
-                    title: 'Type de modèle',
-                    subtitle: 'ViT-B (petit, rapide)',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sélection du modèle non disponible'),
-                        ),
-                      );
-                    },
-                  ),
-                  _SettingsTile(
-                    title: 'Dispositif',
-                    subtitle: 'CPU',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  ),
-                  _SettingsTile(
-                    title: 'Statut du modèle',
-                    subtitle: 'Non chargé',
-                    trailing: Tooltip(
-                      message: 'Télécharger le modèle',
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.download,
-                          color: Colors.orange,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Téléchargement du modèle...'),
-                        ),
-                      );
-                    },
-                  ),
+                  _ModelInfoTile(),
+                  const Divider(height: 1, indent: 0, endIndent: 0),
+                  _ModelConfigurationTile(),
                 ],
               ),
               const SizedBox(height: 24),
@@ -166,24 +120,7 @@ class SettingsPage extends ConsumerWidget {
               _SettingsSection(
                 title: 'Stockage',
                 children: [
-                  _SettingsTile(
-                    title: 'Espace utilisé',
-                    subtitle: '234 MB / 2 GB',
-                    trailing: SizedBox(
-                      width: 80,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: 234 / 2000,
-                          minHeight: 6,
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.blue[400]!,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _StorageInfoTile(),
                   _SettingsTile(
                     title: 'Vider le cache',
                     subtitle: 'Supprimer les images temporaires',
@@ -216,11 +153,37 @@ class SettingsPage extends ConsumerWidget {
                               child: const Text('Annuler'),
                             ),
                             FilledButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Cache vidé ✓')),
-                                );
+                                try {
+                                  final appDir =
+                                      await getApplicationDocumentsDirectory();
+                                  final uploadsDir = Directory(
+                                    '${appDir.path}/uploads',
+                                  );
+
+                                  if (await uploadsDir.exists()) {
+                                    await uploadsDir.delete(recursive: true);
+                                  }
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Cache vidé ✓'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Erreur: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
                               },
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.red,
@@ -348,6 +311,566 @@ class _SettingsTile extends StatelessWidget {
         trailing: trailing,
         onTap: onTap,
         horizontalTitleGap: 16,
+      ),
+    );
+  }
+}
+
+/// Widget pour afficher l'état de la connexion (Health Check)
+class _HealthCheckTile extends ConsumerWidget {
+  const _HealthCheckTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final healthAsync = ref.watch(healthCheckProvider);
+
+    return healthAsync.when(
+      loading: () => _SettingsTile(
+        title: 'Vérifier la connexion',
+        subtitle: 'Vérification...',
+        trailing: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+          ),
+        ),
+      ),
+      error: (err, _) => _SettingsTile(
+        title: 'Vérifier la connexion',
+        subtitle: 'Erreur de connexion ❌',
+        trailing: Icon(Icons.error, color: Colors.red[700]),
+        onTap: () async {
+          ref.invalidate(healthCheckProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Reconnexion en cours...')),
+          );
+        },
+      ),
+      data: (health) {
+        final status = health['status'] as String? ?? 'unknown';
+        final isHealthy = status == 'healthy';
+        return _SettingsTile(
+          title: 'Vérifier la connexion',
+          subtitle: isHealthy ? 'Connecté ✓' : 'Déconnecté',
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isHealthy
+                  ? Colors.green.withValues(alpha: 0.2)
+                  : Colors.red.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isHealthy ? Colors.green : Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isHealthy ? 'Actif' : 'Inactif',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isHealthy ? Colors.green : Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          onTap: () {
+            ref.invalidate(healthCheckProvider);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Status: $status'),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Widget pour afficher les infos du modèle SAM
+class _ModelInfoTile extends ConsumerWidget {
+  const _ModelInfoTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modelAsync = ref.watch(modelInfoProvider);
+
+    return modelAsync.when(
+      loading: () => Column(
+        children: [
+          _SettingsTile(
+            title: 'Type de modèle',
+            subtitle: 'Chargement...',
+            trailing: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+              ),
+            ),
+          ),
+        ],
+      ),
+      error: (err, _) => Column(
+        children: [
+          _SettingsTile(
+            title: 'Type de modèle',
+            subtitle: 'Erreur: $err',
+            trailing: Icon(Icons.error, color: Colors.red[700]),
+          ),
+        ],
+      ),
+      data: (info) {
+        final modelType = info['model_type'] as String? ?? 'unknown';
+        final device = info['device'] as String? ?? 'unknown';
+        final isLoaded = info['is_loaded'] as bool? ?? false;
+        final cudaAvailable = info['cuda_available'] as bool? ?? false;
+
+        return Column(
+          children: [
+            _SettingsTile(
+              title: 'Type de modèle',
+              subtitle: modelType.toUpperCase(),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Allez à "Configuration du modèle" pour changer',
+                    ),
+                  ),
+                );
+              },
+            ),
+            _SettingsTile(
+              title: 'Dispositif',
+              subtitle: device.toUpperCase(),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: device == 'cuda'
+                      ? Colors.green.withValues(alpha: 0.2)
+                      : Colors.blue.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  device == 'cuda' ? '⚡ GPU' : '💻 CPU',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: device == 'cuda'
+                        ? Colors.green[700]
+                        : Colors.blue[700],
+                  ),
+                ),
+              ),
+            ),
+            _SettingsTile(
+              title: 'Statut du modèle',
+              subtitle: isLoaded ? 'Chargé ✓' : 'Non chargé',
+              trailing: Icon(
+                isLoaded ? Icons.check_circle : Icons.download,
+                color: isLoaded ? Colors.green : Colors.orange,
+              ),
+            ),
+            if (!cudaAvailable)
+              _SettingsTile(
+                title: 'CUDA',
+                subtitle: 'Non disponible (GPU requis)',
+                trailing: Icon(Icons.close, color: Colors.red[700]),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Widget pour afficher l'utilisation du stockage
+class _StorageInfoTile extends StatefulWidget {
+  const _StorageInfoTile();
+
+  @override
+  State<_StorageInfoTile> createState() => _StorageInfoTileState();
+}
+
+class _StorageInfoTileState extends State<_StorageInfoTile> {
+  late Future<Map<String, double>> _storageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageFuture = _getStorageInfo();
+  }
+
+  Future<Map<String, double>> _getStorageInfo() async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final uploadsDir = Directory('${appDir.path}/uploads');
+
+      double usedBytes = 0;
+
+      if (await uploadsDir.exists()) {
+        await for (var entity in uploadsDir.list(
+          recursive: true,
+          followLinks: false,
+        )) {
+          if (entity is File) {
+            usedBytes += await entity.length();
+          }
+        }
+      }
+
+      final usedMB = usedBytes / (1024 * 1024);
+      const totalMB = 2000.0; // 2GB
+
+      return {'used': usedMB, 'total': totalMB, 'percentage': usedMB / totalMB};
+    } catch (e) {
+      return {'used': 0, 'total': 2000.0, 'percentage': 0};
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FutureBuilder<Map<String, double>>(
+          future: _storageFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _SettingsTile(
+                title: 'Espace utilisé',
+                subtitle: 'Calcul...',
+                trailing: SizedBox(
+                  width: 80,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.blue[400]!,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            if (!snapshot.hasData) {
+              return _SettingsTile(title: 'Espace utilisé', subtitle: 'Erreur');
+            }
+
+            final data = snapshot.data!;
+            final used = data['used']!.toStringAsFixed(1);
+            final percentage = (data['percentage']! * 100).toStringAsFixed(0);
+
+            return _SettingsTile(
+              title: 'Espace utilisé',
+              subtitle: '$used MB / 2000 MB ($percentage%)',
+              trailing: SizedBox(
+                width: 80,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: data['percentage'],
+                    minHeight: 6,
+                    backgroundColor: Colors.grey[300],
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.blue[400]!,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Widget de configuration du modèle SAM
+class _ModelConfigurationTile extends ConsumerStatefulWidget {
+  const _ModelConfigurationTile();
+
+  @override
+  ConsumerState<_ModelConfigurationTile> createState() =>
+      _ModelConfigurationTileState();
+}
+
+class _ModelConfigurationTileState
+    extends ConsumerState<_ModelConfigurationTile> {
+  late String _selectedModel;
+  late String _selectedDevice;
+  bool _isChanging = false;
+
+  final List<String> _availableModels = ['vit_b', 'vit_l', 'vit_h'];
+  final List<String> _availableDevices = ['cpu', 'cuda'];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedModel = 'vit_b';
+    _selectedDevice = 'cpu';
+  }
+
+  Future<void> _changeModel(String model, String device) async {
+    setState(() => _isChanging = true);
+
+    try {
+      await ref.read(changeModelProvider((model, device)).future);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Modèle changé: $model sur $device'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        // Invalider les providers pour forcer la mise à jour
+        ref.invalidate(modelInfoProvider);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isChanging = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final modelInfoAsync = ref.watch(modelInfoProvider);
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Configuration du modèle',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+
+          // Sélection du modèle
+          Text('Modèle', style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              value: _selectedModel,
+              isExpanded: true,
+              underline: const SizedBox(),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              items: _availableModels.map((model) {
+                String label = model;
+                String? size;
+
+                switch (model) {
+                  case 'vit_b':
+                    label = 'ViT-B (Petit)';
+                    size = '95 MB';
+                    break;
+                  case 'vit_l':
+                    label = 'ViT-L (Moyen)';
+                    size = '308 MB';
+                    break;
+                  case 'vit_h':
+                    label = 'ViT-H (Grand)';
+                    size = '2.5 GB';
+                    break;
+                }
+
+                return DropdownMenuItem(
+                  value: model,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(label),
+                      if (size != null)
+                        Text(
+                          size,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: _isChanging
+                  ? null
+                  : (value) {
+                      if (value != null && value != _selectedModel) {
+                        setState(() => _selectedModel = value);
+                      }
+                    },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Sélection du device
+          Text('Dispositif', style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButton<String>(
+              value: _selectedDevice,
+              isExpanded: true,
+              underline: const SizedBox(),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              items: _availableDevices.map((device) {
+                return DropdownMenuItem(
+                  value: device,
+                  child: Row(
+                    children: [
+                      Icon(
+                        device == 'cuda' ? Icons.speed : Icons.memory,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(device == 'cuda' ? 'GPU (CUDA)' : 'CPU'),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: _isChanging
+                  ? null
+                  : (value) {
+                      if (value != null && value != _selectedDevice) {
+                        setState(() => _selectedDevice = value);
+                      }
+                    },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Bouton de confirmation
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _isChanging
+                  ? null
+                  : () => _changeModel(_selectedModel, _selectedDevice),
+              icon: _isChanging
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.check),
+              label: Text(_isChanging ? 'Changement en cours...' : 'Appliquer'),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Infos du modèle actuel
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: modelInfoAsync.when(
+              data: (modelInfo) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'État actuel',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Modèle: ${modelInfo['model_type'] ?? 'N/A'}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (modelInfo['is_loaded'] == true)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Chargé',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Device: ${modelInfo['device'] ?? 'N/A'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                );
+              },
+              loading: () => const CircularProgressIndicator(strokeWidth: 2),
+              error: (error, _) => Text(
+                'Erreur: $error',
+                style: TextStyle(color: Colors.red[400]),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
