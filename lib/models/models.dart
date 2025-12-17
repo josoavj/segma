@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 class ImageModel {
   final String id;
   final String path;
@@ -50,85 +48,120 @@ class FolderModel {
   }
 }
 
+/// Objet segmenté détecté dans une image
+class SegmentedObject {
+  final int objectId;
+  final String label;
+  final double confidence;
+  final BoundingBox bbox;
+  final String maskPath;
+  final int pixelsCount;
+  bool isSelected;
+
+  SegmentedObject({
+    required this.objectId,
+    required this.label,
+    required this.confidence,
+    required this.bbox,
+    required this.maskPath,
+    required this.pixelsCount,
+    this.isSelected = false,
+  });
+
+  factory SegmentedObject.fromJson(Map<String, dynamic> json) {
+    return SegmentedObject(
+      objectId: json['object_id'] as int,
+      label: json['label'] as String,
+      confidence: (json['confidence'] as num).toDouble(),
+      bbox: BoundingBox.fromJson(json['bbox'] as Map<String, dynamic>),
+      maskPath: json['mask_path'] as String,
+      pixelsCount: json['pixels_count'] as int,
+    );
+  }
+}
+
+/// Boîte englobante
+class BoundingBox {
+  final int x1;
+  final int y1;
+  final int x2;
+  final int y2;
+
+  BoundingBox({
+    required this.x1,
+    required this.y1,
+    required this.x2,
+    required this.y2,
+  });
+
+  int get width => x2 - x1;
+  int get height => y2 - y1;
+
+  factory BoundingBox.fromJson(Map<String, dynamic> json) {
+    return BoundingBox(
+      x1: json['x1'] as int,
+      y1: json['y1'] as int,
+      x2: json['x2'] as int,
+      y2: json['y2'] as int,
+    );
+  }
+}
+
+/// Résultat de segmentation multi-objets
 class SegmentationResult {
   final String imageId;
   final String imagePath;
-  final Uint8List maskData;
   final int width;
   final int height;
-  final double confidence;
+  final List<SegmentedObject> objects;
+  final String segmentationDir;
   final DateTime createdAt;
 
   SegmentationResult({
     required this.imageId,
     required this.imagePath,
-    required this.maskData,
     required this.width,
     required this.height,
-    required this.confidence,
+    required this.objects,
+    required this.segmentationDir,
     required this.createdAt,
   });
 
-  /// Retourne le masque comme une liste de booléens
-  List<bool> getMaskAsBoolList() {
-    final bytes = maskData;
-    final boolList = <bool>[];
-    for (var byte in bytes) {
-      boolList.add(byte > 128);
-    }
-    return boolList;
-  }
-
-  /// Crée une nouvelle instance avec des données mises en cache
-  SegmentationResult copyWith({
-    String? imageId,
-    String? imagePath,
-    Uint8List? maskData,
-    int? width,
-    int? height,
-    double? confidence,
-    DateTime? createdAt,
-  }) {
+  factory SegmentationResult.fromJson(Map<String, dynamic> json) {
     return SegmentationResult(
-      imageId: imageId ?? this.imageId,
-      imagePath: imagePath ?? this.imagePath,
-      maskData: maskData ?? this.maskData,
-      width: width ?? this.width,
-      height: height ?? this.height,
-      confidence: confidence ?? this.confidence,
-      createdAt: createdAt ?? this.createdAt,
+      imageId: json['image_path'].hashCode.toString(),
+      imagePath: json['image_path'] as String,
+      width: json['width'] as int,
+      height: json['height'] as int,
+      objects: (json['objects'] as List)
+          .map((obj) => SegmentedObject.fromJson(obj as Map<String, dynamic>))
+          .toList(),
+      segmentationDir: json['segmentation_dir'] as String,
+      createdAt: DateTime.now(),
     );
   }
 }
 
+/// Requête de segmentation par prompt
 class SegmentationRequest {
   final String imagePath;
-  final int x;
-  final int y;
-  final int? boxX1;
-  final int? boxY1;
-  final int? boxX2;
-  final int? boxY2;
+  final String prompt;
+  final double confidenceThreshold;
+  final String? saveDir;
 
   SegmentationRequest({
     required this.imagePath,
-    required this.x,
-    required this.y,
-    this.boxX1,
-    this.boxY1,
-    this.boxX2,
-    this.boxY2,
+    required this.prompt,
+    this.confidenceThreshold = 0.0,
+    this.saveDir,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'image_path': imagePath,
-      'x': x,
-      'y': y,
-      if (boxX1 != null) 'box_x1': boxX1,
-      if (boxY1 != null) 'box_y1': boxY1,
-      if (boxX2 != null) 'box_x2': boxX2,
-      if (boxY2 != null) 'box_y2': boxY2,
+      'prompt': prompt,
+      'confidence_threshold': confidenceThreshold,
+      if (saveDir != null) 'save_dir': saveDir,
     };
   }
 }
