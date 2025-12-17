@@ -46,3 +46,28 @@ class HealthResponse(BaseModel):
     model_loaded: bool = Field(..., description="Modèle SAM chargé")
     model_type: str = Field(..., description="Type de modèle SAM (sam3, vit_b, vit_l, vit_h)")
     api_version: str = Field(..., description="Version de l'API")
+
+
+class ModelConfigRequest(BaseModel):
+    """Requête de configuration du modèle"""
+    model_type: str = Field(..., description="Type de modèle (vit_b, vit_l, vit_h)")
+    device: Optional[str] = Field(None, description="Device (cpu ou cuda)")
+
+
+class ModelConfigResponse(BaseModel):
+    """Réponse de configuration du modèle"""
+    status: str = Field(..., description="Statut de la configuration")
+    model_type: str = Field(..., description="Type de modèle actuellement chargé")
+    device: str = Field(..., description="Device utilisé")
+    is_loaded: bool = Field(..., description="Modèle chargé avec succès")
+    available_models: List[str] = Field(..., description="Modèles disponibles")
+    cuda_available: bool = Field(..., description="CUDA disponible sur le système")
+
+
+class ModelInfoResponse(BaseModel):
+    """Infos sur le modèle actuellement chargé"""
+    model_type: str = Field(..., description="Type de modèle")
+    device: str = Field(..., description="Device utilisé")
+    is_loaded: bool = Field(..., description="Modèle chargé")
+    available_models: List[str] = Field(..., description="Modèles disponibles")
+    cuda_available: bool = Field(..., description="CUDA disponible")

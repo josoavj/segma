@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
 from app.api import api_router
-from app.models.sam_model import get_sam_model
+from app.models.model_manager import model_manager
 from config import settings
 
 # Configuration du logging
@@ -28,22 +28,22 @@ async def lifespan(app: FastAPI):
     logger.info("║           Démarrage de l'application SEGMA                  ║")
     logger.info("╚════════════════════════════════════════════════════════════╝")
     
+    model_info = model_manager.get_model_info()
+    
     logger.info(f"📦 Configuration:")
     logger.info(f"   • API Version: 1.0.0")
-    logger.info(f"   • Modèle SAM: {settings.SAM_MODEL_TYPE}")
-    logger.info(f"   • Dispositif: {settings.DEVICE}")
+    logger.info(f"   • Modèle SAM: {model_info['model_type']}")
+    logger.info(f"   • Dispositif: {model_info['device']}")
+    logger.info(f"   • CUDA disponible: {model_info['cuda_available']}")
     logger.info(f"   • Host: {settings.HOST}:{settings.PORT}")
     logger.info(f"   • CORS Origins: {', '.join(settings.CORS_ORIGINS)}")
     
-    logger.info("🚀 Initialisation du modèle SAM...")
-    try:
-        sam_model = get_sam_model()
-        if sam_model.is_model_loaded():
-            logger.info("✓ Modèle SAM chargé avec succès!")
-        else:
-            logger.warning("⚠ Modèle SAM non chargé - sera chargé à la première requête")
-    except Exception as e:
-        logger.error(f"✗ Erreur d'initialisation du modèle: {e}")
+    logger.info("🚀 Modèle SAM:")
+    if model_info['is_loaded']:
+        logger.info(f"   ✓ Modèle chargé: {model_info['model_type']} sur {model_info['device']}")
+    else:
+        logger.warning(f"   ⚠ Modèle {model_info['model_type']} en cours de chargement...")
+    logger.info(f"   • Modèles disponibles: {', '.join(model_info['available_models'])}")
     
     logger.info("📚 Documentation API: http://localhost:8000/docs")
     logger.info("")
@@ -87,10 +87,13 @@ async def root():
     return {
         "name": "SEGMA API",
         "version": "1.0.0",
-        "description": "API de segmentation d'images utilisant Segment Anything",
-        "docs": "http://localhost:8000/docs",
-        "openapi": "http://localhost:8000/openapi.json",
-        "health": "http://localhost:8000/api/v1/health"
+        "description": "API de segmentation d'images utilisant Segment Anything 3 + YOLO",
+        "endpoints": {
+            "health": "GET /api/v1/health",
+            "upload": "POST /api/v1/upload",
+            "segment": "POST /api/v1/segment"
+        },
+        "docs": "http://localhost:8000/docs"
     }
 
 
@@ -100,7 +103,7 @@ async def generic_exception_handler(request, exc):
     logger.error(f"Erreur non gérée: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={"detail": "Erreur serveur interne. Consultez les logs pour plus de détails."}
+        content={"detail": "Erreur serveur interne"}
     )
 
 

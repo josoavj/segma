@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.api.schemas import HealthResponse
-from app.models.sam_model import get_sam_model
+from app.models.model_manager import model_manager
 from config import settings
 import logging
 
@@ -19,25 +19,20 @@ async def health():
     Retourne l'état du serveur, le dispositif utilisé et le statut du modèle SAM
     """
     try:
-        sam_model = get_sam_model()
-        model_loaded = sam_model is not None
-        device = settings.DEVICE
-        
-        if model_loaded and hasattr(sam_model, 'device'):
-            device = str(sam_model.device)
+        model_info = model_manager.get_model_info()
         
         return HealthResponse(
             status="healthy",
-            device=device,
-            model_loaded=model_loaded,
-            model_type=settings.SAM_MODEL_TYPE,
+            device=model_info['device'],
+            model_loaded=model_info['is_loaded'],
+            model_type=model_info['model_type'],
             api_version=API_VERSION
         )
     except Exception as e:
         logger.error(f"Erreur dans health check: {e}")
         return HealthResponse(
             status="unhealthy",
-            device=settings.DEVICE,
+            device="unknown",
             model_loaded=False,
             model_type=settings.SAM_MODEL_TYPE,
             api_version=API_VERSION

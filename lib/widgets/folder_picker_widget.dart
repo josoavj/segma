@@ -41,7 +41,7 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
         });
 
         setState(() {
-          _entities = entities.where((e) => e is Directory).toList();
+          _entities = entities.whereType<Directory>().toList();
           currentPath = path;
         });
       }

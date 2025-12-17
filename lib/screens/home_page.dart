@@ -206,7 +206,7 @@ class HomePage extends ConsumerWidget {
                   ),
                 ),
               );
-            }).toList(),
+            }),
           ],
         );
       },
