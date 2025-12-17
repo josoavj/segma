@@ -3,6 +3,17 @@ Application principale SEGMA
 Backend FastAPI pour la segmentation d'images avec SAM
 """
 
+import os
+import torch
+
+# Détection automatique du device AVANT d'importer SAM3
+# Cela empêche SAM3 de forcer CUDA sur un système sans GPU
+if not torch.cuda.is_available():
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    print("🖥️  Pas de GPU détecté - Désactivation CUDA")
+else:
+    print(f"🎮 GPU détecté: {torch.cuda.get_device_name(0)}")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
