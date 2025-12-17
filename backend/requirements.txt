@@ -5,6 +5,7 @@ pillow==10.1.0
 opencv-python==4.8.1.78
 torch==2.1.1
 torchvision==0.16.1
+segment-anything==1.0
 numpy==1.24.3
 pydantic==2.5.0
 pydantic-settings==2.1.0
