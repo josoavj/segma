@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum NavigationPage {
   home('Accueil', 'home'),
@@ -34,13 +35,30 @@ final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, bool>(
 );
 
 class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false);
-
-  void toggleTheme() {
-    state = !state;
+  ThemeNotifier() : super(false) {
+    _loadTheme();
   }
 
-  void setTheme(bool isDark) {
-    state = isDark;
+  Future<void> _loadTheme() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool('darkTheme') ?? false;
+    } catch (e) {
+      state = false;
+    }
+  }
+
+  void toggleTheme() {
+    setTheme(!state);
+  }
+
+  Future<void> setTheme(bool isDark) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('darkTheme', isDark);
+      state = isDark;
+    } catch (e) {
+      state = isDark;
+    }
   }
 }
