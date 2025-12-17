@@ -1,7 +1,11 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
-from app.api.schemas import SegmentationRequest, SegmentationResponse, ImageUploadResponse
+from app.api.schemas import (
+    SegmentationRequest, SegmentationResponse, ImageUploadResponse,
+    ModelConfigRequest, ModelConfigResponse, ModelInfoResponse
+)
 from app.services.segmentation_service import SegmentationService
 from app.models.image_processor import ImageProcessor
+from app.models.model_manager import model_manager
 from config import settings
 import logging
 import os
@@ -130,6 +134,76 @@ async def upload_image(file: UploadFile = File(...)):
     
     except HTTPException:
         raise
+    except Exception as e:
+        logger.error(f"Erreur lors du téléchargement: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Erreur lors du téléchargement du fichier")
+
+
+@router.get("/model/info", response_model=ModelInfoResponse)
+async def get_model_info():
+    """
+    Récupère les informations du modèle SAM actuellement chargé
+    
+    Retourne:
+    - model_type: Type de modèle (vit_b, vit_l, vit_h)
+    - device: Device utilisé (cpu ou cuda)
+    - is_loaded: Si le modèle est chargé
+    - available_models: Liste des modèles disponibles
+    - cuda_available: Si CUDA est disponible sur le système
+    """
+    try:
+        info = model_manager.get_model_info()
+        return ModelInfoResponse(**info)
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des infos: {e}")
+        raise HTTPException(status_code=500, detail="Impossible de récupérer les infos du modèle")
+
+
+@router.post("/model/change", response_model=ModelConfigResponse)
+async def change_model(request: ModelConfigRequest):
+    """
+    Change le modèle SAM et/ou le device
+    
+    Paramètres:
+    - model_type: Nouveau type de modèle (vit_b, vit_l, vit_h)
+    - device: Device (cpu ou cuda, optionnel)
+    
+    Les modèles disponibles:
+    - **vit_b**: Petit modèle, rapide (~96MB)
+    - **vit_l**: Modèle intermédiaire (~312MB)
+    - **vit_h**: Grand modèle, plus précis (~1.2GB)
+    
+    Temps de chargement estimé:
+    - vit_b: ~2-3 secondes
+    - vit_l: ~5-10 secondes
+    - vit_h: ~15-30 secondes
+    """
+    if request.model_type not in ["vit_b", "vit_l", "vit_h"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Modèle invalide: {request.model_type}. Disponibles: vit_b, vit_l, vit_h"
+        )
+    
+    if request.device and request.device not in ["cpu", "cuda"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Device invalide: {request.device}. Utilisez 'cpu' ou 'cuda'"
+        )
+    
+    try:
+        logger.info(f"Changement de modèle: {request.model_type} sur {request.device or 'auto'}")
+        info = model_manager.change_model(request.model_type, request.device)
+        
+        return ModelConfigResponse(
+            status="success",
+            **info
+        )
+    except ValueError as e:
+        logger.error(f"Erreur de validation: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Erreur lors du changement de modèle: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Impossible de changer le modèle")
     except Exception as e:
         logger.error(f"Erreur lors du téléchargement: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Erreur lors du téléchargement du fichier")
