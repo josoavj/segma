@@ -156,7 +156,7 @@ docker-compose exec backend bash
 BACKEND_PORT=8000
 
 # Token HuggingFace pour SAM3
-HF_TOKEN=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
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Niveau de logging
 LOG_LEVEL=info  # ou: debug, warning, error
