@@ -3,8 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
-import 'package:segma/providers/file_provider.dart';
-import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/services/file_service.dart';
 
 // Provider pour les objets segmentés en cours d'édition
