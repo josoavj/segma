@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HF_TOKEN: ${HF_TOKEN:-}
+    container_name: segma-backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      # Cache HuggingFace (persistant entre redémarrages)
+      - hf_cache:/root/.cache/huggingface
+      # Résultats de segmentation
+      - segmentation_data:/app/segmentation_output
+      # Configuration optionnelle
+      - ./backend/config.py:/app/config.py:ro
+    environment:
+      # Désactiver CUDA (CPU only)
+      - CUDA_VISIBLE_DEVICES=
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      # Configuration application
+      - DEVICE=cpu
+      - MAX_IMAGE_SIZE=2048
+      - CONFIDENCE_THRESHOLD=0.5
+      # Logging
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Limites de ressources (optionnel)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 8G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 4G
+
+  # Service optionnel: Nginx reverse proxy
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - backend
+
+# Volumes nommés pour persistance
+volumes:
+  hf_cache:
+    driver: local
+  segmentation_data:
+    driver: local
+
+# Network personnalisé (optionnel)
+networks:
+  default:
+    name: segma-network
+    driver: bridge
