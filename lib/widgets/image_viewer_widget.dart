@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/segmentation_provider.dart';
+import 'package:segma/providers/file_provider.dart';
 
 /// Écran complet pour la visualisation d'image avec segmentation (interface moderne)
 class ImageViewerScreen extends StatelessWidget {
@@ -71,12 +72,12 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(segmentationLoadingProvider);
     final error = ref.watch(segmentationErrorProvider);
-    final currentSeg = ref.watch(currentSegmentationProvider);
+    final segmentState = ref.watch(segmentImageProvider);
 
-    // Lancer la segmentation automatiquement si pas encore faite
-    ref.listen(currentSegmentationProvider, (previous, next) {});
+    // Récupérer les données de segmentation du AsyncNotifier
+    final currentSeg = segmentState.whenData((data) => data).value;
 
-    // Déclencher la segmentation automatiquement au montage
+    // Déclencher la segmentation automatiquement au montage ou si l'image change
     if (currentSeg == null && !isLoading) {
       Future.microtask(() {
         ref
@@ -98,7 +99,10 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            // Retourner en désélectionnant l'image (au lieu de Navigator.pop)
+            ref.read(selectedImageProvider.notifier).state = null;
+          },
           tooltip: 'Retour',
         ),
         title: Column(
@@ -736,27 +740,53 @@ class _MaskOverlayWidget extends StatelessWidget {
 
   Future<Uint8List> _generateMaskImage() async {
     try {
+      // Créer une image avec dimensions correctes
       final mask = img.Image(
         width: segmentation.width,
         height: segmentation.height,
         numChannels: 4,
       );
 
-      if (segmentation.objects.isNotEmpty) {
-        final maskBytes = List<int>.filled(
-          segmentation.width * segmentation.height,
-          0,
-        );
+      // Initialiser tous les pixels en transparent (remplir la toile)
+      for (int y = 0; y < segmentation.height; y++) {
+        for (int x = 0; x < segmentation.width; x++) {
+          mask.setPixelRgba(x, y, 0, 0, 0, 0);
+        }
+      }
 
-        for (int y = 0; y < segmentation.height; y++) {
-          for (int x = 0; x < segmentation.width; x++) {
-            final index = y * segmentation.width + x;
-            if (index < maskBytes.length) {
-              final value = maskBytes[index];
-              if (value > 128) {
-                mask.setPixelRgba(x, y, 0, 100, 255, 150);
+      // Charger et appliquer chaque masque d'objet
+      if (segmentation.objects.isNotEmpty) {
+        for (final obj in segmentation.objects) {
+          try {
+            // Charger le fichier masque binaire
+            final maskFile = File(obj.maskPath);
+            if (!await maskFile.exists()) {
+              debugPrint('Fichier masque non trouvé: ${obj.maskPath}');
+              continue;
+            }
+
+            final maskBytes = await maskFile.readAsBytes();
+
+            // Vérifier que la taille correspond
+            if (maskBytes.length != segmentation.width * segmentation.height) {
+              debugPrint(
+                'Erreur: taille du masque incorrecte (${maskBytes.length} != ${segmentation.width * segmentation.height})',
+              );
+              continue;
+            }
+
+            // Appliquer le masque à l'image (blanc là où il y a du masque)
+            for (int y = 0; y < segmentation.height; y++) {
+              for (int x = 0; x < segmentation.width; x++) {
+                final idx = y * segmentation.width + x;
+                if (maskBytes[idx] > 128) {
+                  // Pixel du masque: afficher en couleur semi-transparente
+                  mask.setPixelRgba(x, y, 100, 150, 255, 180);
+                }
               }
             }
+          } catch (e) {
+            debugPrint('Erreur chargement masque ${obj.objectId}: $e');
           }
         }
       }
