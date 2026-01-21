@@ -1,312 +1,170 @@
-# SEGMA API - Guide d'Utilisation Rapide
+#SEGMA API V3 - Guide d'Utilisation Complet
 
-## 🚀 Démarrer le serveur
+Ce guide détaille comment interagir avec le moteur de segmentation **SAM 3 (Promptable Concept Segmentation)** et **YOLOv8**.
 
-```bash
-cd backend
-export PYTHONPATH=.
-python -m uvicorn main:app --port 8000
-```
+## Points d'entrée (Endpoints)
 
-Serveur accessible: **http://localhost:8000**
-Docs interactives: **http://localhost:8000/docs**
+| Méthode | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v3/health` | État du système (GPU, SAM 3, Version) |
+| `POST` | `/api/v3/upload` | Téléchargement de l'image source |
+| `POST` | `/api/v3/segment` | Inférence IA (Image → Masques .bin) |
 
 ---
 
-## 📋 Endpoints Disponibles
+## 1. Vérification de l'état (Health Check)
 
-### 1. Health Check
-Vérifie que le serveur fonctionne
+Avant de lancer des calculs lourds, vérifiez si le GPU est disponible et si le modèle SAM 3 est chargé.
+
+**Requête :**
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/health
+curl -X GET http://localhost:8000/api/v3/health
+
 ```
 
-**Réponse:**
+**Réponse (JSON) :**
+
 ```json
 {
   "status": "healthy",
-  "device": "cpu",
-  "model_loaded": false,
-  "model_type": "sam3",
-  "api_version": "1.0.0"
+  "device": "cuda",
+  "model_loaded": true,
+  "model_type": "SAM 3",
+  "api_version": "3.0.0"
 }
+
 ```
 
 ---
 
-### 2. Upload d'Image
-Télécharge une image sur le serveur
+## 2. Upload de l'image
+
+L'IA a besoin d'un chemin local pour traiter l'image. Cette étape sauvegarde le fichier sur le serveur.
+
+**Requête :**
 
 ```bash
-curl -X POST -F "file=@mon_image.jpg" \
-  http://localhost:8000/api/v1/upload
+curl -X POST -F "file=@ma_machine.jpg" http://localhost:8000/api/v3/upload
+
 ```
 
-**Réponse:**
+**Réponse (JSON) :**
+
 ```json
 {
-  "filename": "mon_image.jpg",
-  "image_path": "/home/user/uploads/mon_image.jpg",
+  "filename": "ma_machine.jpg",
+  "image_path": "/absolut/path/to/segma/data/uploads/ma_machine.jpg",
   "width": 1920,
   "height": 1080,
-  "size_mb": 2.5
+  "size_mb": 1.45
 }
+
 ```
 
 ---
 
-### 3. Segmentation par Prompt
-**Endpoint Principal** - Segmente les objets par description textuelle
+## 3. Segmentation par Prompt (PCS)
 
-#### Requête Simple (répertoire par défaut):
+C'est ici que SAM 3 identifie les objets par leur nom et génère les masques binaires.
+
+**Requête :**
+
 ```bash
-curl -X POST http://localhost:8000/api/v1/segment \
+curl -X POST http://localhost:8000/api/v3/segment \
   -H "Content-Type: application/json" \
   -d '{
-    "image_path": "/home/user/uploads/mon_image.jpg",
-    "prompt": "détecte tous les animaux",
-    "confidence_threshold": 0.5
+    "image_path": "/path/to/ma_machine.jpg",
+    "prompt": "boulons de fixation et écrous",
+    "confidence_threshold": 0.3
   }'
+
 ```
 
-#### Requête avec Répertoire Personnalisé:
-```bash
-curl -X POST http://localhost:8000/api/v1/segment \
-  -H "Content-Type: application/json" \
-  -d '{
-    "image_path": "/home/user/uploads/mon_image.jpg",
-    "prompt": "détecte tous les animaux",
-    "confidence_threshold": 0.5,
-    "save_dir": "/chemin/custom/segmentation"
-  }'
-```
+**Réponse (JSON) :**
 
-#### Réponse:
 ```json
 {
-  "image_path": "/home/user/uploads/mon_image.jpg",
-  "width": 1920,
-  "height": 1080,
-  "objects_count": 3,
+  "status": "success",
+  "objects_count": 2,
   "objects": [
     {
-      "object_id": 1,
-      "label": "objet 1",
-      "confidence": 0.95,
-      "bbox": {
-        "x1": 50,
-        "y1": 50,
-        "x2": 300,
-        "y2": 300
-      },
-      "mask_path": "/home/user/uploads/.segmentation_mon_image/mask_1.bin",
-      "pixels_count": 45000
-    },
-    {
-      "object_id": 2,
-      "label": "objet 2",
-      "confidence": 0.87,
-      "bbox": {
-        "x1": 320,
-        "y1": 100,
-        "x2": 550,
-        "y2": 350
-      },
-      "mask_path": "/home/user/uploads/.segmentation_mon_image/mask_2.bin",
-      "pixels_count": 52000
-    },
-    {
-      "object_id": 3,
-      "label": "objet 3",
-      "confidence": 0.72,
-      "bbox": {
-        "x1": 200,
-        "y1": 350,
-        "x2": 450,
-        "y2": 550
-      },
-      "mask_path": "/home/user/uploads/.segmentation_mon_image/mask_3.bin",
-      "pixels_count": 38000
+      "object_id": 0,
+      "label": "bolt",
+      "confidence": 0.92,
+      "bbox": {"x1": 450, "y1": 300, "x2": 510, "y2": 360},
+      "mask_path": "/data/masks/seg_ma_machine/mask_0.bin",
+      "pixels_count": 3200
     }
-  ],
-  "segmentation_dir": "/home/user/uploads/.segmentation_mon_image"
+  ]
 }
+
 ```
 
 ---
 
-## 🎯 Format des Masques Binaires
+## 4. Comprendre le format des masques (.bin)
 
-Chaque masque est un fichier **`.bin`** (raw binary):
+Le format `.bin` est un flux binaire brut (**raw data**) sans en-tête ni compression.
 
-```
-Format: uint8 (1 byte par pixel)
-Valeurs: 
-  - 255 = BLANC (zone segmentée)
-  - 0   = NOIR  (reste de l'image)
-  
-Dimensions: Exactement width × height de l'image originale
-```
+* **Type de données** : `uint8` (1 octet par pixel).
+* **Valeurs** : `255` (Zone sélectionnée), `0` (Fond).
+* **Taille du fichier** : Exactement  de l'image originale.
 
-### Exemple de lecture en Python:
+### Exemple de conversion .bin vers PNG (Python) :
+
 ```python
 import numpy as np
 from PIL import Image
 
-# Lire le masque binaire
-mask = np.fromfile("mask_1.bin", dtype=np.uint8)
-mask = mask.reshape((1080, 1920))  # height, width
+# Charger le fichier binaire
+w, h = 1920, 1080
+mask_data = np.fromfile("mask_0.bin", dtype=np.uint8)
+mask_array = mask_data.reshape((h, w))
 
-# Afficher
-Image.fromarray(mask, mode='L').save("mask_1.png")
+# Sauvegarder en image classique
+Image.fromarray(mask_array).save("visual_mask.png")
 
-# Ou superposer sur l'image originale
-image = Image.open("mon_image.jpg")
-segmented = Image.new('RGB', image.size, color='black')
-segmented.paste(image, mask=Image.fromarray(mask))
-segmented.save("segmented.jpg")
 ```
 
 ---
 
-## 📁 Structure de Sauvegarde
+## 5. Structure de stockage
 
-### Par Défaut (sans `save_dir`):
-```
-uploads/
-├── mon_image.jpg
-└── .segmentation_mon_image/
-    ├── mask_1.bin      (zone segmentée = blanc, reste = noir)
-    ├── mask_2.bin
-    └── mask_3.bin
-```
+Le backend organise les fichiers pour éviter les conflits :
 
-### Personnalisé (avec `save_dir`):
-```
-/chemin/custom/segmentation/
-├── mask_1.bin
-├── mask_2.bin
-└── mask_3.bin
+```text
+data/
+├── uploads/              # Images originales (ma_machine.jpg)
+└── masks/
+    └── seg_ma_machine/   # Dossier spécifique à l'image
+        ├── mask_0.bin    # Masque du premier objet
+        ├── mask_1.bin    # Masque du second objet
+        └── metadata.json # (Optionnel) Copie des infos YOLO
+
 ```
 
 ---
 
-## 🔍 Exemples Complets
+## 6. Dépannage & Erreurs
 
-### Python (Requests + PIL):
-```python
-import requests
-import numpy as np
-from PIL import Image
-
-BASE_URL = "http://localhost:8000/api/v1"
-
-# 1. Upload image
-with open("photo.jpg", "rb") as f:
-    response = requests.post(
-        f"{BASE_URL}/upload",
-        files={"file": f}
-    )
-    image_path = response.json()["image_path"]
-
-# 2. Segmentation
-response = requests.post(
-    f"{BASE_URL}/segment",
-    json={
-        "image_path": image_path,
-        "prompt": "tous les animaux",
-        "confidence_threshold": 0.6
-    }
-)
-
-result = response.json()
-
-# 3. Traiter les masques
-for obj in result["objects"]:
-    mask_path = obj["mask_path"]
-    confidence = obj["confidence"]
-    
-    # Lire masque
-    mask = np.fromfile(mask_path, dtype=np.uint8)
-    mask = mask.reshape((result["height"], result["width"]))
-    
-    # Sauvegarder
-    Image.fromarray(mask, mode='L').save(f"mask_{obj['object_id']}.png")
-    print(f"Objet {obj['object_id']}: {confidence:.2%} confiance")
-```
+| Code HTTP | Cause possible | Solution |
+| --- | --- | --- |
+| **413** | Image trop lourde | Augmenter `MAX_FILE_SIZE` dans le `.env` |
+| **404** | Image path invalide | Vérifier que le chemin envoyé est bien celui retourné par `/upload` |
+| **500** | CUDA Out of Memory | Réduire la résolution de l'image ou utiliser `DEVICE=cpu` |
+| **500** | SAM 3 Timeout | Augmenter le timeout de votre client (Inférence > 2s) |
 
 ---
 
-## ⚙️ Configuration
+## 7. Note pour l'intégration Flutter
 
-### Variables d'environnement (.env):
-```dotenv
-# Server
-HOST=0.0.0.0
-PORT=8000
-DEBUG=False
+Pour afficher les masques sur mobile :
 
-# Model (pour futur)
-SAM_MODEL_TYPE=vit_b  # vit_b, vit_l, vit_h
-DEVICE=cpu            # cpu ou cuda
-
-# Files
-MAX_FILE_SIZE=52428800  # 50 MB
-UPLOAD_DIR=./uploads
-
-# CORS
-CORS_ORIGINS=http://localhost:3000,http://localhost:8080
-```
+1. Utilisez `File(path).readAsBytesSync()` pour obtenir un `Uint8List`.
+2. Ne convertissez pas tout en PNG sur le serveur (trop lent).
+3. Utilisez un `CustomPainter` dans Flutter pour dessiner le masque binaire directement sur l'image originale.
 
 ---
 
-## 📦 Installation des Dépendances
-
-### Minimum (mode simulation):
-```bash
-pip install fastapi uvicorn pillow python-dotenv pydantic pydantic-settings python-multipart
-```
-
-### Complet (mode réel avec SAM 3):
-```bash
-pip install -r requirements.txt
-# + PyTorch et SAM 3 (sera disponible)
-```
-
----
-
-## 🐛 Codes d'Erreur
-
-| Code | Erreur | Solution |
-|------|--------|----------|
-| 400  | Paramètres invalides | Vérifier prompt, threshold, chemins |
-| 404  | Image non trouvée | Vérifier `image_path` |
-| 413  | Fichier trop gros | Max 50MB, réduire la taille |
-| 500  | Erreur serveur | Consulter les logs |
-
----
-
-## 📝 Notes
-
-- **Masques**: Sauvegardés en format binaire brut (`.bin`)
-- **Format**: uint8, même résolution que l'image source
-- **Répertoire**: Créé automatiquement, nécessite pas de préparation
-- **Mode Simulation**: Jusqu'à l'installation de SAM 3
-- **CORS**: Configuré pour Flutter (localhost:3000)
-
----
-
-## 🔗 Intégration avec Flutter
-
-L'app Flutter peut:
-1. Uploader des images: `POST /api/v1/upload`
-2. Envoyer le prompt: `POST /api/v1/segment`
-3. Récupérer les masques: Accéder aux fichiers `.bin` depuis le chemin retourné
-4. Afficher les masques: Lire les fichiers binaires et les convertir en images
-
----
-
-**Version API**: 1.0.0  
-**État**: Opérationnel (mode simulation)  
-**SAM Version**: En attente de SAM 3
+**Version API** : 3.0.0 (Janvier 2026)
