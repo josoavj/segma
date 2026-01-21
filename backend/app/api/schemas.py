@@ -1,73 +1,68 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 
 class SegmentationRequest(BaseModel):
-    """Requête de segmentation par prompt texte (SAM 3)"""
-    image_path: str = Field(..., description="Chemin absolu de l'image")
-    prompt: str = Field(..., description="Description des objets à segmenter (ex: 'tous les animaux', 'voitures')")
-    confidence_threshold: float = Field(0.5, description="Seuil de confiance minimum (0.0-1.0)")
-    save_dir: Optional[str] = Field(None, description="Chemin du répertoire de sauvegarde (optionnel, défaut: .segmentation_<image_name>)")
+    """Requête de segmentation par prompt texte (SAM 3 PCS)"""
+    image_path: str = Field(..., description="Chemin absolu de l'image sur le serveur")
+    prompt: str = Field(..., description="Concept textuel à segmenter (ex: 'boulons rouillés')")
+    confidence_threshold: float = Field(0.25, ge=0.0, le=1.0, description="Seuil de confiance")
+    save_dir: Optional[str] = Field(None, description="Répertoire de destination pour les .bin")
 
 
 class SegmentedObject(BaseModel):
-    """Un objet segmenté"""
-    object_id: int = Field(..., description="ID de l'objet")
-    label: str = Field(..., description="Label/description de l'objet")
-    confidence: float = Field(..., description="Confiance de la segmentation")
-    bbox: dict = Field(..., description="Boîte englobante {x1, y1, x2, y2}")
-    mask_path: str = Field(..., description="Chemin du masque binaire sauvegardé")
-    pixels_count: int = Field(..., description="Nombre de pixels du masque")
+    """Métadonnées d'un objet extrait par SAM 3"""
+    object_id: int = Field(..., description="Index de l'objet")
+    label: str = Field(..., description="Label identifié par YOLO ou prompt")
+    confidence: float = Field(..., description="Score de confiance du modèle")
+    # Utilisation d'un Dict pour la flexibilité de la BBox {x1, y1, x2, y2}
+    bbox: Dict[str, int] = Field(..., description="Boîte englobante en pixels")
+    mask_path: str = Field(..., description="Chemin absolu vers le fichier .bin")
+    pixels_count: int = Field(..., description="Surface de l'objet en pixels")
 
 
 class SegmentationResponse(BaseModel):
-    """Réponse de segmentation multi-objets"""
-    image_path: str = Field(..., description="Chemin de l'image segmentée")
-    width: int = Field(..., description="Largeur de l'image")
-    height: int = Field(..., description="Hauteur de l'image")
-    objects_count: int = Field(..., description="Nombre d'objets détectés")
-    objects: List[SegmentedObject] = Field(..., description="Liste des objets segmentés")
-    segmentation_dir: str = Field(..., description="Répertoire contenant les masques binaires")
+    """Réponse complète après traitement SAM 3 + YOLO"""
+    image_path: str = Field(..., description="Chemin de l'image source")
+    resolution: str = Field(..., description="Format 'Largeur x Hauteur'")
+    objects_count: int = Field(..., description="Nombre d'objets trouvés")
+    objects: List[SegmentedObject] = Field(..., description="Détails de chaque segment")
+    segmentation_dir: str = Field(..., description="Dossier contenant les masques binaires")
 
 
 class ImageUploadResponse(BaseModel):
-    """Réponse du téléchargement d'image"""
-    filename: str = Field(..., description="Nom du fichier sauvegardé")
-    image_path: str = Field(..., description="Chemin absolu de l'image sauvegardée")
-    width: int = Field(..., description="Largeur de l'image")
-    height: int = Field(..., description="Hauteur de l'image")
-    size_mb: float = Field(..., description="Taille du fichier en MB")
+    """Réponse après upload de l'image depuis Flutter"""
+    filename: str = Field(..., description="Nom du fichier stocké")
+    image_path: str = Field(..., description="Chemin complet pour traitement")
+    width: int = Field(..., description="Largeur originale")
+    height: int = Field(..., description="Hauteur originale")
+    size_mb: float = Field(..., description="Poids du fichier en MegaBytes")
 
 
 class HealthResponse(BaseModel):
-    """Réponse de santé du serveur"""
-    status: str = Field(..., description="État du serveur")
-    device: str = Field(..., description="Dispositif utilisé (CPU/GPU)")
-    model_loaded: bool = Field(..., description="Modèle SAM chargé")
-    model_type: str = Field(..., description="Type de modèle SAM (sam3, vit_b, vit_l, vit_h)")
-    api_version: str = Field(..., description="Version de l'API")
+    """État de santé du moteur d'IA"""
+    status: str = Field("ready", description="État du serveur")
+    device: str = Field(..., description="Dispositif actif (cpu/cuda)")
+    model_loaded: bool = Field(..., description="Indique si SAM 3 est en mémoire")
+    model_type: str = Field("SAM 3", description="Version du modèle")
+    api_version: str = Field("3.0.0")
 
-
-class ModelConfigRequest(BaseModel):
-    """Requête de configuration du modèle"""
-    model_type: str = Field(..., description="Type de modèle (vit_b, vit_l, vit_h)")
-    device: Optional[str] = Field(None, description="Device (cpu ou cuda)")
-
+# --- Schemas pour la gestion dynamique (Optionnel) ---
 
 class ModelConfigResponse(BaseModel):
-    """Réponse de configuration du modèle"""
-    status: str = Field(..., description="Statut de la configuration")
-    model_type: str = Field(..., description="Type de modèle actuellement chargé")
-    device: str = Field(..., description="Device utilisé")
-    is_loaded: bool = Field(..., description="Modèle chargé avec succès")
-    available_models: List[str] = Field(..., description="Modèles disponibles")
-    cuda_available: bool = Field(..., description="CUDA disponible sur le système")
-
+    """Configuration actuelle du backend"""
+    status: str
+    model_type: str
+    device: str
+    is_loaded: bool
+    cuda_available: bool
 
 class ModelInfoResponse(BaseModel):
-    """Infos sur le modèle actuellement chargé"""
+    """Informations détaillées du modèle SAM 3"""
     model_type: str = Field(..., description="Type de modèle")
-    device: str = Field(..., description="Device utilisé")
-    is_loaded: bool = Field(..., description="Modèle chargé")
+    device: str = Field(..., description="Device utilisé (cpu/cuda)")
+    device_name: str = Field(..., description="Nom du device (CPU/GPU)")
+    vram_gb: Optional[float] = Field(None, description="VRAM disponible en GB")
+    is_loaded: bool = Field(..., description="Indique si le modèle est chargé")
     available_models: List[str] = Field(..., description="Modèles disponibles")
     cuda_available: bool = Field(..., description="CUDA disponible")
