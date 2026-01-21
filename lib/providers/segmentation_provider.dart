@@ -22,12 +22,12 @@ final currentSegmentationProvider = StateProvider<SegmentationResult?>(
 
 // Prompt de segmentation
 final segmentationPromptProvider = StateProvider<String>((ref) {
-  return 'all objects in the image';
+  return 'all objects';
 });
 
-// Seuil de confiance
+// Seuil de confiance (SAM 3 recommande 0.25)
 final confidenceThresholdProvider = StateProvider<double>((ref) {
-  return 0.0;
+  return 0.25;
 });
 
 // Historique de segmentation
