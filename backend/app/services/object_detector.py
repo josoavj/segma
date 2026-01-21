@@ -1,11 +1,7 @@
-"""
-Service de détection d'objets avec YOLO
-Fournit des labels en anglais pour les objets détectés
-"""
-
 import logging
 import numpy as np
 from pathlib import Path
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +10,10 @@ try:
     YOLO_AVAILABLE = True
 except ImportError:
     YOLO_AVAILABLE = False
-    logger.warning("YOLO non disponible - labels génériques par défaut")
-
+    logger.warning("⚠️ YOLO non disponible (pip install ultralytics)")
 
 class ObjectDetector:
-    """Détecteur d'objets utilisant YOLO"""
+    """Détecteur singleton YOLOv8 pour l'étiquetage des masques SAM 3"""
     
     _instance = None
     
@@ -34,124 +29,78 @@ class ObjectDetector:
         
         self.model = None
         self.available = False
-        self._initialized = True
         self.class_names = {}
         
         if YOLO_AVAILABLE:
             try:
-                logger.info("Chargement du modèle YOLO...")
-                self.model = YOLO("yolov8n.pt")  # nano model - très rapide
-                self.available = True
+                # Utilise le chemin défini dans config.py
+                model_name = settings.YOLO_MODEL 
+                logger.info(f"Chargement de YOLO ({model_name})...")
+                self.model = YOLO(model_name)
                 self.class_names = self.model.names
-                logger.info(f"✓ Modèle YOLO chargé ({len(self.class_names)} classes)")
+                self.available = True
+                logger.info(f"✅ YOLO prêt ({len(self.class_names)} classes)")
             except Exception as e:
-                logger.warning(f"Impossible de charger YOLO: {e}")
+                logger.error(f"❌ Erreur chargement YOLO: {e}")
                 self.available = False
-    
+        
+        self._initialized = True
+
     def detect_labels(self, image: np.ndarray, bboxes: list) -> dict:
         """
-        Détecte les labels des objets basés sur leurs bounding boxes
-        
-        Args:
-            image: Image numpy array (RGB)
-            bboxes: Liste des bounding boxes [{'x1': int, 'y1': int, 'x2': int, 'y2': int}]
-        
-        Returns:
-            Dict mapping: {bbox_index: label_name}
+        Associe un label textuel à chaque bounding box de SAM 3 via l'IoU.
+        bboxes: [{'x1', 'y1', 'x2', 'y2'}, ...]
         """
-        
         labels = {}
-        
-        if not self.available or self.model is None:
-            logger.debug("YOLO non disponible, utilisation de labels génériques")
-            generic_labels = ['object', 'person', 'item', 'thing', 'entity', 'thing', 'stuff']
-            for i, bbox in enumerate(bboxes):
-                labels[i] = generic_labels[i % len(generic_labels)]
-            return labels
-        
+        if not self.available or not bboxes:
+            return {i: "object" for i in range(len(bboxes))}
+
         try:
-            # Détecter les objets dans l'image avec confiance basse
-            results = self.model(image, verbose=False, conf=0.1)  # Seuil de confiance bas pour tout détecter
-            
+            # Inférence YOLO sur toute l'image
+            results = self.model(image, verbose=False, conf=0.2)
             if not results or not results[0].boxes:
-                logger.debug("Aucune détection YOLO, labels génériques")
-                generic_labels = ['object', 'person', 'item', 'thing', 'entity', 'thing', 'stuff']
-                for i, bbox in enumerate(bboxes):
-                    labels[i] = generic_labels[i % len(generic_labels)]
-                return labels
-            
-            # Pour chaque bbox de segmentation, trouver la détection YOLO la plus proche
-            yolo_results = results[0]
-            yolo_boxes = yolo_results.boxes.xyxy.numpy()
-            yolo_classes = yolo_results.boxes.cls.numpy()
-            yolo_confs = yolo_results.boxes.conf.numpy()
-            
-            logger.debug(f"YOLO: {len(yolo_boxes)} détections trouvées")
-            
-            for seg_idx, seg_bbox in enumerate(bboxes):
-                best_label = f"object_{seg_idx + 1}"
-                best_iou = 0
-                best_conf = 0
-                
-                # Calculer IoU avec chaque détection YOLO
-                for yolo_idx, (yolo_box, yolo_class, yolo_conf) in enumerate(
-                    zip(yolo_boxes, yolo_classes, yolo_confs)
-                ):
-                    # Calculer IoU
-                    iou = self._compute_iou(seg_bbox, yolo_box)
-                    
-                    # Choisir la meilleure détection avec le plus grand IoU et confiance
-                    if iou > best_iou or (iou == best_iou and yolo_conf > best_conf):
+                return {i: "object" for i in range(len(bboxes))}
+
+            yolo_boxes = results[0].boxes.xyxy.cpu().numpy()
+            yolo_classes = results[0].boxes.cls.cpu().numpy()
+
+            for i, seg_bbox in enumerate(bboxes):
+                best_iou = 0.0
+                best_label = "object"
+
+                for j, y_box in enumerate(yolo_boxes):
+                    iou = self._compute_iou(seg_bbox, y_box)
+                    if iou > best_iou:
                         best_iou = iou
-                        best_conf = yolo_conf
-                        # Obtenir le label YOLO
-                        class_id = int(yolo_class)
-                        label_name = self.class_names.get(class_id, f"object_{seg_idx + 1}")
-                        best_label = label_name
-                
-                labels[seg_idx] = best_label
-                logger.debug(f"Bbox {seg_idx}: {best_label} (IoU: {best_iou:.2f})")
+                        class_id = int(yolo_classes[j])
+                        best_label = self.class_names.get(class_id, "object")
+
+                # On n'attribue le label que si la correspondance est décente (IoU > 30%)
+                labels[i] = best_label if best_iou > 0.3 else "unidentified"
             
             return labels
-        
+
         except Exception as e:
-            logger.warning(f"Erreur YOLO: {e}")
-            generic_labels = ['object', 'person', 'item', 'thing', 'entity', 'thing', 'stuff']
-            for i, bbox in enumerate(bboxes):
-                labels[i] = generic_labels[i % len(generic_labels)]
-            return labels
-    
+            logger.error(f"Erreur lors de l'étiquetage YOLO: {e}")
+            return {i: "object" for i in range(len(bboxes))}
+
     @staticmethod
     def _compute_iou(bbox1: dict, bbox2: np.ndarray) -> float:
-        """
-        Calcule l'Intersection over Union entre deux boîtes
-        
-        Args:
-            bbox1: {'x1': int, 'y1': int, 'x2': int, 'y2': int}
-            bbox2: numpy array [x1, y1, x2, y2]
-        
-        Returns:
-            float: IoU score entre 0 et 1
-        """
-        x1_min = max(bbox1['x1'], bbox2[0])
-        y1_min = max(bbox1['y1'], bbox2[1])
-        x2_max = min(bbox1['x2'], bbox2[2])
-        y2_max = min(bbox1['y2'], bbox2[3])
-        
-        if x2_max < x1_min or y2_max < y1_min:
-            return 0.0
-        
-        intersection = (x2_max - x1_min) * (y2_max - y1_min)
-        
+        """Intersection over Union entre une box dict et une box numpy [x1, y1, x2, y2]"""
+        # 
+        x1 = max(bbox1['x1'], bbox2[0])
+        y1 = max(bbox1['y1'], bbox2[1])
+        x2 = min(bbox1['x2'], bbox2[2])
+        y2 = min(bbox1['y2'], bbox2[3])
+
+        intersection = max(0, x2 - x1) * max(0, y2 - y1)
+        if intersection == 0: return 0.0
+
         area1 = (bbox1['x2'] - bbox1['x1']) * (bbox1['y2'] - bbox1['y1'])
         area2 = (bbox2[2] - bbox2[0]) * (bbox2[3] - bbox2[1])
-        
         union = area1 + area2 - intersection
-        
+
         return intersection / union if union > 0 else 0.0
 
-
 def get_object_detector() -> ObjectDetector:
-    """Getter pour l'instance singleton du détecteur"""
     return ObjectDetector()
-
