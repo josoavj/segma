@@ -1,26 +1,22 @@
-"""
-Application principale SEGMA
-Backend FastAPI pour la segmentation d'images avec SAM
-"""
-
 import os
 import torch
-
-# Détection automatique du device AVANT d'importer SAM3
-# Cela empêche SAM3 de forcer CUDA sur un système sans GPU
-if not torch.cuda.is_available():
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
-    print("🖥️  Pas de GPU détecté - Désactivation CUDA")
-else:
-    print(f"🎮 GPU détecté: {torch.cuda.get_device_name(0)}")
-
+import logging
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
-import logging
-from app.api import api_router
+
+# Configuration globale avant tout import de modèles
+if not torch.cuda.is_available():
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    device_status = "🖥️ CPU"
+else:
+    device_status = f"🎮 GPU: {torch.cuda.get_device_name(0)}"
+
+# Import local de tes modules harmonisés
 from app.models.model_manager import model_manager
+from app.api.endpoints import segment_router # Ton futur fichier de routes
 from config import settings
 
 # Configuration du logging
@@ -28,102 +24,67 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__)
-
+logger = logging.getLogger("SEGMA")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Gestion du cycle de vie de l'application"""
-    # Startup
+    """Initialisation au démarrage et nettoyage à la fermeture"""
     logger.info("╔════════════════════════════════════════════════════════════╗")
-    logger.info("║           Démarrage de l'application SEGMA                  ║")
+    logger.info("║           DÉMARRAGE DU MOTEUR SEGMA (SAM 3)                ║")
     logger.info("╚════════════════════════════════════════════════════════════╝")
     
-    model_info = model_manager.get_model_info()
-    
-    logger.info(f"📦 Configuration:")
-    logger.info(f"   • API Version: 1.0.0")
-    logger.info(f"   • Modèle SAM: {model_info['model_type']}")
-    logger.info(f"   • Dispositif: {model_info['device']}")
-    logger.info(f"   • CUDA disponible: {model_info['cuda_available']}")
-    logger.info(f"   • Host: {settings.HOST}:{settings.PORT}")
-    logger.info(f"   • CORS Origins: {', '.join(settings.CORS_ORIGINS)}")
-    
-    logger.info("🚀 Modèle SAM:")
-    if model_info['is_loaded']:
-        logger.info(f"   ✓ Modèle chargé: {model_info['model_type']} sur {model_info['device']}")
-    else:
-        logger.warning(f"   ⚠ Modèle {model_info['model_type']} en cours de chargement...")
-    logger.info(f"   • Modèles disponibles: {', '.join(model_info['available_models'])}")
-    
-    logger.info("📚 Documentation API: http://localhost:8000/docs")
-    logger.info("")
-    
+    # Pré-chargement du modèle SAM 3 via le manager pour éviter la latence à la 1ère requête
+    logger.info(f"Système détecté : {device_status}")
+    try:
+        model_info = model_manager.get_model_info()
+        logger.info(f"✓ Modèle {model_info['model_type']} prêt sur {model_info['device']}")
+    except Exception as e:
+        logger.error(f"❌ Échec de l'initialisation du modèle : {e}")
+
     yield
     
-    # Shutdown
-    logger.info("")
-    logger.info("🛑 Arrêt de l'application SEGMA...")
-    logger.info("Au revoir!")
+    logger.info("🛑 Arrêt du serveur SEGMA...")
 
-
-# Créer l'application FastAPI
 app = FastAPI(
-    title="SEGMA API",
-    description="API de segmentation d'images utilisant Segment Anything (SAM)",
-    version="1.0.0",
-    lifespan=lifespan,
+    title="SEGMA API v3",
+    description="Segmentation d'images haute précision avec SAM 3 (PCS) & YOLOv8",
+    version="3.0.0",
+    lifespan=lifespan
 )
 
-# Configuration CORS
-cors_origins = settings.CORS_ORIGINS
-if isinstance(cors_origins, str):
-    cors_origins = [origin.strip() for origin in cors_origins.split(",")]
-
+# Configuration CORS améliorée
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Inclure les routes API
-app.include_router(api_router)
-
+# Inclusion des routes
+app.include_router(segment_router, prefix="/api/v3")
 
 @app.get("/")
 async def root():
-    """Endpoint racine - Information de l'API"""
     return {
-        "name": "SEGMA API",
-        "version": "1.0.0",
-        "description": "API de segmentation d'images utilisant Segment Anything 3 + YOLO",
-        "endpoints": {
-            "health": "GET /api/v1/health",
-            "upload": "POST /api/v1/upload",
-            "segment": "POST /api/v1/segment"
-        },
-        "docs": "http://localhost:8000/docs"
+        "app": "SEGMA API",
+        "engine": "SAM 3 (Segment Anything Model 3)",
+        "status": "online",
+        "docs": "/docs"
     }
-
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request, exc):
-    """Gestionnaire d'exceptions générique"""
-    logger.error(f"Erreur non gérée: {exc}", exc_info=True)
+    logger.error(f"🚨 ERREUR CRITIQUE : {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={"detail": "Erreur serveur interne"}
+        content={"detail": "Une erreur interne est survenue sur le serveur SEGMA."}
     )
 
-
 if __name__ == "__main__":
-    import uvicorn
-    
     uvicorn.run(
         "main:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=settings.DEBUG,
+        reload=settings.DEBUG
     )

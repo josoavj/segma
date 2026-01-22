@@ -128,11 +128,21 @@ class SegmentationResult {
   });
 
   factory SegmentationResult.fromJson(Map<String, dynamic> json) {
+    // Parser la résolution "WxH" depuis le backend SAM 3
+    final resolution = json['resolution'] as String? ?? '0x0';
+    final resolutionParts = resolution.split('x');
+    final width =
+        int.tryParse(resolutionParts.isNotEmpty ? resolutionParts[0] : '0') ??
+        0;
+    final height =
+        int.tryParse(resolutionParts.length > 1 ? resolutionParts[1] : '0') ??
+        0;
+
     return SegmentationResult(
       imageId: json['image_path'].hashCode.toString(),
       imagePath: json['image_path'] as String,
-      width: json['width'] as int,
-      height: json['height'] as int,
+      width: width,
+      height: height,
       objects: (json['objects'] as List)
           .map((obj) => SegmentedObject.fromJson(obj as Map<String, dynamic>))
           .toList(),

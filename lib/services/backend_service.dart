@@ -26,7 +26,7 @@ class BackendService {
   /// Vérifie la santé du serveur backend
   Future<Map<String, dynamic>> healthCheck() async {
     try {
-      final response = await dio.get('/api/v1/health');
+      final response = await dio.get('/api/v3/health');
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       }
@@ -48,7 +48,7 @@ class BackendService {
         'file': await MultipartFile.fromFile(imagePath),
       });
 
-      final response = await dio.post('/api/v1/upload', data: formData);
+      final response = await dio.post('/api/v3/upload', data: formData);
 
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
@@ -63,7 +63,7 @@ class BackendService {
   Future<SegmentationResult> segmentByPrompt(
     String imagePath,
     String prompt, {
-    double confidenceThreshold = 0.0,
+    double confidenceThreshold = 0.25,
   }) async {
     try {
       final request = SegmentationRequest(
@@ -73,7 +73,7 @@ class BackendService {
       );
 
       final response = await dio.post(
-        '/api/v1/segment',
+        '/api/v3/segment',
         data: request.toJson(),
       );
 
@@ -91,7 +91,7 @@ class BackendService {
   /// Obtient les informations du modèle SAM actuellement chargé
   Future<Map<String, dynamic>> getModelInfo() async {
     try {
-      final response = await dio.get('/api/v1/model/info');
+      final response = await dio.get('/api/v3/model/info');
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       }
@@ -112,7 +112,7 @@ class BackendService {
         if (device != null) 'device': device,
       };
 
-      final response = await dio.post('/api/v1/model/change', data: payload);
+      final response = await dio.post('/api/v3/model/change', data: payload);
 
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;

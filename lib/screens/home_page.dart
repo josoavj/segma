@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/file_provider.dart';
+import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/services/folder_paths_service.dart';
 import 'package:segma/services/file_service.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
@@ -17,9 +18,36 @@ class HomePage extends ConsumerWidget {
     final selectedFolder = ref.watch(selectedFolderProvider);
     final selectedImage = ref.watch(selectedImageProvider);
 
+    // Nettoyer les données de segmentation quand on change d'image
+    ref.listen(selectedImageProvider, (previous, next) {
+      if (previous == null && next != null) {
+        // On sélectionne une nouvelle image : nettoyer les anciennes données
+        ref.read(currentSegmentationProvider.notifier).state = null;
+        ref.read(segmentationErrorProvider.notifier).state = null;
+        ref.read(segmentationLoadingProvider.notifier).state = false;
+      } else if (previous != null && next == null) {
+        // On désélectionne l'image : nettoyer les données
+        ref.read(currentSegmentationProvider.notifier).state = null;
+        ref.read(segmentationErrorProvider.notifier).state = null;
+        ref.read(segmentationLoadingProvider.notifier).state = false;
+      } else if (previous != null &&
+          next != null &&
+          previous.path != next.path) {
+        // On change d'image : nettoyer les anciennes données
+        ref.read(currentSegmentationProvider.notifier).state = null;
+        ref.read(segmentationErrorProvider.notifier).state = null;
+        ref.read(segmentationLoadingProvider.notifier).state = false;
+      }
+    });
+
     return Scaffold(
       body: folderStructureAsync.when(
         data: (folderStructure) {
+          // Si une image est sélectionnée, afficher le viewer
+          if (selectedImage != null) {
+            return ImageViewerScreen(image: selectedImage);
+          }
+
           return Row(
             children: [
               // Colonne 1: Navigation des dossiers améliorée
@@ -35,13 +63,9 @@ class HomePage extends ConsumerWidget {
                         child: ImageGridWidget(
                           folderPath: selectedFolder.path,
                           onImageSelected: (image) {
-                            // Naviguer vers ImageViewerScreen au lieu d'afficher dans la colonne
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ImageViewerScreen(image: image),
-                              ),
-                            );
+                            // Mettre à jour l'image sélectionnée (au lieu de Navigator.push)
+                            ref.read(selectedImageProvider.notifier).state =
+                                image;
                           },
                           selectedImage: selectedImage,
                         ),

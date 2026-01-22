@@ -1,118 +1,92 @@
-"""Gestionnaire global du modèle SAM3 - Singleton pattern"""
-
 import logging
-import os
-from typing import Optional
 import torch
-from app.models.sam3_model import SAM3ModelWrapper, get_sam3_model
+from typing import Optional, Dict
+from app.models.sam3_wrapper import SAM3Wrapper 
+from config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class ModelManager:
-    """Gestionnaire singleton du modèle SAM3"""
+    """Singleton pour gérer le cycle de vie des modèles IA (SAM 3)"""
     
     _instance: Optional['ModelManager'] = None
-    _sam3_model: Optional[SAM3ModelWrapper] = None
-    _current_model_type: str = "vit_l"
     
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(ModelManager, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
         return cls._instance
     
     def __init__(self):
-        if self._sam3_model is None:
-            self._sam3_model = get_sam3_model()
+        if self._initialized:
+            return
+        
+        self.sam3_model: Optional[SAM3Wrapper] = None
+        self.device = self._get_device()
+        self.is_loaded = False
+        
+        # Chargement immédiat au démarrage du serveur
+        self._load_model()
+        self._initialized = True
     
-    def get_model(self) -> SAM3ModelWrapper:
-        """Retourne le modèle SAM3"""
-        return self._sam3_model
+    def _get_device(self) -> str:
+        """Détermine le device à utiliser (cuda ou cpu)"""
+        # On priorise le réglage du .env mais on valide la capacité réelle
+        req_device = settings.DEVICE.lower()
+        
+        if req_device == "cuda" and torch.cuda.is_available():
+            logger.info(f"✓ CUDA détecté: {torch.cuda.get_device_name(0)}")
+            return "cuda"
+        
+        if req_device == "mps" and torch.backends.mps.is_available():
+            logger.info("✓ Apple Silicon GPU (MPS) détecté")
+            return "mps"
+            
+        logger.warning(f"⚠️ {req_device.upper()} non disponible, repli sur CPU")
+        return "cpu"
     
-    def change_model(self, model_type: str, device: Optional[str] = None) -> dict:
-        """
-        Change le modèle SAM3
-        
-        Note: SAM3 ne supporte actuellement que les modèles vision transformers.
-        Cette méthode maint la compatibilité API en changeant le device si nécessaire.
-        
-        Args:
-            model_type: Type de modèle (vit_b, vit_l, vit_h) - compatibilité uniquement
-            device: 'cpu' ou 'cuda'
-        
-        Returns:
-            Infos du modèle actuel
-        """
-        if model_type not in ["vit_b", "vit_l", "vit_h"]:
-            raise ValueError(f"Modèle invalide: {model_type}. Disponibles: vit_b, vit_l, vit_h")
-        
-        if device and device not in ["cpu", "cuda"]:
-            raise ValueError(f"Device invalide: {device}. Utilisez 'cpu' ou 'cuda'")
-        
+    def _load_model(self):
+        """Charge le modèle SAM 3 via le wrapper"""
         try:
-            # SAM3 utilise un seul modèle, on stocke juste le type pour compatibilité API
-            self._current_model_type = model_type
+            logger.info(f"📥 Initialisation de SAM 3 sur {self.device}...")
+            # SAM3Wrapper gère déjà son propre try/except interne
+            self.sam3_model = SAM3Wrapper(device=self.device)
+            self.is_loaded = self.sam3_model.is_loaded
             
-            # Si un device différent est spécifié, charger le modèle sur ce device
-            if device and device != self._sam3_model.device:
-                logger.info(f"📍 Changement device: {self._sam3_model.device} → {device}")
-                self._sam3_model.device = device
-                if self._sam3_model.is_loaded and self._sam3_model.model:
-                    self._sam3_model.model = self._sam3_model.model.to(device)
-            
-            logger.info(f"✓ Configuration mise à jour: {model_type} sur {self._sam3_model.device}")
-            return self.get_model_info()
-        
+            if self.is_loaded:
+                logger.info("✅ SAM 3 prêt à l'emploi")
+            else:
+                logger.error("❌ Échec de l'initialisation de SAM 3")
         except Exception as e:
-            logger.error(f"✗ Erreur lors du changement: {e}")
-            raise
+            logger.error(f"❌ Erreur critique au chargement du manager: {e}")
+            self.is_loaded = False
     
-    def get_model_info(self) -> dict:
-        """Retourne les infos du modèle SAM3"""
-        if not self._sam3_model:
-            return self._default_info()
-        
-        try:
-            cuda_available = torch.cuda.is_available()
-            cuda_disabled = os.environ.get("CUDA_VISIBLE_DEVICES") == ""
-            
-            device_name = "CPU"
-            vram_gb = None
-            
-            if cuda_available and not cuda_disabled:
-                try:
-                    device_name = torch.cuda.get_device_name(0)
-                    vram_gb = round(
-                        torch.cuda.get_device_properties(0).total_memory / (1024**3), 2
-                    )
-                except:
-                    device_name = "GPU (unavailable)"
-            
-            return {
-                "model_type": self._current_model_type,
-                "device": self._sam3_model.device,
-                "device_name": device_name,
-                "vram_gb": vram_gb,
-                "is_loaded": self._sam3_model.is_loaded,
-                "available_models": ["vit_b", "vit_l", "vit_h"],
-                "cuda_available": cuda_available and not cuda_disabled
-            }
-        except Exception as e:
-            logger.error(f"Erreur get_model_info: {e}")
-            return self._default_info()
+    def get_model(self) -> SAM3Wrapper:
+        """Retourne l'instance unique du modèle"""
+        if self.sam3_model is None or not self.is_loaded:
+            self._load_model()
+        return self.sam3_model
     
-    def _default_info(self) -> dict:
-        """Info par défaut"""
+    def get_model_info(self) -> Dict:
+        """Retourne les métadonnées pour l'endpoint /health"""
         return {
-            "model_type": "vit_l",
-            "device": "cpu",
-            "device_name": "CPU",
-            "vram_gb": None,
-            "is_loaded": False,
-            "available_models": ["vit_b", "vit_l", "vit_h"],
-            "cuda_available": False
+            "model_type": "facebook/sam3",
+            "device": self.device,
+            "is_loaded": self.is_loaded,
+            "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
+            "cuda_available": torch.cuda.is_available(),
+            "api_version": "3.0.0"
         }
+    
+    def _get_gpu_memory_info(self) -> float:
+        """Calcul de la VRAM totale en Go pour monitoring"""
+        try:
+            if torch.cuda.is_available():
+                props = torch.cuda.get_device_properties(0)
+                return round(props.total_memory / (1024 ** 3), 2)
+        except:
+            pass
+        return 0.0
 
-
-# Instance globale
+# Instance globale pour tout l'import du backend
 model_manager = ModelManager()
