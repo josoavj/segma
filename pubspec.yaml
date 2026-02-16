@@ -33,8 +33,8 @@ dependencies:
 
   # UI & State Management
   cupertino_icons: ^1.0.8
-  flutter_riverpod: ^2.4.10
-  riverpod_annotation: ^2.3.9
+  flutter_riverpod: ^3.2.1
+  riverpod_annotation: ^4.0.2
 
   # File & Image handling
   path_provider: ^2.1.1
@@ -45,7 +45,7 @@ dependencies:
   dio: ^5.3.1
 
   # Utils & Encoding
-  intl: ^0.19.0
+  intl: ^0.20.2
   uuid: ^4.0.0
   convert: ^3.1.1
   shared_preferences: ^2.2.2
@@ -55,7 +55,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
-  riverpod_generator: ^2.3.9
+  riverpod_generator: ^4.0.3
   build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
