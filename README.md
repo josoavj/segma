@@ -1,6 +1,6 @@
 # segma
 
-A new Flutter project.
+Image segmentation software using SAM.
 
 ## Getting Started
 
