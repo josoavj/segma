@@ -1,13 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
+import 'package:segma/config/backend_config.dart';
 import 'package:segma/services/backend_service.dart';
 
 // Service backend
 final backendServiceProvider = Provider<BackendService>((ref) {
-  return BackendService(
-    baseUrl: 'http://localhost:8000', // À configurer via environment
-  );
+  return BackendService(baseUrl: AppConfig.backendUrl);
 });
 
 // État de chargement de la segmentation
@@ -56,6 +55,11 @@ final uploadImageProvider = FutureProvider.family<Map<String, dynamic>, String>(
   },
 );
 
+// Cache local -> chemin backend pour éviter les uploads répétés
+final uploadedImagePathMapProvider = StateProvider<Map<String, String>>(
+  (ref) => {},
+);
+
 // Segmentation par prompt - AsyncNotifier pour éviter les modifications pendant construction
 class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
   @override
@@ -73,8 +77,21 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
         final prompt = ref.read(segmentationPromptProvider);
         final threshold = ref.read(confidenceThresholdProvider);
 
+        final uploadMap = ref.read(uploadedImagePathMapProvider);
+        var backendImagePath = uploadMap[imagePath];
+
+        if (backendImagePath == null || backendImagePath.isEmpty) {
+          final uploadResult = await service.uploadImage(imagePath);
+          backendImagePath =
+              (uploadResult['image_path'] as String?) ?? imagePath;
+          ref.read(uploadedImagePathMapProvider.notifier).state = {
+            ...uploadMap,
+            imagePath: backendImagePath,
+          };
+        }
+
         final result = await service.segmentByPrompt(
-          imagePath,
+          backendImagePath,
           prompt,
           confidenceThreshold: threshold,
         );
