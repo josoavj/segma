@@ -526,3 +526,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 }
+
+extension on Object {
+  get path => null;
+}
