@@ -85,6 +85,38 @@ class ModelManager:
             "cuda_available": torch.cuda.is_available(),
             "api_version": "3.0.0"
         }
+
+    def change_model(self, model_type: Optional[str] = None, device: Optional[str] = None) -> Dict:
+        """Change la configuration active (modèle/device) et recharge le wrapper."""
+        target_model = model_type or settings.SAM3_MODEL_ID
+        if target_model != settings.SAM3_MODEL_ID:
+            raise ValueError(
+                f"Modèle non supporté: {target_model}. Modèle disponible: {settings.SAM3_MODEL_ID}"
+            )
+
+        target_device = (device or self.device).lower()
+        if target_device not in {"cpu", "cuda", "mps"}:
+            raise ValueError("Device invalide. Utiliser cpu, cuda ou mps.")
+
+        if target_device == "cuda" and not torch.cuda.is_available():
+            logger.warning("CUDA demandé mais indisponible, repli sur CPU")
+            target_device = "cpu"
+        elif target_device == "mps" and not torch.backends.mps.is_available():
+            logger.warning("MPS demandé mais indisponible, repli sur CPU")
+            target_device = "cpu"
+
+        self.device = target_device
+        self.is_loaded = False
+        self.sam3_model = None
+        self._load_model()
+
+        return {
+            "status": "ok" if self.is_loaded else "error",
+            "model_type": settings.SAM3_MODEL_ID,
+            "device": self.device,
+            "is_loaded": self.is_loaded,
+            "cuda_available": torch.cuda.is_available(),
+        }
     
     def _get_gpu_memory_info(self) -> float:
         """Calcul de la VRAM totale en Go pour monitoring"""
