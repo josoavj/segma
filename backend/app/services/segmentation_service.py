@@ -3,7 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 from app.exceptions import SegmentationException, ImageProcessingException
-from app.models.image_processor import ImageProcessor
+from app.models.sam3.image_processor import ImageProcessor
 from app.services.object_detector import get_object_detector
 from app.models.model_manager import model_manager
 
