@@ -57,6 +57,18 @@ class ModelConfigResponse(BaseModel):
     is_loaded: bool
     cuda_available: bool
 
+
+class ModelChangeRequest(BaseModel):
+    """Requête de changement de configuration modèle/device"""
+    model_type: Optional[str] = Field(
+        None,
+        description="Identifiant du modèle (SAM 3 unique dans cette version)",
+    )
+    device: Optional[str] = Field(
+        None,
+        description="Device cible (cpu/cuda/mps selon disponibilité)",
+    )
+
 class ModelInfoResponse(BaseModel):
     """Informations détaillées du modèle SAM 3"""
     model_type: str = Field(..., description="Type de modèle")
