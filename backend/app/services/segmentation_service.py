@@ -51,7 +51,13 @@ class SegmentationService:
             
             if not raw_masks:
                 logger.warning(f"Aucun objet trouvé pour le concept '{prompt}'")
-                return {"objects": [], "count": 0}
+                return {
+                    "image_path": image_path,
+                    "resolution": f"{width}x{height}",
+                    "objects_count": 0,
+                    "objects": [],
+                    "segmentation_dir": str(seg_dir.absolute())
+                }
 
             # 4. Traitement et enrichissement avec YOLO
             objects_data = []
