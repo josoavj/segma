@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/services/file_service.dart';
 
