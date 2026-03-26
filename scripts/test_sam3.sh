@@ -39,7 +39,7 @@ echo ""
 echo "📦 Vérification des dépendances:"
 python -c "import torch; print(f'   ✓ PyTorch: {torch.__version__}')" || echo "   ❌ PyTorch manquant"
 python -c "import torchvision; print(f'   ✓ TorchVision: {torchvision.__version__}')" || echo "   ❌ TorchVision manquant"
-python -c "import sam3; print(f'   ✓ SAM3: OK')" || echo "   ❌ SAM3 manquant"
+python -c "from transformers import Sam3Processor, Sam3Model; print('   ✓ Transformers SAM3: OK')" || echo "   ❌ Transformers SAM3 manquant"
 python -c "import huggingface_hub; print(f'   ✓ HuggingFace Hub: OK')" || echo "   ⚠️  HuggingFace Hub manquant"
 python -c "import fastapi; print(f'   ✓ FastAPI: OK')" || echo "   ⚠️  FastAPI manquant"
 echo ""
@@ -48,16 +48,14 @@ echo ""
 echo "🔬 Test d'import SAM3 détaillé:"
 python << 'EOF'
 try:
-    from sam3.sam3_model import SAM3Model
-    print("   ✓ SAM3Model importable")
-    
-    # Vérifier les méthodes essentielles
-    methods = ['segment_by_text_prompt', 'segment_by_point', 'segment_by_box']
-    for method in methods:
-        if hasattr(SAM3Model, method):
-            print(f"   ✓ Méthode {method} disponible")
-        else:
-            print(f"   ❌ Méthode {method} manquante")
+    from transformers import Sam3Processor, Sam3Model
+    print("   ✓ Sam3Processor importable")
+    print("   ✓ Sam3Model importable")
+
+    processor = Sam3Processor.from_pretrained("facebook/sam3")
+    model = Sam3Model.from_pretrained("facebook/sam3")
+    print(f"   ✓ Processor chargé: {processor.__class__.__name__}")
+    print(f"   ✓ Modèle chargé: {model.__class__.__name__}")
     
     print("\n   ✅ SAM3 est correctement installé!")
     
