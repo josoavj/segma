@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:segma/config/backend_config.dart' as backend_config;
 import 'package:segma/providers/segmentation_provider.dart';
 
 class ModelConfigPage extends ConsumerWidget {
@@ -18,11 +19,13 @@ class ModelConfigPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erreur: $err')),
         data: (modelInfo) {
-          final currentModel = modelInfo['model_type'] as String? ?? 'vit_b';
+          final currentModel =
+              modelInfo['model_type'] as String? ??
+              backend_config.AppConfig.sam3Model;
           final currentDevice = modelInfo['device'] as String? ?? 'cpu';
           final availableModels =
               (modelInfo['available_models'] as List?)?.cast<String>() ??
-              ['vit_b', 'vit_l', 'vit_h'];
+              [backend_config.AppConfig.sam3Model];
           final cudaAvailable = modelInfo['cuda_available'] as bool? ?? false;
 
           return SingleChildScrollView(
@@ -55,7 +58,7 @@ class ModelConfigPage extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'Backend: localhost:8000',
+                                'Backend: ${backend_config.AppConfig.backendUrl}',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 12,
@@ -144,19 +147,19 @@ class ModelConfigPage extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // Sélection du device
-                if (cudaAvailable) ...[
-                  const Text(
-                    'Changer le device',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  DeviceTile(
-                    device: 'cpu',
-                    isSelected: currentDevice == 'cpu',
-                    onTap: () {
-                      _changeModel(context, ref, currentModel, 'cpu');
-                    },
-                  ),
+                const Text(
+                  'Changer le device',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                DeviceTile(
+                  device: 'cpu',
+                  isSelected: currentDevice == 'cpu',
+                  onTap: () {
+                    _changeModel(context, ref, currentModel, 'cpu');
+                  },
+                ),
+                if (cudaAvailable)
                   DeviceTile(
                     device: 'cuda',
                     isSelected: currentDevice == 'cuda',
@@ -164,7 +167,6 @@ class ModelConfigPage extends ConsumerWidget {
                       _changeModel(context, ref, currentModel, 'cuda');
                     },
                   ),
-                ],
               ],
             ),
           );
@@ -252,16 +254,15 @@ class ModelTile extends StatelessWidget {
   }
 
   String _getModelDescription(String model) {
-    switch (model) {
-      case 'vit_b':
-        return '96MB - Rapide (CPU recommandé)';
-      case 'vit_l':
-        return '312MB - Équilibré';
-      case 'vit_h':
-        return '1.2GB - Très précis (GPU recommandé)';
-      default:
-        return '';
+    final description = backend_config.AppConfig.modelDescriptions[model];
+    final sizeMb = backend_config.AppConfig.modelSizes[model];
+    if (description == null) {
+      return model;
     }
+    if (sizeMb == null) {
+      return description;
+    }
+    return '$description - ${sizeMb}MB';
   }
 }
 
