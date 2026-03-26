@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from PIL import Image
 from transformers import Sam3Processor, Sam3Model
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -13,11 +14,13 @@ class SAM3Wrapper:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
             self.device = device
+
+        self.model_id = settings.SAM3_MODEL_ID
             
         try:
             logger.info(f"Chargement de SAM 3 sur {self.device}...")
-            self.processor = Sam3Processor.from_pretrained("facebook/sam3")
-            self.model = Sam3Model.from_pretrained("facebook/sam3").to(self.device)
+            self.processor = Sam3Processor.from_pretrained(self.model_id)
+            self.model = Sam3Model.from_pretrained(self.model_id).to(self.device)
             self.is_loaded = True
             logger.info("✓ SAM 3 opérationnel (Mode PCS activé)")
         except Exception as e:
@@ -84,63 +87,53 @@ class SAM3Wrapper:
             with torch.no_grad():
                 outputs = self.model(**inputs)
             
-            # Post-processing pour redimensionner les masques à la taille originale
-            masks = self.processor.post_process_masks(
-                outputs.pred_masks, 
-                inputs.original_sizes, 
-                inputs.reshaped_input_sizes,
-                threshold=threshold
+            # Post-processing SAM3: retour d'instances avec masks/scores/boxes
+            target_size = (image_pil.height, image_pil.width)
+            predictions = self.processor.post_process_instance_segmentation(
+                outputs,
+                threshold=threshold,
+                target_sizes=[target_size],
             )
-            
-            # Récupérer les scores de confiance
-            scores = outputs.iou_predictions if hasattr(outputs, 'iou_predictions') else None
             
             # Construire la liste des résultats
             results = []
-            
-            if masks is not None:
-                # Convertir les masques en numpy s'ils sont des tenseurs
-                if hasattr(masks, 'cpu'):
+
+            if predictions and isinstance(predictions[0], dict):
+                pred = predictions[0]
+                masks = pred.get("masks")
+                scores = pred.get("scores")
+                boxes = pred.get("boxes")
+
+                if isinstance(masks, torch.Tensor):
                     masks = masks.cpu().numpy()
-                elif isinstance(masks, torch.Tensor):
-                    masks = masks.numpy()
-                
-                # S'assurer que masks est un array (H, W, N) ou (N, H, W)
-                if masks.ndim == 4:  # (1, N, H, W)
-                    masks = masks.squeeze(0)
-                elif masks.ndim == 2:  # Un seul masque (H, W)
-                    masks = masks.unsqueeze(0) if hasattr(masks, 'unsqueeze') else masks[np.newaxis, ...]
-                
-                # Traiter chaque masque
+                if isinstance(scores, torch.Tensor):
+                    scores = scores.cpu().numpy()
+                if isinstance(boxes, torch.Tensor):
+                    boxes = boxes.cpu().numpy()
+
+                masks = np.array(masks) if masks is not None else np.empty((0,))
+                scores = np.array(scores) if scores is not None else np.empty((0,))
+                boxes = np.array(boxes) if boxes is not None else np.empty((0, 4))
+
                 for idx, mask in enumerate(masks):
-                    # Normaliser le masque à 0-1 ou 0-255
-                    if mask.max() > 1:
-                        mask = (mask > 0).astype(np.uint8)
+                    mask_np = (mask > 0).astype(np.uint8)
+                    score = float(scores[idx]) if idx < len(scores) else 0.0
+
+                    if idx < len(boxes):
+                        x1, y1, x2, y2 = boxes[idx].tolist()
+                        bbox = {
+                            "x1": int(x1),
+                            "y1": int(y1),
+                            "x2": int(x2),
+                            "y2": int(y2),
+                        }
                     else:
-                        mask = (mask > 0.5).astype(np.uint8)
-                    
-                    # Obtenir le score (par défaut 0.9 si pas disponible)
-                    if scores is not None:
-                        if hasattr(scores, 'cpu'):
-                            scores_np = scores.cpu().numpy()
-                        else:
-                            scores_np = np.array(scores)
-                        
-                        # Gérer les dimensions multiples
-                        if scores_np.ndim > 1:
-                            score = float(scores_np.flatten()[idx]) if idx < len(scores_np.flatten()) else 0.9
-                        else:
-                            score = float(scores_np[idx]) if idx < len(scores_np) else 0.9
-                    else:
-                        score = 0.9
-                    
-                    # Calculer la boîte englobante
-                    bbox = self._compute_bbox_from_mask(mask)
-                    
+                        bbox = self._compute_bbox_from_mask(mask_np)
+
                     results.append({
-                        "mask": mask,
+                        "mask": mask_np,
                         "score": score,
-                        "bbox": bbox
+                        "bbox": bbox,
                     })
             
             logger.info(f"✓ SAM 3 détecté {len(results)} objets pour prompt: '{prompt}'")

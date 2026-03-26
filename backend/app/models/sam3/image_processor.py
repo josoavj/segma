@@ -29,8 +29,11 @@ class ImageProcessor:
         Le masque est redimensionné automatiquement par SAM 3, 
         on s'assure ici du format uint8 (0 ou 255).
         """
-        # Conversion CPU et extraction numpy
-        mask = mask_tensor.cpu().numpy().squeeze()
+        # Accepte indifféremment tenseurs PyTorch et tableaux numpy
+        if hasattr(mask_tensor, "detach"):
+            mask = mask_tensor.detach().cpu().numpy().squeeze()
+        else:
+            mask = np.array(mask_tensor).squeeze()
         
         # Seuil de binarisation (True/False -> 255/0)
         return (mask > 0).astype(np.uint8) * 255

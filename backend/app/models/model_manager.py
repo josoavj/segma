@@ -1,7 +1,7 @@
 import logging
 import torch
 from typing import Optional, Dict
-from app.models.sam3_wrapper import SAM3Wrapper 
+from app.models.sam3.sam3_wrapper import SAM3Wrapper
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -69,13 +69,53 @@ class ModelManager:
     
     def get_model_info(self) -> Dict:
         """Retourne les métadonnées pour l'endpoint /health"""
+        device_name = "CPU"
+        if self.device == "cuda" and torch.cuda.is_available():
+            device_name = torch.cuda.get_device_name(0)
+        elif self.device == "mps":
+            device_name = "Apple Silicon GPU (MPS)"
+
         return {
-            "model_type": "facebook/sam3",
+            "model_type": settings.SAM3_MODEL_ID,
             "device": self.device,
+            "device_name": device_name,
             "is_loaded": self.is_loaded,
             "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
+            "available_models": [settings.SAM3_MODEL_ID],
             "cuda_available": torch.cuda.is_available(),
             "api_version": "3.0.0"
+        }
+
+    def change_model(self, model_type: Optional[str] = None, device: Optional[str] = None) -> Dict:
+        """Change la configuration active (modèle/device) et recharge le wrapper."""
+        target_model = model_type or settings.SAM3_MODEL_ID
+        if target_model != settings.SAM3_MODEL_ID:
+            raise ValueError(
+                f"Modèle non supporté: {target_model}. Modèle disponible: {settings.SAM3_MODEL_ID}"
+            )
+
+        target_device = (device or self.device).lower()
+        if target_device not in {"cpu", "cuda", "mps"}:
+            raise ValueError("Device invalide. Utiliser cpu, cuda ou mps.")
+
+        if target_device == "cuda" and not torch.cuda.is_available():
+            logger.warning("CUDA demandé mais indisponible, repli sur CPU")
+            target_device = "cpu"
+        elif target_device == "mps" and not torch.backends.mps.is_available():
+            logger.warning("MPS demandé mais indisponible, repli sur CPU")
+            target_device = "cpu"
+
+        self.device = target_device
+        self.is_loaded = False
+        self.sam3_model = None
+        self._load_model()
+
+        return {
+            "status": "ok" if self.is_loaded else "error",
+            "model_type": settings.SAM3_MODEL_ID,
+            "device": self.device,
+            "is_loaded": self.is_loaded,
+            "cuda_available": torch.cuda.is_available(),
         }
     
     def _get_gpu_memory_info(self) -> float:

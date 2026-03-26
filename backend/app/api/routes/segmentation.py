@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
 from app.api.schemas import (
     SegmentationRequest, SegmentationResponse, ImageUploadResponse,
-    ModelConfigResponse, ModelInfoResponse
+    ModelConfigResponse, ModelInfoResponse, ModelChangeRequest
 )
 from app.services.segmentation_service import SegmentationService
-from app.models.image_processor import ImageProcessor
+from app.models.sam3.image_processor import ImageProcessor
 from app.models.model_manager import model_manager
 from config import settings
 import logging
@@ -94,3 +94,18 @@ async def get_model_info():
     except Exception as e:
         logger.error(f"Erreur Model Info: {e}")
         raise HTTPException(status_code=500, detail="Impossible de récupérer les infos modèle.")
+
+
+@router.post("/model/change", response_model=ModelConfigResponse)
+async def change_model_config(request: ModelChangeRequest):
+    """Change le modèle/device actif puis recharge SAM 3."""
+    try:
+        return model_manager.change_model(
+            model_type=request.model_type,
+            device=request.device,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Erreur Model Change: {e}")
+        raise HTTPException(status_code=500, detail="Impossible de changer la configuration du modèle.")

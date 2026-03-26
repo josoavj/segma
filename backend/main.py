@@ -16,7 +16,7 @@ else:
 
 # Import local de tes modules harmonisés
 from app.models.model_manager import model_manager
-from app.api.endpoints import segment_router # Ton futur fichier de routes
+from app.api import api_router
 from config import settings
 
 # Configuration du logging
@@ -61,8 +61,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inclusion des routes
-app.include_router(segment_router, prefix="/api/v3")
+# Inclusion des routes API
+app.include_router(api_router)
 
 @app.get("/")
 async def root():

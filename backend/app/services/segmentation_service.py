@@ -3,7 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 from app.exceptions import SegmentationException, ImageProcessingException
-from app.models.image_processor import ImageProcessor
+from app.models.sam3.image_processor import ImageProcessor
 from app.services.object_detector import get_object_detector
 from app.models.model_manager import model_manager
 
@@ -51,7 +51,13 @@ class SegmentationService:
             
             if not raw_masks:
                 logger.warning(f"Aucun objet trouvé pour le concept '{prompt}'")
-                return {"objects": [], "count": 0}
+                return {
+                    "image_path": image_path,
+                    "resolution": f"{width}x{height}",
+                    "objects_count": 0,
+                    "objects": [],
+                    "segmentation_dir": str(seg_dir.absolute())
+                }
 
             # 4. Traitement et enrichissement avec YOLO
             objects_data = []

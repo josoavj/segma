@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/navigation_provider.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/config/app_config.dart';
+import 'package:segma/config/backend_config.dart' as backend_config;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
@@ -618,13 +619,12 @@ class _ModelConfigurationTileState
   late String _selectedDevice;
   bool _isChanging = false;
 
-  final List<String> _availableModels = ['vit_b', 'vit_l', 'vit_h'];
-  final List<String> _availableDevices = ['cpu', 'cuda'];
+  final List<String> _availableModels = [backend_config.AppConfig.sam3Model];
 
   @override
   void initState() {
     super.initState();
-    _selectedModel = 'vit_b';
+    _selectedModel = backend_config.AppConfig.sam3Model;
     _selectedDevice = 'cpu';
   }
 
@@ -664,6 +664,13 @@ class _ModelConfigurationTileState
   @override
   Widget build(BuildContext context) {
     final modelInfoAsync = ref.watch(modelInfoProvider);
+    final modelInfo = modelInfoAsync.asData?.value;
+    final cudaAvailable = modelInfo?['cuda_available'] as bool? ?? false;
+    final availableDevices = cudaAvailable ? ['cpu', 'cuda'] : ['cpu'];
+
+    if (!availableDevices.contains(_selectedDevice)) {
+      _selectedDevice = 'cpu';
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -694,23 +701,10 @@ class _ModelConfigurationTileState
               underline: const SizedBox(),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               items: _availableModels.map((model) {
-                String label = model;
-                String? size;
-
-                switch (model) {
-                  case 'vit_b':
-                    label = 'ViT-B (Petit)';
-                    size = '95 MB';
-                    break;
-                  case 'vit_l':
-                    label = 'ViT-L (Moyen)';
-                    size = '308 MB';
-                    break;
-                  case 'vit_h':
-                    label = 'ViT-H (Grand)';
-                    size = '2.5 GB';
-                    break;
-                }
+                final label =
+                    backend_config.AppConfig.modelDescriptions[model] ?? model;
+                final sizeMb = backend_config.AppConfig.modelSizes[model];
+                final size = sizeMb != null ? '$sizeMb MB' : null;
 
                 return DropdownMenuItem(
                   value: model,
@@ -759,7 +753,7 @@ class _ModelConfigurationTileState
               isExpanded: true,
               underline: const SizedBox(),
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              items: _availableDevices.map((device) {
+              items: availableDevices.map((device) {
                 return DropdownMenuItem(
                   value: device,
                   child: Row(
