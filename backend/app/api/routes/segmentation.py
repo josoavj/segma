@@ -4,7 +4,7 @@ from app.api.schemas import (
     ModelConfigResponse, ModelInfoResponse
 )
 from app.services.segmentation_service import SegmentationService
-from app.models.image_processor import ImageProcessor
+from app.models.sam3.image_processor import ImageProcessor
 from app.models.model_manager import model_manager
 from config import settings
 import logging
