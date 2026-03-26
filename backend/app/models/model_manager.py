@@ -1,7 +1,7 @@
 import logging
 import torch
 from typing import Optional, Dict
-from app.models.sam3_wrapper import SAM3Wrapper 
+from app.models.sam3.sam3_wrapper import SAM3Wrapper
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -69,11 +69,19 @@ class ModelManager:
     
     def get_model_info(self) -> Dict:
         """Retourne les métadonnées pour l'endpoint /health"""
+        device_name = "CPU"
+        if self.device == "cuda" and torch.cuda.is_available():
+            device_name = torch.cuda.get_device_name(0)
+        elif self.device == "mps":
+            device_name = "Apple Silicon GPU (MPS)"
+
         return {
-            "model_type": "facebook/sam3",
+            "model_type": settings.SAM3_MODEL_ID,
             "device": self.device,
+            "device_name": device_name,
             "is_loaded": self.is_loaded,
             "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
+            "available_models": [settings.SAM3_MODEL_ID],
             "cuda_available": torch.cuda.is_available(),
             "api_version": "3.0.0"
         }
