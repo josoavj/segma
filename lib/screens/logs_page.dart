@@ -15,6 +15,8 @@ class LogsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     final logsAsync = ref.watch(logsProvider);
     final searchFilter = ref.watch(logFilterProvider);
     final levelFilter = ref.watch(logLevelFilterProvider);
@@ -26,9 +28,18 @@ class LogsPage extends ConsumerWidget {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue[400]!, Colors.blue[600]!],
+                colors: [
+                  Color.lerp(scheme.surfaceContainerHigh, scheme.primary, 0.55)!,
+                  Color.lerp(scheme.surfaceContainerHigh, scheme.secondary, 0.42)!,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: scheme.outline.withValues(alpha: 0.18),
+                  width: 1,
+                ),
               ),
             ),
             padding: const EdgeInsets.all(20),
@@ -42,17 +53,22 @@ class LogsPage extends ConsumerWidget {
                   },
                   decoration: InputDecoration(
                     hintText: 'Rechercher dans les logs...',
-                    hintStyle: TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white),
+                    hintStyle: TextStyle(
+                      color: scheme.onSurface.withValues(alpha: 0.58),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: scheme.onSurface.withValues(alpha: 0.75),
+                    ),
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.2),
+                    fillColor: scheme.surface.withValues(alpha: 0.66),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: scheme.onSurface),
                 ),
                 const SizedBox(height: 12),
                 // Filter buttons
@@ -69,12 +85,14 @@ class LogsPage extends ConsumerWidget {
                                 null;
                           }
                         },
-                        backgroundColor: Colors.blue[600]!.withValues(
-                          alpha: 0.3,
+                        backgroundColor: scheme.onPrimary.withValues(
+                          alpha: 0.12,
                         ),
-                        selectedColor: Colors.blue[600]!,
-                        labelStyle: const TextStyle(
-                          color: Colors.white,
+                        selectedColor: scheme.primaryContainer,
+                        labelStyle: TextStyle(
+                          color: levelFilter == null
+                              ? scheme.onPrimaryContainer
+                              : scheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -86,12 +104,14 @@ class LogsPage extends ConsumerWidget {
                           ref.read(logLevelFilterProvider.notifier).state =
                               selected ? 'INFO' : null;
                         },
-                        backgroundColor: Colors.lightBlue.withValues(
-                          alpha: 0.3,
+                        backgroundColor: scheme.onPrimary.withValues(
+                          alpha: 0.12,
                         ),
-                        selectedColor: Colors.lightBlue[700]!,
-                        labelStyle: const TextStyle(
-                          color: Colors.white,
+                        selectedColor: scheme.secondaryContainer,
+                        labelStyle: TextStyle(
+                          color: levelFilter == 'INFO'
+                              ? scheme.onSecondaryContainer
+                              : scheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -103,10 +123,14 @@ class LogsPage extends ConsumerWidget {
                           ref.read(logLevelFilterProvider.notifier).state =
                               selected ? 'WARNING' : null;
                         },
-                        backgroundColor: Colors.orange.withValues(alpha: 0.3),
-                        selectedColor: Colors.orange[700]!,
-                        labelStyle: const TextStyle(
-                          color: Colors.white,
+                        backgroundColor: scheme.onPrimary.withValues(
+                          alpha: 0.12,
+                        ),
+                        selectedColor: scheme.tertiaryContainer,
+                        labelStyle: TextStyle(
+                          color: levelFilter == 'WARNING'
+                              ? scheme.onTertiaryContainer
+                              : scheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -118,10 +142,14 @@ class LogsPage extends ConsumerWidget {
                           ref.read(logLevelFilterProvider.notifier).state =
                               selected ? 'ERROR' : null;
                         },
-                        backgroundColor: Colors.red.withValues(alpha: 0.3),
-                        selectedColor: Colors.red[700]!,
-                        labelStyle: const TextStyle(
-                          color: Colors.white,
+                        backgroundColor: scheme.onPrimary.withValues(
+                          alpha: 0.12,
+                        ),
+                        selectedColor: scheme.errorContainer,
+                        labelStyle: TextStyle(
+                          color: levelFilter == 'ERROR'
+                              ? scheme.onErrorContainer
+                              : scheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -183,13 +211,17 @@ class LogsPage extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error, size: 64, color: Colors.red[400]),
+                    Icon(
+                      Icons.error,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Erreur: $error',
                       style: Theme.of(
                         context,
-                      ).textTheme.titleMedium?.copyWith(color: Colors.red[400]),
+                      ).textTheme.titleMedium?.copyWith(color: scheme.error),
                     ),
                   ],
                 ),
@@ -207,18 +239,20 @@ class _LogEntryWidget extends StatelessWidget {
 
   const _LogEntryWidget({required this.logEntry});
 
-  Color _getLevelColor() {
+  Color _getLevelColor(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     switch (logEntry.level) {
       case 'DEBUG':
-        return Colors.grey;
+        return scheme.outline;
       case 'INFO':
-        return Colors.blue;
+        return scheme.primary;
       case 'WARNING':
-        return Colors.orange;
+        return scheme.tertiary;
       case 'ERROR':
-        return Colors.red;
+        return scheme.error;
       default:
-        return Colors.grey;
+        return scheme.outline;
     }
   }
 
@@ -237,6 +271,11 @@ class _LogEntryWidget extends StatelessWidget {
     }
   }
 
+  Color _getLevelIconColor(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Color.lerp(_getLevelColor(context), scheme.onSurface, 0.55)!;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -245,23 +284,27 @@ class _LogEntryWidget extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getLevelColor().withValues(alpha: 0.2),
+            color: _getLevelColor(context).withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(_getLevelIcon(), color: _getLevelColor(), size: 20),
+          child: Icon(
+            _getLevelIcon(),
+            color: _getLevelIconColor(context),
+            size: 20,
+          ),
         ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _getLevelColor().withValues(alpha: 0.2),
+                color: _getLevelColor(context).withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 logEntry.level,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _getLevelColor(),
+                  color: _getLevelColor(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
