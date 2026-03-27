@@ -17,11 +17,22 @@ class ModernSidebar extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.grey[900]
-              : Colors.white,
+              ? const Color(0x3320304F)
+              : const Color(0xA3FFFFFF),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.22)
+                  : const Color(0xFFB8D8FF).withValues(alpha: 0.24),
+              blurRadius: 28,
+              offset: const Offset(8, 0),
+            ),
+          ],
           border: Border(
             right: BorderSide(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.16)
+                  : const Color(0xFFD5E2F7).withValues(alpha: 0.85),
               width: 1,
             ),
           ),
@@ -149,6 +160,7 @@ class ModernSidebar extends ConsumerWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     final IconData icon = _getSelectedIcon(page);
 
     return Padding(
@@ -159,12 +171,12 @@ class ModernSidebar extends ConsumerWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: isSelected
-                ? Colors.blue.withValues(alpha: 0.2)
+                ? scheme.primaryContainer.withValues(alpha: 0.85)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: isSelected
                 ? Border.all(
-                    color: Colors.blue.withValues(alpha: 0.3),
+                    color: scheme.primary.withValues(alpha: 0.45),
                     width: 1,
                   )
                 : null,
@@ -178,7 +190,9 @@ class ModernSidebar extends ConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 child: Icon(
                   icon,
-                  color: isSelected ? Colors.blue : Colors.grey,
+                  color: isSelected
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
                   size: 24,
                 ),
               ),
@@ -191,6 +205,9 @@ class ModernSidebar extends ConsumerWidget {
 
   Widget _buildExpandedFooter(BuildContext context, WidgetRef ref) {
     final isDarkTheme = ref.watch(themeNotifierProvider);
+    final toggleIconColor = isDarkTheme
+        ? const Color(0xFFFFC857)
+        : const Color(0xFF7FA8FF);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -215,7 +232,7 @@ class ModernSidebar extends ConsumerWidget {
                     Icon(
                       isDarkTheme ? Icons.light_mode : Icons.dark_mode,
                       size: 16,
-                      color: Theme.of(context).primaryColor,
+                      color: toggleIconColor,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -254,6 +271,9 @@ class ModernSidebar extends ConsumerWidget {
 
   Widget _buildCollapsedFooter(BuildContext context, WidgetRef ref) {
     final isDarkTheme = ref.watch(themeNotifierProvider);
+    final toggleIconColor = isDarkTheme
+        ? const Color(0xFFFFC857)
+        : const Color(0xFF7FA8FF);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -271,7 +291,7 @@ class ModernSidebar extends ConsumerWidget {
               child: Icon(
                 isDarkTheme ? Icons.light_mode : Icons.dark_mode,
                 size: 20,
-                color: Theme.of(context).primaryColor,
+                color: toggleIconColor,
               ),
             ),
           ),
@@ -286,23 +306,30 @@ class ModernSidebar extends ConsumerWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.blue.withValues(alpha: 0.15)
+              ? scheme.primaryContainer.withValues(alpha: 0.75)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: isSelected
-              ? Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 1)
+              ? Border.all(
+                  color: scheme.primary.withValues(alpha: 0.45),
+                  width: 1,
+                )
               : null,
         ),
         child: ListTile(
           leading: Icon(
             isSelected ? _getSelectedIcon(page) : _getUnselectedIcon(page),
-            color: isSelected ? Colors.blue : Colors.grey,
+            color: isSelected
+                ? scheme.onPrimaryContainer
+                : scheme.onSurfaceVariant,
             size: 20,
           ),
           title: Text(
@@ -310,7 +337,7 @@ class ModernSidebar extends ConsumerWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.blue : null,
+              color: isSelected ? scheme.onPrimaryContainer : scheme.onSurface,
             ),
           ),
           onTap: onTap,
