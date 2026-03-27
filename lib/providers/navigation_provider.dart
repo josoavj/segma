@@ -27,7 +27,7 @@ final sidebarCollapsedProvider = StateProvider<bool>((ref) {
 });
 
 final isDarkThemeProvider = StateProvider<bool>((ref) {
-  return false;
+  return true;
 });
 
 final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, bool>(
@@ -35,16 +35,16 @@ final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, bool>(
 );
 
 class ThemeNotifier extends StateNotifier<bool> {
-  ThemeNotifier() : super(false) {
+  ThemeNotifier() : super(true) {
     _loadTheme();
   }
 
   Future<void> _loadTheme() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      state = prefs.getBool('darkTheme') ?? false;
+      state = prefs.getBool('darkTheme') ?? true;
     } catch (e) {
-      state = false;
+      state = true;
     }
   }
 

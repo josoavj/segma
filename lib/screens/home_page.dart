@@ -83,7 +83,11 @@ class HomePage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error, size: 48, color: Colors.red),
+              Icon(
+                Icons.error,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
               const SizedBox(height: 16),
               Text('Erreur: $error'),
             ],
@@ -359,7 +363,11 @@ class HomePage extends ConsumerWidget {
               ),
               GestureDetector(
                 onTap: onRemove,
-                child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+                child: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -411,7 +419,11 @@ class HomePage extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -420,6 +432,8 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildImageHeaderPanel(BuildContext context, selectedFolder) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -444,12 +458,12 @@ class HomePage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: scheme.primaryContainer.withValues(alpha: 0.72),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.image_search,
-              color: Colors.white,
+              color: scheme.onPrimaryContainer,
               size: 24,
             ),
           ),
@@ -483,11 +497,11 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Expanded(
       child: Container(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.grey[900]
-            : Colors.grey[50],
+        color: Theme.of(context).colorScheme.surface,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -501,7 +515,7 @@ class HomePage extends ConsumerWidget {
                 child: Icon(
                   Icons.folder_open_outlined,
                   size: 64,
-                  color: Theme.of(context).primaryColor,
+                  color: scheme.onPrimaryContainer,
                 ),
               ),
               const SizedBox(height: 20),
@@ -517,7 +531,9 @@ class HomePage extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(
                   context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                ).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),

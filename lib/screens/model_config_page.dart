@@ -8,6 +8,7 @@ class ModelConfigPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
     final modelInfoAsync = ref.watch(modelInfoProvider);
 
     return Scaffold(
@@ -35,14 +36,14 @@ class ModelConfigPage extends ConsumerWidget {
               children: [
                 // État du serveur
                 Card(
-                  color: Colors.green[50],
+                  color: scheme.tertiaryContainer,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
                         Icon(
                           Icons.check_circle,
-                          color: Colors.green[700],
+                          color: scheme.tertiary,
                           size: 32,
                         ),
                         const SizedBox(width: 16),
@@ -60,7 +61,7 @@ class ModelConfigPage extends ConsumerWidget {
                               Text(
                                 'Backend: ${backend_config.AppConfig.backendUrl}',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: scheme.onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),
@@ -103,9 +104,9 @@ class ModelConfigPage extends ConsumerWidget {
                             const Text('Device'),
                             Text(
                               currentDevice.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color: scheme.primary,
                               ),
                             ),
                           ],
@@ -117,7 +118,9 @@ class ModelConfigPage extends ConsumerWidget {
                             const Text('CUDA disponible'),
                             Icon(
                               cudaAvailable ? Icons.check : Icons.close,
-                              color: cudaAvailable ? Colors.green : Colors.red,
+                              color: cudaAvailable
+                                  ? scheme.tertiary
+                                  : scheme.error,
                             ),
                           ],
                         ),
@@ -214,8 +217,10 @@ class ModelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Card(
-      color: isSelected ? Colors.blue[50] : null,
+      color: isSelected ? scheme.primaryContainer.withValues(alpha: 0.75) : null,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -237,15 +242,24 @@ class ModelTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       _getModelDescription(model),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
               if (isSelected)
-                Icon(Icons.radio_button_checked, color: Colors.blue[700])
+                Icon(
+                  Icons.radio_button_checked,
+                  color: scheme.onPrimaryContainer,
+                )
               else
-                Icon(Icons.radio_button_unchecked, color: Colors.grey[400]),
+                Icon(
+                  Icons.radio_button_unchecked,
+                  color: scheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),
@@ -280,8 +294,10 @@ class DeviceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Card(
-      color: isSelected ? Colors.blue[50] : null,
+      color: isSelected ? scheme.primaryContainer.withValues(alpha: 0.75) : null,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -304,14 +320,23 @@ class DeviceTile extends StatelessWidget {
                     device == 'cpu'
                         ? 'Processeur central'
                         : 'GPU NVIDIA (rapide)',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
               if (isSelected)
-                Icon(Icons.radio_button_checked, color: Colors.blue[700])
+                Icon(
+                  Icons.radio_button_checked,
+                  color: scheme.onPrimaryContainer,
+                )
               else
-                Icon(Icons.radio_button_unchecked, color: Colors.grey[400]),
+                Icon(
+                  Icons.radio_button_unchecked,
+                  color: scheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),

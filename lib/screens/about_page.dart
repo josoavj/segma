@@ -21,6 +21,8 @@ class AboutPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -122,6 +124,8 @@ class AboutPage extends ConsumerWidget {
               _SectionCard(
                 title: 'À propos',
                 icon: Icons.info,
+                iconColor: scheme.primary,
+                iconBackgroundColor: scheme.tertiaryContainer,
                 child: Text(
                   'SEGMA est une application de segmentation d\'images '
                   'utilisant le modèle Segment Anything (SAM) de Meta. '
@@ -142,6 +146,8 @@ class AboutPage extends ConsumerWidget {
               _SectionCard(
                 title: 'Technologies',
                 icon: Icons.code,
+                iconColor: scheme.primary,
+                iconBackgroundColor: scheme.secondaryContainer,
                 child: Column(
                   children: [
                     _buildTechCard(
@@ -149,7 +155,7 @@ class AboutPage extends ConsumerWidget {
                       name: 'Flutter & Dart',
                       description: 'Interface utilisateur moderne et réactive',
                       icon: Icons.mobile_friendly,
-                      color: Colors.blue,
+                      color: scheme.primary,
                     ),
                     const SizedBox(height: 12),
                     _buildTechCard(
@@ -157,7 +163,7 @@ class AboutPage extends ConsumerWidget {
                       name: 'Python & FastAPI',
                       description: 'Backend haute performance',
                       icon: Icons.api,
-                      color: Colors.green,
+                      color: scheme.tertiary,
                     ),
                     const SizedBox(height: 12),
                     _buildTechCard(
@@ -165,7 +171,7 @@ class AboutPage extends ConsumerWidget {
                       name: 'Meta SAM',
                       description: 'Modèle de segmentation avancé',
                       icon: Icons.image_search,
-                      color: Colors.purple,
+                      color: scheme.secondary,
                     ),
                     const SizedBox(height: 12),
                     _buildTechCard(
@@ -173,7 +179,7 @@ class AboutPage extends ConsumerWidget {
                       name: 'PyTorch',
                       description: 'Framework d\'apprentissage automatique',
                       icon: Icons.analytics,
-                      color: Colors.orange,
+                      color: scheme.error,
                     ),
                   ],
                 ),
@@ -184,6 +190,8 @@ class AboutPage extends ConsumerWidget {
               _SectionCard(
                 title: 'Développé par',
                 icon: Icons.person,
+                iconColor: scheme.onPrimaryContainer,
+                iconBackgroundColor: scheme.primaryContainer,
                 child: _buildDeveloperCard(
                   context,
                   name: 'Josoa VONJINIAINA',
@@ -199,7 +207,7 @@ class AboutPage extends ConsumerWidget {
                   Divider(color: Theme.of(context).dividerColor),
                   const SizedBox(height: 16),
                   Text(
-                    'Tous droits réservés © 2025 - SEGMA',
+                    'Tous droits réservés © 2026 - SEGMA',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -207,7 +215,7 @@ class AboutPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Made with ❤️ Flutter & Python',
+                    'Made with Flutter & Python',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -229,12 +237,20 @@ class AboutPage extends ConsumerWidget {
     required IconData icon,
     required Color color,
   }) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: Color.lerp(scheme.surface, color, 0.14),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: Color.lerp(
+            scheme.outline,
+            color,
+            0.35,
+          )!.withValues(alpha: 0.75),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -243,10 +259,14 @@ class AboutPage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
+              color: Color.lerp(scheme.surface, color, 0.24),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(
+              icon,
+              color: Color.lerp(scheme.onSurface, color, 0.62),
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           // Tech Info
@@ -284,6 +304,8 @@ class AboutPage extends ConsumerWidget {
     required String role,
     String? profileUrl,
   }) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -297,8 +319,12 @@ class AboutPage extends ConsumerWidget {
           // Avatar
           CircleAvatar(
             radius: 32,
-            backgroundColor: Colors.blue[100],
-            child: Icon(Icons.person, color: Colors.blue[600], size: 32),
+            backgroundColor: scheme.primaryContainer,
+            child: Icon(
+              Icons.person,
+              color: scheme.onPrimaryContainer,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           // Developer Info
@@ -349,20 +375,29 @@ class _SectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget child;
+  final Color? iconColor;
+  final Color? iconBackgroundColor;
 
   const _SectionCard({
     required this.title,
     required this.icon,
     required this.child,
+    this.iconColor,
+    this.iconBackgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+        border: Border.all(
+          color: scheme.outline.withValues(alpha: 0.34),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,10 +409,14 @@ class _SectionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue[100],
+                    color: iconBackgroundColor ?? scheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: Colors.blue[600], size: 24),
+                  child: Icon(
+                    icon,
+                    color: iconColor ?? scheme.primary,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(

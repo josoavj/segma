@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM python:3.13-slim as builder
+FROM python:3.12-slim as builder
 
 WORKDIR /build
 
@@ -30,7 +30,7 @@ RUN if [ -n "$HF_TOKEN" ]; then \
     ; fi
 
 # Stage 2: Runtime - Image de production légère
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -60,16 +60,15 @@ COPY backend/ /app/
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    CUDA_VISIBLE_DEVICES="" \
     TORCH_HOME=/root/.cache/torch \
     HF_HOME=/root/.cache/huggingface
 
-# Créer répertoire de sortie
-RUN mkdir -p /app/segmentation_output
+# Créer répertoires de données backend
+RUN mkdir -p /app/data/uploads /app/data/masks
 
 # Health check pour vérifier que le service est opérationnel
 HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+    CMD curl -f http://localhost:8000/api/v3/health || exit 1
 
 # Expose le port FastAPI
 EXPOSE 8000

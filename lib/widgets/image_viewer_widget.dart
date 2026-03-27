@@ -68,8 +68,20 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     }
   }
 
+  void _handleBackNavigation(BuildContext context) {
+    // Toujours nettoyer l'image sélectionnée pour le flux state-driven.
+    ref.read(selectedImageProvider.notifier).state = null;
+
+    // Et si l'écran a été ouvert avec Navigator.push, revenir proprement.
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.maybePop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final isLoading = ref.watch(segmentationLoadingProvider);
     final error = ref.watch(segmentationErrorProvider);
     final segmentState = ref.watch(segmentImageProvider);
@@ -99,10 +111,7 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () {
-            // Retourner en désélectionnant l'image (au lieu de Navigator.pop)
-            ref.read(selectedImageProvider.notifier).state = null;
-          },
+          onPressed: () => _handleBackNavigation(context),
           tooltip: 'Retour',
         ),
         title: Column(
@@ -161,12 +170,12 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.15),
+                          color: const Color(0xFF1F4A8A).withValues(alpha: 0.42),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
                           Icons.auto_awesome,
-                          color: Colors.blue,
+                          color: Color(0xFF8FD1FF),
                           size: 18,
                         ),
                       ),
@@ -465,8 +474,8 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                                       child: Center(
                                         child: Text(
                                           '${object.objectId}',
-                                          style: const TextStyle(
-                                            color: Colors.blue,
+                                          style: TextStyle(
+                                            color: scheme.onPrimaryContainer,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 11,
                                           ),
@@ -492,7 +501,7 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                                     ),
                                     trailing: Icon(
                                       Icons.check_circle,
-                                      color: Colors.green.withValues(
+                                      color: scheme.tertiary.withValues(
                                         alpha: 0.7,
                                       ),
                                       size: 16,

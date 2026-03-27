@@ -43,6 +43,7 @@ dependencies:
 
   # API & Network
   dio: ^5.3.1
+  google_fonts: ^8.0.2
 
   # Utils & Encoding
   intl: ^0.20.2

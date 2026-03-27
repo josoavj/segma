@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
-import 'package:segma/widgets/image_viewer_widget.dart';
 
 class ImageGridWidget extends ConsumerWidget {
   final String folderPath;
@@ -19,6 +18,8 @@ class ImageGridWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     final imagesAsync = ref.watch(folderImagesProvider(folderPath));
 
     return imagesAsync.when(
@@ -31,14 +32,16 @@ class ImageGridWidget extends ConsumerWidget {
                 Icon(
                   Icons.image_not_supported_outlined,
                   size: 64,
-                  color: Colors.grey[400],
+                  color: scheme.onSurfaceVariant,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Aucune image dans ce dossier',
                   style: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                  ).textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -61,12 +64,6 @@ class ImageGridWidget extends ConsumerWidget {
             return GestureDetector(
               onTap: () {
                 onImageSelected(image);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageViewerScreen(image: image),
-                  ),
-                );
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
@@ -79,7 +76,7 @@ class ImageGridWidget extends ConsumerWidget {
                       border: Border.all(
                         color: isSelected
                             ? Theme.of(context).primaryColor
-                            : Colors.grey.withOpacity(0.3),
+                            : scheme.outline.withValues(alpha: 0.35),
                         width: isSelected ? 3 : 1,
                       ),
                       boxShadow: isSelected
@@ -94,7 +91,7 @@ class ImageGridWidget extends ConsumerWidget {
                             ]
                           : [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 4,
                                 spreadRadius: 0,
                               ),
@@ -110,10 +107,10 @@ class ImageGridWidget extends ConsumerWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: Colors.grey[300],
-                                child: const Icon(
+                                color: scheme.surfaceContainerHighest,
+                                child: Icon(
                                   Icons.broken_image,
-                                  color: Colors.grey,
+                                  color: scheme.onSurfaceVariant,
                                 ),
                               );
                             },
@@ -184,7 +181,11 @@ class ImageGridWidget extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text('Erreur: $error'),
           ],

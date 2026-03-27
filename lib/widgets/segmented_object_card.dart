@@ -15,6 +15,8 @@ class SegmentedObjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
@@ -65,23 +67,31 @@ class SegmentedObjectCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.crop, size: 16, color: Colors.grey[600]),
+                        Icon(
+                          Icons.crop,
+                          size: 16,
+                          color: scheme.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${object.bbox.width}×${object.bbox.height}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Icon(Icons.square, size: 16, color: Colors.grey[600]),
+                        Icon(
+                          Icons.square,
+                          size: 16,
+                          color: scheme.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${object.pixelsCount} px',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ],

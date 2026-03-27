@@ -65,13 +65,17 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Column(
       children: [
         // Navigation bar
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            border: Border(
+              bottom: BorderSide(color: scheme.outline.withValues(alpha: 0.35)),
+            ),
           ),
           child: Row(
             children: [
@@ -91,7 +95,7 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
                 icon: const Icon(Icons.check_circle),
                 onPressed: () => widget.onFolderSelected(currentPath),
                 tooltip: 'Sélectionner ce dossier',
-                color: Colors.green,
+                color: scheme.tertiary,
               ),
             ],
           ),
@@ -109,10 +113,14 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
                     final folderName = entity.path.split('/').last;
 
                     return ListTile(
-                      leading: const Icon(Icons.folder),
+                      leading: Icon(Icons.folder, color: scheme.primary),
                       title: Text(folderName),
                       onTap: () => _loadDirectory((entity as Directory).path),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                      trailing: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     );
                   },
                 ),

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -13,24 +11,29 @@ services:
     volumes:
       # Cache HuggingFace (persistant entre redémarrages)
       - hf_cache:/root/.cache/huggingface
-      # Résultats de segmentation
-      - segmentation_data:/app/segmentation_output
+      # Données backend persistantes
+      - uploads_data:/app/data/uploads
+      - masks_data:/app/data/masks
       # Configuration optionnelle
       - ./backend/config.py:/app/config.py:ro
     environment:
-      # Désactiver CUDA (CPU only)
-      - CUDA_VISIBLE_DEVICES=
+      # Configuration GPU NVIDIA (par défaut)
+      - DEVICE=${DEVICE:-cuda}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all}
+      - NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:-compute,utility}
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       # Configuration application
-      - DEVICE=cpu
-      - MAX_IMAGE_SIZE=2048
-      - CONFIDENCE_THRESHOLD=0.5
+      - MAX_FILE_SIZE=104857600
+      - UPLOAD_DIR=/app/data/uploads
+      - OUTPUT_DIR=/app/data/masks
       # Logging
       - LOG_LEVEL=info
+    gpus: all
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v3/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,6 +47,38 @@ services:
     #     reservations:
     #       cpus: '1'
     #       memory: 4G
+
+  backend-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HF_TOKEN: ${HF_TOKEN:-}
+    container_name: segma-backend-cpu
+    profiles: ["cpu"]
+    ports:
+      - "${BACKEND_CPU_PORT:-8001}:8000"
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+      - uploads_data:/app/data/uploads
+      - masks_data:/app/data/masks
+      - ./backend/config.py:/app/config.py:ro
+    environment:
+      - DEVICE=cpu
+      - CUDA_VISIBLE_DEVICES=
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - MAX_FILE_SIZE=104857600
+      - UPLOAD_DIR=/app/data/uploads
+      - OUTPUT_DIR=/app/data/masks
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v3/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Service optionnel: Nginx reverse proxy
   # nginx:
@@ -59,7 +94,9 @@ services:
 volumes:
   hf_cache:
     driver: local
-  segmentation_data:
+  uploads_data:
+    driver: local
+  masks_data:
     driver: local
 
 # Network personnalisé (optionnel)
