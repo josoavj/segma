@@ -11,6 +11,8 @@ class SegmentedObjectsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     final segmentationHistory = ref.watch(segmentationHistoryProvider);
     final sortBy = ref.watch(segmentationSortProvider);
 
@@ -78,10 +80,10 @@ class SegmentedObjectsPage extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: scheme.primary.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.sort, color: Colors.white),
+                      child: Icon(Icons.sort, color: scheme.onPrimaryContainer),
                     ),
                   ),
               ],
@@ -97,13 +99,13 @@ class SegmentedObjectsPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: Colors.blue[100],
+                            color: scheme.primaryContainer,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.layers,
                             size: 64,
-                            color: Colors.blue[600],
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -148,6 +150,8 @@ class _SegmentationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     final fileName = segmentation.imagePath.split('/').last;
     final fileSize = segmentation.objects.isNotEmpty
         ? (segmentation.objects.fold(
@@ -162,15 +166,22 @@ class _SegmentationCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-            colors: [Colors.purple[50]!, Colors.purple[100]!],
+            colors: [
+              Color.lerp(scheme.surface, scheme.primaryContainer, 0.45)!,
+              Color.lerp(scheme.surface, scheme.secondaryContainer, 0.40)!,
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: scheme.outline.withValues(alpha: 0.25),
+            width: 1,
           ),
         ),
         child: Padding(
@@ -186,14 +197,18 @@ class _SegmentationCard extends StatelessWidget {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.blue[200],
+                      color: Color.lerp(
+                        scheme.surfaceContainer,
+                        scheme.primary,
+                        0.25,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: Icon(
                         Icons.image,
                         size: 40,
-                        color: Colors.blue[600],
+                        color: scheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -218,7 +233,11 @@ class _SegmentationCard extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.purple[200],
+                                color: Color.lerp(
+                                  scheme.surfaceContainerHighest,
+                                  scheme.primary,
+                                  0.18,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -227,7 +246,7 @@ class _SegmentationCard extends StatelessWidget {
                                     : '0%',
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
-                                      color: Colors.purple[700],
+                                      color: scheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
@@ -236,7 +255,7 @@ class _SegmentationCard extends StatelessWidget {
                             Text(
                               '${segmentation.width}×${segmentation.height}',
                               style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(color: Colors.grey),
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -250,7 +269,7 @@ class _SegmentationCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: scheme.surface.withValues(alpha: 0.62),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -294,7 +313,8 @@ class _SegmentationCard extends StatelessWidget {
                       icon: const Icon(Icons.download),
                       label: const Text('Télécharger'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue[600],
+                        backgroundColor: scheme.primaryContainer,
+                        foregroundColor: scheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -312,6 +332,12 @@ class _SegmentationCard extends StatelessWidget {
                       },
                       icon: const Icon(Icons.copy),
                       label: const Text('Copier'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: scheme.primary,
+                        side: BorderSide(
+                          color: scheme.primary.withValues(alpha: 0.35),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -321,6 +347,12 @@ class _SegmentationCard extends StatelessWidget {
                         const SnackBar(content: Text('Objet supprimé')),
                       );
                     },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: scheme.error,
+                      side: BorderSide(
+                        color: scheme.error.withValues(alpha: 0.35),
+                      ),
+                    ),
                     child: const Icon(Icons.delete_outline),
                   ),
                 ],
@@ -348,14 +380,14 @@ class _DetailRow extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.blue[700],
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       ],
