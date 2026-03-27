@@ -12,6 +12,8 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     final isDarkTheme = ref.watch(themeNotifierProvider);
 
     return Scaffold(
@@ -43,7 +45,7 @@ class SettingsPage extends ConsumerWidget {
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: scheme.primary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
@@ -74,7 +76,7 @@ class SettingsPage extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.2),
+                        color: scheme.tertiaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -83,18 +85,18 @@ class SettingsPage extends ConsumerWidget {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
+                            decoration: BoxDecoration(
+                              color: scheme.tertiary,
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Text(
+                          Text(
                             'Actif',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: Colors.green,
+                              color: scheme.onTertiaryContainer,
                             ),
                           ),
                         ],
@@ -128,12 +130,12 @@ class SettingsPage extends ConsumerWidget {
                     trailing: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
+                        color: scheme.errorContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.delete_outline,
-                        color: Colors.red,
+                        color: Colors.white,
                         size: 18,
                       ),
                     ),
@@ -187,7 +189,7 @@ class SettingsPage extends ConsumerWidget {
                                 }
                               },
                               style: FilledButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: scheme.error,
                               ),
                               child: const Text('Supprimer'),
                             ),
@@ -207,16 +209,20 @@ class SettingsPage extends ConsumerWidget {
                   _SettingsTile(
                     title: 'Version',
                     subtitle: '1.0.0',
-                    trailing: const Icon(
+                    trailing: Icon(
                       Icons.check_circle,
-                      color: Colors.green,
+                      color: scheme.tertiary,
                       size: 20,
                     ),
                   ),
                   _SettingsTile(
                     title: 'Vérifier les mises à jour',
                     subtitle: 'Vous avez la dernière version',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: scheme.primary,
+                    ),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -228,7 +234,11 @@ class SettingsPage extends ConsumerWidget {
                   _SettingsTile(
                     title: 'Développeur',
                     subtitle: 'Josoa VONJINIAINA',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: scheme.primary,
+                    ),
                   ),
                 ],
               ),
@@ -249,11 +259,13 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+        border: Border.all(color: scheme.outline.withValues(alpha: 0.32), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,10 +301,12 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: Colors.grey.withValues(alpha: 0.1), width: 1),
+          top: BorderSide(color: scheme.outline.withValues(alpha: 0.22), width: 1),
         ),
       ),
       child: ListTile(
@@ -307,7 +321,7 @@ class _SettingsTile extends StatelessWidget {
           subtitle,
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
         trailing: trailing,
         onTap: onTap,
@@ -323,6 +337,8 @@ class _HealthCheckTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     final healthAsync = ref.watch(healthCheckProvider);
 
     return healthAsync.when(
@@ -334,14 +350,14 @@ class _HealthCheckTile extends ConsumerWidget {
           height: 24,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+            valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
           ),
         ),
       ),
       error: (err, _) => _SettingsTile(
         title: 'Vérifier la connexion',
         subtitle: 'Erreur de connexion ❌',
-        trailing: Icon(Icons.error, color: Colors.red[700]),
+        trailing: Icon(Icons.error, color: scheme.error),
         onTap: () async {
           ref.invalidate(healthCheckProvider);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -359,8 +375,8 @@ class _HealthCheckTile extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: isHealthy
-                  ? Colors.green.withValues(alpha: 0.2)
-                  : Colors.red.withValues(alpha: 0.2),
+                  ? scheme.tertiaryContainer
+                  : scheme.errorContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -370,7 +386,7 @@ class _HealthCheckTile extends ConsumerWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: isHealthy ? Colors.green : Colors.red,
+                    color: isHealthy ? scheme.tertiary : scheme.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -380,7 +396,9 @@ class _HealthCheckTile extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: isHealthy ? Colors.green : Colors.red,
+                    color: isHealthy
+                        ? scheme.onTertiaryContainer
+                        : scheme.onErrorContainer,
                   ),
                 ),
               ],
@@ -407,6 +425,7 @@ class _ModelInfoTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
     final modelAsync = ref.watch(modelInfoProvider);
 
     return modelAsync.when(
@@ -420,7 +439,7 @@ class _ModelInfoTile extends ConsumerWidget {
               height: 24,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
               ),
             ),
           ),
@@ -431,7 +450,7 @@ class _ModelInfoTile extends ConsumerWidget {
           _SettingsTile(
             title: 'Type de modèle',
             subtitle: 'Erreur: $err',
-            trailing: Icon(Icons.error, color: Colors.red[700]),
+            trailing: Icon(Icons.error, color: scheme.error),
           ),
         ],
       ),
@@ -446,7 +465,11 @@ class _ModelInfoTile extends ConsumerWidget {
             _SettingsTile(
               title: 'Type de modèle',
               subtitle: modelType.toUpperCase(),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: scheme.primary,
+              ),
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -464,8 +487,8 @@ class _ModelInfoTile extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: device == 'cuda'
-                      ? Colors.green.withValues(alpha: 0.2)
-                      : Colors.blue.withValues(alpha: 0.2),
+                      ? scheme.tertiaryContainer
+                      : scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -474,8 +497,8 @@ class _ModelInfoTile extends ConsumerWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: device == 'cuda'
-                        ? Colors.green[700]
-                        : Colors.blue[700],
+                        ? scheme.tertiary
+                        : scheme.primary,
                   ),
                 ),
               ),
@@ -485,14 +508,14 @@ class _ModelInfoTile extends ConsumerWidget {
               subtitle: isLoaded ? 'Chargé ✓' : 'Non chargé',
               trailing: Icon(
                 isLoaded ? Icons.check_circle : Icons.download,
-                color: isLoaded ? Colors.green : Colors.orange,
+                color: isLoaded ? scheme.tertiary : scheme.secondary,
               ),
             ),
             if (!cudaAvailable)
               _SettingsTile(
                 title: 'CUDA',
                 subtitle: 'Non disponible (GPU requis)',
-                trailing: Icon(Icons.close, color: Colors.red[700]),
+                trailing: Icon(Icons.close, color: scheme.error),
               ),
           ],
         );
@@ -812,6 +835,8 @@ class _ModelConfigurationTileState
             ),
             child: modelInfoAsync.when(
               data: (modelInfo) {
+                final scheme = Theme.of(context).colorScheme;
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -835,14 +860,14 @@ class _ModelConfigurationTileState
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.2),
+                              color: scheme.tertiaryContainer,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'Chargé',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.green[700],
+                                color: scheme.onTertiaryContainer,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -860,7 +885,7 @@ class _ModelConfigurationTileState
               loading: () => const CircularProgressIndicator(strokeWidth: 2),
               error: (error, _) => Text(
                 'Erreur: $error',
-                style: TextStyle(color: Colors.red[400]),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ),
