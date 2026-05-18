@@ -3,6 +3,7 @@
 ## Vue d'Ensemble
 
 SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta qui peut segmenter des images basé sur:
+
 - **Prompts texte** (nouveau!) - "all cars", "red objects"
 - **Prompts visuels** (points/boxes)
 - **Prompts vidéo** (tracking)
@@ -43,6 +44,7 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 ```
 
 **Capacités SAM1:**
+
 - ✅ Segmentation par points
 - ✅ Segmentation par boxes
 - ❌ **Segmentation par texte - IMPOSSIBLE**
@@ -94,6 +96,7 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 ```
 
 **Capacités SAM3:**
+
 - ✅ Segmentation par points
 - ✅ Segmentation par boxes
 - ✅ **Segmentation par texte - RÉEL!** 
@@ -110,11 +113,13 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 **Modèle**: Vision Transformer (ViT)
 
 **Variantes disponibles:**
+
 - **ViT-B**: 95 MB, rapide (100ms CPU)
 - **ViT-L**: 308 MB, modéré (300ms CPU)
 - **ViT-H**: 2.5 GB, haute qualité (1s+ CPU)
 
 **Rôle**: 
+
 - Encode l'image en patch embeddings
 - Crée une représentation spatial dense
 - Base pour tous les prompts
@@ -124,6 +129,7 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 **Modèle**: CLIP ou équivalent
 
 **Rôle**:
+
 - Encode le texte (ex: "all cars")
 - Produit un embedding textuel
 - Aligné avec l'image encoder (CLIP training)
@@ -137,6 +143,7 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 ### 3. Attention Mechanism
 
 **Rôle**:
+
 - Aligne text embedding avec image features
 - Focus sur régions pertinentes
 - Génère attention maps
@@ -152,11 +159,13 @@ Text embedding: "cars"
 ### 4. Mask Decoder
 
 **Architecture**:
+
 - Deconvolution avec résiduals
 - Upsampling 4x
 - Refine edges avec attention
 
 **Output**:
+
 - Masque binaire (0-1)
 - Bounding box
 - Score de confiance
@@ -226,11 +235,13 @@ model.segment_by_text_prompt(image, "all cars")
 ```
 
 **Avantages:**
+
 - Intuitive pour l'utilisateur
 - Flexible (270K+ concepts)
 - Pas besoin de cliquer
 
 **Inconvénients:**
+
 - Peut être imprécis pour descriptions complexes
 - Sensible à la qualité du prompt
 
@@ -242,10 +253,12 @@ model.segment_by_point(image, x=100, y=200)
 ```
 
 **Avantages:**
+
 - Très précis
 - Utilisateur interactif
 
 **Inconvénients:**
+
 - Requiert action utilisateur
 
 ### 3. Box-based
@@ -256,10 +269,12 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 ```
 
 **Avantages:**
+
 - Rapide à utiliser
 - Bonne précision
 
 **Inconvénients:**
+
 - Pas pour les objets petits/dispersés
 
 ---
@@ -279,6 +294,7 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 ```
 
 **Limites:**
+
 - Meilleures pour les termes génériques
 - Pire pour les noms propres ("Barack Obama")
 - Pire pour les cas rares/spécialisés
