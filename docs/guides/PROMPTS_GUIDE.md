@@ -27,6 +27,7 @@ Text Prompt: "all red cars"
 SAM3 a été entraîné en **anglais**.
 
 ❌ **Mauvais (français):**
+
 ```
 "la voiture"
 "tous les objets rouges"
@@ -34,6 +35,7 @@ SAM3 a été entraîné en **anglais**.
 ```
 
 ✅ **Bon (anglais):**
+
 ```
 "the car"
 "all red objects"
@@ -45,6 +47,7 @@ SAM3 a été entraîné en **anglais**.
 SAM3 fonctionne mieux avec des **termes génériques** plutôt que spécifiques.
 
 ❌ **Trop spécifique:**
+
 ```
 "Toyota Camry 2024"
 "John Smith"
@@ -52,6 +55,7 @@ SAM3 fonctionne mieux avec des **termes génériques** plutôt que spécifiques.
 ```
 
 ✅ **Générique:**
+
 ```
 "cars"
 "people"
@@ -63,6 +67,7 @@ SAM3 fonctionne mieux avec des **termes génériques** plutôt que spécifiques.
 Préférez les **prompts simples et clairs**.
 
 ❌ **Complexe/Ambigu:**
+
 ```
 "le truc bleu là-bas qui ressemble un peu à un oiseau"
 "choses brillantes"
@@ -70,6 +75,7 @@ Préférez les **prompts simples et clairs**.
 ```
 
 ✅ **Simple/Clair:**
+
 ```
 "blue object"
 "shiny objects"

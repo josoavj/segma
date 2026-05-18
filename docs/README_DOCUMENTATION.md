@@ -7,12 +7,15 @@
 ## 🎯 Commencer
 
 ### ⏱️ 5 minutes
+
 [QUICK_START.md](docs/setup/QUICK_START.md)
 
 ### ⏱️ 30 minutes
+
 [INSTALLATION.md](docs/setup/INSTALLATION.md)
 
 ### ⏱️ 1 heure
+
 [ARCHITECTURE.md](docs/guides/ARCHITECTURE.md) + [PROMPTS_GUIDE.md](docs/guides/PROMPTS_GUIDE.md)
 
 ---
@@ -80,15 +83,19 @@ segma-flutter
 ## 📖 Par Cas d'Usage
 
 ### Je commence
+
 → [QUICK_START.md](docs/setup/QUICK_START.md)
 
 ### J'ai une erreur
+
 → [FAQ.md](docs/troubleshooting/FAQ.md)
 
 ### Je veux comprendre SAM3
+
 → [ARCHITECTURE.md](docs/guides/ARCHITECTURE.md)
 
 ### Je veux écrire de bons prompts
+
 → [PROMPTS_GUIDE.md](docs/guides/PROMPTS_GUIDE.md)
 
 ---

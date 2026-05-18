@@ -84,18 +84,21 @@ flutter run -d linux
 ## 📝 Commands Utiles
 
 ### Activer le venv dans le terminal
+
 ```bash
 source /home/shadowcraft/.pyenv/bin/activate
 # Ou utiliser directement: /home/shadowcraft/.pyenv/bin/python
 ```
 
 ### Démarrer le backend en background
+
 ```bash
 cd /home/shadowcraft/Projets/segma/backend
 /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload &
 ```
 
 ### Voir les logs du backend
+
 ```bash
 # Terminal 1: Démarrer backend avec logs détaillés
 LOGLEVEL=DEBUG /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload --log-level debug
@@ -111,11 +114,13 @@ curl -X POST http://localhost:8000/api/v1/segment \
 ## 🐛 Dépannage Rapide
 
 ### "SAM3 non disponible"
+
 ```bash
 /home/shadowcraft/.pyenv/bin/pip install sam3>=1.0
 ```
 
 ### "Unauthorized" lors du téléchargement
+
 ```bash
 /home/shadowcraft/.pyenv/bin/huggingface-cli whoami
 # Si erreur: relancer huggingface-cli login
@@ -123,12 +128,14 @@ curl -X POST http://localhost:8000/api/v1/segment \
 ```
 
 ### CUDA non disponible
+
 ```bash
 # Le backend détecte auto et utilise CPU (plus lent)
 # Pas de changement requis - fonctionne quand même
 ```
 
 ### Port 8000 déjà utilisé
+
 ```bash
 # Utiliser un autre port
 /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload --port 8001
