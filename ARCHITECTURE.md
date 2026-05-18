@@ -5,11 +5,13 @@ Une application complète de segmentation d'images combinant Flutter pour l'inte
 ## 🏗️ Architecture
 
 ### Frontend (Flutter)
+
 - **UI deux colonnes** : Arborescence des dossiers | Galerie d'images | Visualisation
 - **Gestion d'état** : Riverpod (modern et performant)
 - **Interaction interactive** : Clic sur l'image pour déclencher la segmentation
 
 ### Backend (Python)
+
 - **Framework** : FastAPI (haute performance)
 - **Modèle** : Segment Anything Model (SAM) de Meta
 - **Endpoints** : 
@@ -89,6 +91,7 @@ flutter run -d linux  # ou macos, windows, etc
 ## 🎯 Fonctionnalités
 
 ### ✅ Implémenté
+
 - Navigation des dossiers (arborescence)
 - Affichage des images d'un dossier (grille)
 - Visualisation d'une image en grand
@@ -97,6 +100,7 @@ flutter run -d linux  # ou macos, windows, etc
 - Sauvegarde des masques binaires (même taille que l'originale)
 
 ### 🔄 En cours/À venir
+
 - Sauvegarde des masques sur disque
 - Historique des segmentations
 - Export en différents formats
@@ -134,12 +138,14 @@ Configurable via variable d'environnement `SAM_MODEL_TYPE` dans `backend/.env`
 ## 💾 Format des Données
 
 ### Masques
+
 - **Type** : Binaire (0 et 255)
 - **Format** : PNG ou numpy array
 - **Taille** : Identique à l'image originale
 - **Stockage** : Uint8List en mémoire, transfert en base64
 
 ### Résultats de Segmentation
+
 ```dart
 SegmentationResult {
   imageId,
@@ -155,6 +161,7 @@ SegmentationResult {
 ## 🛠️ Configuration
 
 ### Backend (.env)
+
 ```env
 SAM_MODEL_TYPE=vit_b    # Modèle à utiliser
 DEVICE=cpu              # cpu ou cuda pour GPU
@@ -164,6 +171,7 @@ CORS_ORIGINS=...        # Origines autorisées
 ```
 
 ### Frontend (config/app_config.dart)
+
 ```dart
 const String backendUrl = 'http://localhost:8000';
 const String initialFolder = '/home';
@@ -172,12 +180,14 @@ const String initialFolder = '/home';
 ## 📚 Dépendances Clés
 
 ### Flutter
+
 - `flutter_riverpod` - Gestion d'état
 - `image_picker` - Sélection d'images
 - `dio` - Requêtes HTTP
 - `image` - Traitement d'images
 
 ### Python
+
 - `fastapi` - Framework API
 - `torch` - ML framework
 - `segment-anything` - Modèle SAM
