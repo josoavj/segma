@@ -16,14 +16,17 @@ Bienvenue! Cette documentation explique comment utiliser SEGMA avec SAM3.
 ## 📁 Dossiers
 
 **`setup/`** - Installation et configuration
+
 - QUICK_START.md - Démarrage rapide
 - INSTALLATION.md - Guide complet
 
 **`guides/`** - Concepts et utilisation
+
 - ARCHITECTURE.md - Comment fonctionne SAM3
 - PROMPTS_GUIDE.md - Écrire de bons prompts texte
 
 **`troubleshooting/`** - Aide et dépannage
+
 - FAQ.md - Questions fréquentes
 
 ## 🎯 Par Cas d'Usage
