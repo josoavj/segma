@@ -18,16 +18,14 @@ class SegmentationEditorPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Row(
-        children: [
-          // Panneau de contrôle gauche
-          _buildLeftPanel(context, ref),
+    return Row(
+      children: [
+        // Panneau de contrôle gauche
+        _buildLeftPanel(context, ref),
 
-          // Image principale avec overlay
-          Expanded(flex: 3, child: _buildImageViewer(context)),
-        ],
-      ),
+        // Image principale avec overlay
+        Expanded(flex: 3, child: _buildImageViewer(context)),
+      ],
     );
   }
 
@@ -55,14 +53,14 @@ class SegmentationEditorPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Review objects',
+                  'Révision des objets',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Adjust results with clicks or boxes.',
+                  'Ajustez les résultats avec des clics ou des boîtes.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -78,7 +76,7 @@ class SegmentationEditorPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search objects...',
+                hintText: 'Rechercher des objets...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -99,7 +97,7 @@ class SegmentationEditorPage extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _showAddObjectDialog(context, ref),
                 icon: const Icon(Icons.add),
-                label: const Text('Add object'),
+                label: const Text('Ajouter un objet'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -115,7 +113,7 @@ class SegmentationEditorPage extends ConsumerWidget {
             child: objects.isEmpty
                 ? Center(
                     child: Text(
-                      'No objects yet',
+                      'Aucun objet pour le moment',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -151,15 +149,15 @@ class SegmentationEditorPage extends ConsumerWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Object'),
+        title: const Text('Ajouter un objet'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Object name',
-                hintText: 'e.g., Car, Person, Building...',
+                labelText: 'Nom de l\'objet',
+                hintText: 'ex: Voiture, Personne, Bâtiment...',
               ),
             ),
             const SizedBox(height: 16),
@@ -168,7 +166,7 @@ class SegmentationEditorPage extends ConsumerWidget {
               builder: (context, value, _) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Confidence: ${(value * 100).toStringAsFixed(0)}%'),
+                  Text('Confiance: ${(value * 100).toStringAsFixed(0)}%'),
                   Slider(
                     value: value,
                     onChanged: (newValue) => confidence.value = newValue,
@@ -181,12 +179,12 @@ class SegmentationEditorPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Annuler'),
           ),
           FilledButton(
             onPressed: () =>
                 _addObject(context, ref, nameController.text, confidence.value),
-            child: const Text('Add'),
+            child: const Text('Ajouter'),
           ),
         ],
       ),
@@ -201,7 +199,7 @@ class SegmentationEditorPage extends ConsumerWidget {
   ) async {
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter an object name')),
+        const SnackBar(content: Text('Veuillez entrer un nom d\'objet')),
       );
       return;
     }
@@ -240,12 +238,12 @@ class SegmentationEditorPage extends ConsumerWidget {
 
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Object "$name" added successfully')),
+        SnackBar(content: Text('Objet "$name" ajouté avec succès')),
       );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error adding object: $e')));
+      ).showSnackBar(SnackBar(content: Text('Erreur lors de l\'ajout: $e')));
     }
   }
 
@@ -338,7 +336,7 @@ class SegmentationEditorPage extends ConsumerWidget {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
               ],
               child: Icon(
                 Icons.more_vert,
@@ -386,7 +384,7 @@ class SegmentationEditorPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Image not found',
+                        'Image non trouvée',
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ],
