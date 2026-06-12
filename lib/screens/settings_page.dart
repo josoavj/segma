@@ -16,12 +16,11 @@ class SettingsPage extends ConsumerWidget {
 
     final isDarkTheme = ref.watch(themeNotifierProvider);
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
               // Section Apparence
               _SettingsSection(
                 title: 'Apparence',
@@ -246,8 +245,7 @@ class SettingsPage extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
