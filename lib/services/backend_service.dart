@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/config/backend_config.dart';
 
@@ -15,7 +16,11 @@ class BackendService {
           receiveTimeout: AppConfig.uploadTimeout,
         ),
       ) {
-    dio.interceptors.add(LogInterceptor(responseBody: true, requestBody: true));
+    dio.interceptors.add(LogInterceptor(
+      responseBody: kDebugMode,
+      requestBody: kDebugMode,
+      error: true,
+    ));
   }
 
   /// Factory pour créer une instance avec la configuration par défaut

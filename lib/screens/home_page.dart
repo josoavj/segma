@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
 import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/services/folder_paths_service.dart';
 import 'package:segma/services/file_service.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
@@ -19,7 +19,7 @@ class HomePage extends ConsumerWidget {
     final selectedImage = ref.watch(selectedImageProvider);
 
     // Nettoyer les données de segmentation quand on change d'image
-    ref.listen(selectedImageProvider, (previous, next) {
+    ref.listen<ImageModel?>(selectedImageProvider, (previous, next) {
       if (previous == null && next != null) {
         // On sélectionne une nouvelle image : nettoyer les anciennes données
         ref.read(currentSegmentationProvider.notifier).state = null;
@@ -40,58 +40,56 @@ class HomePage extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      body: folderStructureAsync.when(
-        data: (folderStructure) {
-          // Si une image est sélectionnée, afficher le viewer
-          if (selectedImage != null) {
-            return ImageViewerScreen(image: selectedImage);
-          }
+    return folderStructureAsync.when(
+      data: (folderStructure) {
+        // Si une image est sélectionnée, afficher le viewer
+        if (selectedImage != null) {
+          return ImageViewerScreen(image: selectedImage);
+        }
 
-          return Row(
-            children: [
-              // Colonne 1: Navigation des dossiers améliorée
-              _buildSidebarPanel(context, ref, folderStructure, selectedFolder),
+        return Row(
+          children: [
+            // Colonne 1: Navigation des dossiers améliorée
+            _buildSidebarPanel(context, ref, folderStructure, selectedFolder),
 
-              // Colonne 2: Grille des images
-              if (selectedFolder != null)
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildImageHeaderPanel(context, selectedFolder),
-                      Expanded(
-                        child: ImageGridWidget(
-                          folderPath: selectedFolder.path,
-                          onImageSelected: (image) {
-                            // Mettre à jour l'image sélectionnée (au lieu de Navigator.push)
-                            ref.read(selectedImageProvider.notifier).state =
-                                image;
-                          },
-                          selectedImage: selectedImage,
-                        ),
+            // Colonne 2: Grille des images
+            if (selectedFolder != null)
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildImageHeaderPanel(context, selectedFolder),
+                    Expanded(
+                      child: ImageGridWidget(
+                        folderPath: selectedFolder.path,
+                        onImageSelected: (image) {
+                          // Mettre à jour l'image sélectionnée (au lieu de Navigator.push)
+                          ref.read(selectedImageProvider.notifier).state =
+                              image;
+                        },
+                        selectedImage: selectedImage,
                       ),
-                    ],
-                  ),
-                )
-              else
-                _buildEmptyState(context),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text('Erreur: $error'),
-            ],
-          ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              _buildEmptyState(context),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text('Erreur: $error'),
+          ],
         ),
       ),
     );
@@ -100,8 +98,8 @@ class HomePage extends ConsumerWidget {
   Widget _buildSidebarPanel(
     BuildContext context,
     WidgetRef ref,
-    folderStructure,
-    selectedFolder,
+    FolderModel folderStructure,
+    FolderModel? selectedFolder,
   ) {
     return Container(
       width: 280,
@@ -171,14 +169,10 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildFolderButtons(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<Map<String, String>>(
-      future: FolderPathsService.getStandardFolders(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
+    final standardFoldersAsync = ref.watch(standardFoldersProvider);
 
-        final folders = snapshot.data!;
+    return standardFoldersAsync.when(
+      data: (folders) {
         final customFolders = ref.watch(customFoldersProvider);
 
         return Column(
@@ -236,6 +230,19 @@ class HomePage extends ConsumerWidget {
           ],
         );
       },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+        ),
+      ),
+      error: (err, stack) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Erreur chargement dossiers',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+        ),
+      ),
     );
   }
 
@@ -303,7 +310,9 @@ class HomePage extends ConsumerWidget {
               }
               ref.read(selectedFolderProvider.notifier).state = folder;
               ref.read(selectedImageProvider.notifier).state = null;
-              Navigator.pop(context);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             },
           ),
         ),
@@ -431,7 +440,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildImageHeaderPanel(BuildContext context, selectedFolder) {
+  Widget _buildImageHeaderPanel(BuildContext context, FolderModel selectedFolder) {
     final scheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -541,7 +550,4 @@ class HomePage extends ConsumerWidget {
       ),
     );
   }
-}
-
-extension on Object {
 }

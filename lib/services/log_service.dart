@@ -34,10 +34,17 @@ class LogService {
   final List<LogEntry> _logs = [];
   late File _logFile;
   bool _initialized = false;
+  Future<void>? _initFuture;
 
   Future<void> initialize() async {
     if (_initialized) return;
+    if (_initFuture != null) return _initFuture;
 
+    _initFuture = _doInitialize();
+    return _initFuture;
+  }
+
+  Future<void> _doInitialize() async {
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
       final segmaDir = Directory('${appDocDir.path}/Segma');
@@ -62,9 +69,11 @@ class LogService {
   Future<void> _writeToFile(LogEntry entry) async {
     try {
       if (!_initialized) await initialize();
+      // On utilise writeAsString avec flush pour garantir l'écriture sans bloquer l'UI
       await _logFile.writeAsString(
         '${entry.toString()}\n',
         mode: FileMode.append,
+        flush: false,
       );
     } catch (e) {
       debugPrint('Erreur lors de l\'écriture du log: $e');
@@ -92,23 +101,29 @@ class LogService {
     final timeFormat = DateFormat('HH:mm:ss.SSS');
     final timestamp = timeFormat.format(now);
 
+    // En production, on limite la taille de la stacktrace pour la sécurité
+    String? cleanStackTrace = stackTrace;
+    if (!kDebugMode && stackTrace != null && stackTrace.length > 500) {
+      cleanStackTrace = '${stackTrace.substring(0, 500)}... [TRUNCATED]';
+    }
+
     final entry = LogEntry(
       timestamp: timestamp,
       level: level,
       message: message,
-      stackTrace: stackTrace,
+      stackTrace: cleanStackTrace,
     );
 
     _logs.add(entry);
     _writeToFile(entry);
 
-    // Garder seulement les 1000 derniers logs en mémoire
     if (_logs.length > 1000) {
       _logs.removeRange(0, _logs.length - 1000);
     }
 
-    // Afficher aussi en debug console
-    debugPrint(entry.toString());
+    if (kDebugMode) {
+      debugPrint(entry.toString());
+    }
   }
 
   List<LogEntry> getLogs({String? level, int limit = 100}) {

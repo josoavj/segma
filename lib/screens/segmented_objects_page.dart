@@ -16,7 +16,7 @@ class SegmentedObjectsPage extends ConsumerWidget {
     final segmentationHistory = ref.watch(segmentationHistoryProvider);
     final sortBy = ref.watch(segmentationSortProvider);
 
-    // Sort the history
+    // Trier l'historique
     final sortedHistory = List<SegmentationResult>.from(segmentationHistory);
     if (sortBy == 'recent') {
       sortedHistory.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -33,10 +33,9 @@ class SegmentedObjectsPage extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      body: Column(
-        children: [
-          // Sort and Filter Bar
+    return Column(
+      children: [
+        // Sort and Filter Bar
           Container(
             color: Theme.of(context).colorScheme.surface,
             padding: const EdgeInsets.all(16),
@@ -138,8 +137,7 @@ class SegmentedObjectsPage extends ConsumerWidget {
                   ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 
@@ -162,7 +160,7 @@ class _SegmentationCard extends StatelessWidget {
                   1024)
               .toStringAsFixed(2)
         : '0';
-    final aspectRatio = segmentation.width / segmentation.height;
+    final aspectRatio = segmentation.height > 0 ? segmentation.width / segmentation.height : 1.0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),

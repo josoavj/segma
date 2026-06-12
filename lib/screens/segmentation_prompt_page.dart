@@ -110,12 +110,14 @@ class _SegmentationPageState extends ConsumerState<SegmentationPage> {
     final error = ref.watch(segmentationErrorProvider);
     final result = ref.watch(currentSegmentationProvider);
 
-    return WillPopScope(
-      onWillPop: () async {
-        ref.invalidate(segmentationPromptProvider);
-        ref.invalidate(confidenceThresholdProvider);
-        ref.invalidate(currentSegmentationProvider);
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          ref.invalidate(segmentationPromptProvider);
+          ref.invalidate(confidenceThresholdProvider);
+          ref.invalidate(currentSegmentationProvider);
+        }
       },
       child: Scaffold(
         appBar: AppBar(
