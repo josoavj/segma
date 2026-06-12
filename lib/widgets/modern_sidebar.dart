@@ -51,37 +51,38 @@ class ModernSidebar extends ConsumerWidget {
 
               // Navigation items
               Expanded(
-                child: ListView(
+                child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(
                     horizontal: isCollapsed ? 4 : 12,
                     vertical: 16,
                   ),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    ...NavigationPage.values.map((page) {
-                      final isSelected = currentPage == page;
-                      return isCollapsed
-                          ? _buildCollapsedNavItem(
-                              context,
-                              page: page,
-                              isSelected: isSelected,
-                              onTap: () {
-                                ref.read(currentPageProvider.notifier).state =
-                                    page;
-                              },
-                            )
-                          : _buildNavItem(
-                              context,
-                              page: page,
-                              isSelected: isSelected,
-                              onTap: () {
-                                ref.read(currentPageProvider.notifier).state =
-                                    page;
-                              },
-                            );
-                    }),
-                  ],
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...NavigationPage.values.map((page) {
+                        final isSelected = currentPage == page;
+                        return isCollapsed
+                            ? _buildCollapsedNavItem(
+                                context,
+                                page: page,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  ref.read(currentPageProvider.notifier).state =
+                                      page;
+                                },
+                              )
+                            : _buildNavItem(
+                                context,
+                                page: page,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  ref.read(currentPageProvider.notifier).state =
+                                      page;
+                                },
+                              );
+                      }),
+                    ],
+                  ),
                 ),
               ),
 
