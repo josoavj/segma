@@ -23,13 +23,11 @@ class AboutPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
               // Logo/Icon
               Container(
                 width: 200,
@@ -226,7 +224,6 @@ class AboutPage extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
