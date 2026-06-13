@@ -14,13 +14,20 @@ class BackendService {
           baseUrl: baseUrl,
           connectTimeout: AppConfig.apiTimeout,
           receiveTimeout: AppConfig.uploadTimeout,
+          sendTimeout: AppConfig.uploadTimeout,
+          headers: {
+            'X-Client-Platform': Platform.operatingSystem,
+            'X-App-Version': '1.0.0',
+          },
         ),
       ) {
-    dio.interceptors.add(LogInterceptor(
-      responseBody: kDebugMode,
-      requestBody: kDebugMode,
-      error: true,
-    ));
+    if (!kReleaseMode) {
+      dio.interceptors.add(LogInterceptor(
+        responseBody: true, 
+        requestBody: true,
+        error: true,
+      ));
+    }
   }
 
   /// Factory pour créer une instance avec la configuration par défaut
@@ -64,17 +71,19 @@ class BackendService {
     }
   }
 
-  /// Segmente une image avec un prompt texte
+  /// Segmente une image avec un prompt texte ou des points interactifs
   Future<SegmentationResult> segmentByPrompt(
     String imagePath,
     String prompt, {
     double confidenceThreshold = 0.25,
+    List<InteractivePoint>? points,
   }) async {
     try {
       final request = SegmentationRequest(
         imagePath: imagePath,
         prompt: prompt,
         confidenceThreshold: confidenceThreshold,
+        points: points,
       );
 
       final response = await dio.post(
@@ -91,6 +100,21 @@ class BackendService {
     } on DioException catch (e) {
       throw Exception('Erreur réseau: ${e.message}');
     }
+  }
+
+  /// Méthode spécialisée pour la segmentation interactive par points
+  Future<SegmentationResult> segmentInteractive(
+    String imagePath,
+    List<InteractivePoint> points, {
+    String prompt = 'object',
+    double confidenceThreshold = 0.25,
+  }) async {
+    return segmentByPrompt(
+      imagePath,
+      prompt,
+      confidenceThreshold: confidenceThreshold,
+      points: points,
+    );
   }
 
   /// Obtient les informations du modèle SAM actuellement chargé
