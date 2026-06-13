@@ -1,16 +1,48 @@
-# segma
+# SEGMA - Image Segmentation with SAM 3
 
-Image segmentation software using SAM.
+SEGMA est une solution de pointe pour la segmentation d'images, combinant la puissance de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
 
-## Getting Started
+## 🌟 Fonctionnalités Clés
 
-This project is a starting point for a Flutter application.
+- **Exploration Intelligente** : Arborescence de fichiers dynamique avec détection automatique des dossiers système (Documents, Images).
+- **Segmentation SAM 3 Interactive** : 
+    - **Mode Texte** : Segmentez des objets via des prompts en langage naturel.
+    - **Mode Interactif** : Affinez vos masques en cliquant directement sur l'image (Inclusion/Exclusion).
+- **Éditeur de Précision** : Interface dédiée pour l'ajustement des segments en temps réel avec retour visuel.
+- **Gestion de l'Historique** : Suivez et triez vos segmentations par date, confiance ou nom de fichier.
+- **Performance Industrielle** : Support natif du GPU (CUDA) via un backend haute performance en FastAPI.
+- **Sécurité & Logs** : Système de journalisation robuste avec rotation automatique et protection des données sensibles en production.
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Installation Rapide
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 1. Backend (Python)
+Le serveur gère l'exécution du modèle SAM 3.
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+```
+*Note: Un GPU NVIDIA avec CUDA est recommandé pour une réactivité optimale.*
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 2. Frontend (Flutter)
+Compilez l'application pour votre plateforme (Linux, Windows).
+```bash
+# Installation des dépendances
+flutter pub get
+
+# Lancement en mode développement
+flutter run -d linux
+
+# Build de production avec URL backend personnalisée
+flutter build linux --release --dart-define=BACKEND_URL=http://VOTRE_IP:8000
+```
+
+## 🏗️ Architecture Technique
+
+- **Frontend** : Flutter 3.6+, Riverpod (Gestion d'état), Dio (Réseau).
+- **Backend** : FastAPI, PyTorch, Segment Anything Model 3.
+- **Déploiement** : Prêt pour Docker (Dockerfile inclus).
+
+## 📄 Licence
+
+Ce projet est sous licence propriétaire. Développé par **Josoa VONJINIAINA**.

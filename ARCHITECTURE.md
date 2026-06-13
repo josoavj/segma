@@ -1,203 +1,53 @@
-# SEGMA - Image Segmentation Application
+# Documentation de l'Architecture - SEGMA
 
-Une application complète de segmentation d'images combinant Flutter pour l'interface utilisateur et PyTorch/SAM (Segment Anything Model) pour le backend de segmentation.
+SEGMA utilise une architecture client-serveur découplée pour offrir une expérience fluide de segmentation d'IA haute performance.
 
-## 🏗️ Architecture
+## 🏗️ Architecture Globale
 
-### Frontend (Flutter)
+### 1. Frontend (Flutter)
+Interface utilisateur réactive et multiplateforme (Linux/Windows).
+- **Gestion d'État** : Riverpod (AsyncNotifier) pour une logique asynchrone robuste.
+- **Réseau** : Dio avec des intercepteurs configurés pour la sécurité en production.
+- **Interaction** : Normalisation des coordonnées de clics pour une compatibilité parfaite avec SAM, quel que soit l'écran.
 
-- **UI deux colonnes** : Arborescence des dossiers | Galerie d'images | Visualisation
-- **Gestion d'état** : Riverpod (modern et performant)
-- **Interaction interactive** : Clic sur l'image pour déclencher la segmentation
+### 2. Backend (Python/FastAPI)
+Moteur d'exécution pour SAM 3.
+- **Modèle** : `facebook/sam3` (Segment Anything Model 3).
+- **Accélération** : Support CUDA pour des temps de réponse inférieurs à la seconde.
+- **APIs (v3)** :
+    - `GET /api/v3/health` : État du serveur.
+    - `POST /api/v3/upload` : Envoi d'images.
+    - `POST /api/v3/segment` : Segmentation hybride (Texte + Points).
+    - `GET /api/v3/model/info` : Statut du GPU et du modèle chargé.
 
-### Backend (Python)
+## 📦 Structure du Code Source
 
-- **Framework** : FastAPI (haute performance)
-- **Modèle** : Segment Anything Model (SAM) de Meta
-- **Endpoints** : 
-  - `POST /api/v1/segment/point` - Segmentation par point cliqué
-  - `POST /api/v1/segment/box` - Segmentation par boîte délimitatrice
-  - `GET /api/v1/health` - Santé du serveur
+### Flutter (`lib/`)
+- `config/` : Configuration dynamique (URLs, Timeouts).
+- `models/` : Modèles de données typés (SegmentationResult, InteractivePoint).
+- `providers/` : Logique métier (Navigation, Fichiers, Segmentation).
+- `screens/` : Pages de l'interface utilisateur.
+- `services/` : Services de bas niveau (Fichiers, Logs, Réseau).
+- `widgets/` : Composants UI réutilisables et Overlay graphiques.
 
-## 📦 Structure du Projet
+### Backend (`backend/`)
+- `main.py` : Point d'entrée FastAPI.
+- `requirements.txt` : Dépendances (PyTorch, FastAPI, SAM 3).
 
-```
-segma/
-├── lib/                           # Code Flutter
-│   ├── main.dart                  # Point d'entrée
-│   ├── config/                    # Configuration
-│   ├── core/                      # Code partagé
-│   ├── models/                    # Modèles de données
-│   ├── providers/                 # Riverpod providers
-│   ├── screens/
-│   │   └── home_page.dart         # Page principale (2 colonnes)
-│   ├── services/
-│   │   ├── file_service.dart      # Gestion fichiers/dossiers
-│   │   └── backend_service.dart   # Communication API
-│   └── widgets/
-│       ├── folder_tree_widget.dart    # Arborescence
-│       ├── image_grid_widget.dart     # Galerie
-│       └── image_viewer_widget.dart   # Visualisation + interaction
-├── backend/                       # Code Python
-│   ├── main.py                    # Application FastAPI
-│   ├── config.py                  # Configuration
-│   ├── requirements.txt           # Dépendances Python
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── routes/
-│   │   │   │   └── segmentation.py
-│   │   │   └── schemas.py
-│   │   ├── models/
-│   │   │   ├── sam_model.py       # Modèle SAM
-│   │   │   └── image_processor.py
-│   │   └── services/
-│   │       └── segmentation_service.py
-│   └── .env                       # Variables d'environnement
-└── pubspec.yaml                   # Dépendances Flutter
-```
+## 🔌 Flux d'Interaction Interactif
 
-## 🚀 Installation & Utilisation
+1. **Chargement** : L'utilisateur sélectionne une image. Elle est uploadée une seule fois sur le backend.
+2. **Interaction** : L'utilisateur clique sur l'image (Inclusion ou Exclusion).
+3. **Traitement** : Flutter envoie les coordonnées normalisées `(0.0 à 1.0)` au backend.
+4. **Calcul** : SAM 3 traite l'image avec les nouveaux points en utilisant le cache d'embedding.
+5. **Rendu** : Flutter reçoit le nouveau masque et le dessine instantanément via un overlay.
 
-### Backend
+## 🚀 Optimisations de Production
 
-```bash
-cd backend
+- **Mise en cache** : Les images ne sont pas ré-uploadées inutilement.
+- **Isolats de Rendu** : Utilisation de `RepaintBoundary` pour isoler les animations d'interface du contenu d'image statique.
+- **Sécurité** : Les logs techniques sont automatiquement désactivés en mode production pour protéger la vie privée des utilisateurs.
+- **Dockerisation** : Le backend est prêt pour le déploiement via Docker avec support GPU.
 
-# Créer un environnement virtuel
-python -m venv venv
-source venv/bin/activate
-
-# Installer les dépendances
-pip install -r requirements.txt
-
-# Télécharger le modèle SAM (une seule fois)
-# Voir: https://github.com/facebookresearch/segment-anything
-
-# Lancer le serveur
-python main.py
-# L'API sera disponible sur http://localhost:8000
-```
-
-### Frontend
-
-```bash
-# À la racine du projet
-flutter pub get
-
-# Lancer l'application
-flutter run -d linux  # ou macos, windows, etc
-```
-
-## 🎯 Fonctionnalités
-
-### ✅ Implémenté
-
-- Navigation des dossiers (arborescence)
-- Affichage des images d'un dossier (grille)
-- Visualisation d'une image en grand
-- Clic sur l'image pour déclencher la segmentation
-- Affichage du masque de segmentation
-- Sauvegarde des masques binaires (même taille que l'originale)
-
-### 🔄 En cours/À venir
-
-- Sauvegarde des masques sur disque
-- Historique des segmentations
-- Export en différents formats
-- Support du box-prompting (boîte délimitatrice)
-- Améliorations UI/UX
-
-## 🔌 Flux de Communication
-
-```
-Flutter App
-    ↓
-[Clique sur image] → récupère (x, y)
-    ↓
-BackendService.segmentImageByPoint(path, x, y)
-    ↓
-FastAPI POST /api/v1/segment/point
-    ↓
-SegmentationService
-    ↓
-SAMModel (PyTorch)
-    ↓
-Retourne masque (base64) + confiance
-    ↓
-Flutter affiche le masque en overlay
-```
-
-## 🔑 Modèles SAM Disponibles
-
-- `vit_b` : Petit (95MB) - Rapide
-- `vit_l` : Moyen (308MB) - Équilibré
-- `vit_h` : Grand (2.5GB) - Meilleure qualité
-
-Configurable via variable d'environnement `SAM_MODEL_TYPE` dans `backend/.env`
-
-## 💾 Format des Données
-
-### Masques
-
-- **Type** : Binaire (0 et 255)
-- **Format** : PNG ou numpy array
-- **Taille** : Identique à l'image originale
-- **Stockage** : Uint8List en mémoire, transfert en base64
-
-### Résultats de Segmentation
-
-```dart
-SegmentationResult {
-  imageId,
-  imagePath,
-  maskData (Uint8List),
-  width,
-  height,
-  confidence (float),
-  createdAt
-}
-```
-
-## 🛠️ Configuration
-
-### Backend (.env)
-
-```env
-SAM_MODEL_TYPE=vit_b    # Modèle à utiliser
-DEVICE=cpu              # cpu ou cuda pour GPU
-DEBUG=False             # Mode debug
-PORT=8000               # Port du serveur
-CORS_ORIGINS=...        # Origines autorisées
-```
-
-### Frontend (config/app_config.dart)
-
-```dart
-const String backendUrl = 'http://localhost:8000';
-const String initialFolder = '/home';
-```
-
-## 📚 Dépendances Clés
-
-### Flutter
-
-- `flutter_riverpod` - Gestion d'état
-- `image_picker` - Sélection d'images
-- `dio` - Requêtes HTTP
-- `image` - Traitement d'images
-
-### Python
-
-- `fastapi` - Framework API
-- `torch` - ML framework
-- `segment-anything` - Modèle SAM
-- `pillow` - Traitement d'images
-- `opencv-python` - Vision par ordinateur
-
-## 📝 Licence
-
-Projet développé avec Flutter et SAM (Meta)
-
-## 🤝 Contribution
-
-Les contributions sont bienvenues ! Veuillez soumettre un pull request.
+---
+*Mis à jour : 2026*

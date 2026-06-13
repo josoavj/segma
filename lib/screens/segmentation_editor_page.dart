@@ -1,417 +1,335 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
-import 'package:segma/services/file_service.dart';
+import 'package:segma/providers/segmentation_provider.dart';
 
-// Provider pour les objets segmentés en cours d'édition
-final editorObjectsProvider = StateProvider<List<SegmentationResult>>((ref) {
-  return [];
-});
-
-class SegmentationEditorPage extends ConsumerWidget {
+class SegmentationEditorPage extends ConsumerStatefulWidget {
   final ImageModel image;
 
   const SegmentationEditorPage({super.key, required this.image});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        // Panneau de contrôle gauche
-        _buildLeftPanel(context, ref),
+  ConsumerState<SegmentationEditorPage> createState() => _SegmentationEditorPageState();
+}
 
-        // Image principale avec overlay
-        Expanded(flex: 3, child: _buildImageViewer(context)),
-      ],
-    );
+class _SegmentationEditorPageState extends ConsumerState<SegmentationEditorPage> {
+  final GlobalKey _imageKey = GlobalKey();
+  bool _isPositiveMode = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Réinitialiser les points au démarrage de l'éditeur
+    Future.microtask(() {
+      ref.read(interactivePointsProvider.notifier).state = [];
+      ref.read(currentSegmentationProvider.notifier).state = null;
+    });
   }
 
-  Widget _buildLeftPanel(BuildContext context, WidgetRef ref) {
-    final objects = ref.watch(editorObjectsProvider);
+  void _handleTap(TapUpDetails details, Size size) {
+    final RenderBox renderBox = _imageKey.currentContext?.findRenderObject() as RenderBox;
+    final localPosition = renderBox.globalToLocal(details.globalPosition);
 
-    return Container(
-      width: 340,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Révision des objets',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Ajustez les résultats avec des clics ou des boîtes.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
+    // Normalisation des coordonnées entre 0 et 1 pour une compatibilité totale
+    final xNorm = localPosition.dx / size.width;
+    final yNorm = localPosition.dy / size.height;
 
-          const Divider(height: 1),
-
-          // Barre de recherche
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Rechercher des objets...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-              ),
-            ),
-          ),
-
-          // Bouton Add object
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _showAddObjectDialog(context, ref),
-                icon: const Icon(Icons.add),
-                label: const Text('Ajouter un objet'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-
-          // Liste des objets
-          Expanded(
-            child: objects.isEmpty
-                ? Center(
-                    child: Text(
-                      'Aucun objet pour le moment',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ListView.builder(
-                      itemCount: objects.length,
-                      itemBuilder: (context, index) {
-                        final object = objects[index];
-                        return _buildObjectItem(
-                          context,
-                          object: object,
-                          index: index,
-                          ref: ref,
-                        );
-                      },
-                    ),
-                  ),
-          ),
-
-          const Divider(height: 1),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showAddObjectDialog(BuildContext context, WidgetRef ref) async {
-    final nameController = TextEditingController();
-    final confidence = ValueNotifier<double>(0.9);
-
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajouter un objet'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom de l\'objet',
-                hintText: 'ex: Voiture, Personne, Bâtiment...',
-              ),
-            ),
-            const SizedBox(height: 16),
-            ValueListenableBuilder<double>(
-              valueListenable: confidence,
-              builder: (context, value, _) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Confiance: ${(value * 100).toStringAsFixed(0)}%'),
-                  Slider(
-                    value: value,
-                    onChanged: (newValue) => confidence.value = newValue,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                _addObject(context, ref, nameController.text, confidence.value),
-            child: const Text('Ajouter'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _addObject(
-    BuildContext context,
-    WidgetRef ref,
-    String name,
-    double confidence,
-  ) async {
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer un nom d\'objet')),
+    if (xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1) {
+      final point = InteractivePoint(
+        x: xNorm,
+        y: yNorm,
+        isPositive: _isPositiveMode,
       );
-      return;
+
+      final currentPoints = ref.read(interactivePointsProvider);
+      ref.read(interactivePointsProvider.notifier).state = [...currentPoints, point];
+
+      _triggerSegmentation();
     }
+  }
 
-    try {
-      // Créer un masque fictif pour la démo (en pratique, ce serait un masque réel de SAM)
-      final width = 512; // À adapter selon l'image
-      final height = 512;
-      final maskBytes = Uint8List(width * height);
+  Future<void> _triggerSegmentation() async {
+    await ref.read(segmentImageProvider.notifier).segment(widget.image.path);
+  }
 
-      // Remplir avec des valeurs aléatoires pour la démo
-      for (int i = 0; i < maskBytes.length; i++) {
-        maskBytes[i] = (i % 2) * 255;
+  void _clearPoints() {
+    ref.read(interactivePointsProvider.notifier).state = [];
+    ref.read(currentSegmentationProvider.notifier).state = null;
+  }
+
+  void _undoPoint() {
+    final points = ref.read(interactivePointsProvider);
+    if (points.isNotEmpty) {
+      ref.read(interactivePointsProvider.notifier).state = points.sublist(0, points.length - 1);
+      if (ref.read(interactivePointsProvider).isEmpty) {
+        ref.read(currentSegmentationProvider.notifier).state = null;
+      } else {
+        _triggerSegmentation();
       }
-
-      // Sauvegarder le masque localement
-      await FileService.saveMask(image.path, maskBytes, name);
-
-      // Créer l'objet segmenté
-      final result = SegmentationResult(
-        imageId: image.id,
-        imagePath: image.path,
-        width: width,
-        height: height,
-        objects: [],
-        segmentationDir: '',
-        createdAt: DateTime.now(),
-      );
-
-      // Ajouter à la liste locale
-      final currentObjects = ref.read(editorObjectsProvider);
-      ref.read(editorObjectsProvider.notifier).state = [
-        ...currentObjects,
-        result,
-      ];
-
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Objet "$name" ajouté avec succès')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erreur lors de l\'ajout: $e')));
     }
   }
 
-  Widget _buildObjectItem(
-    BuildContext context, {
-    required SegmentationResult object,
-    required int index,
-    required WidgetRef ref,
-  }) {
-    final objectName = object.imagePath.split('/').last.split('.').first;
-    final color = _getColorForIndex(index);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Édition : ${widget.image.name}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: () => _showHelp(),
           ),
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            // Thumbnail
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Center(
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(color: color, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Label et info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    objectName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(color == Colors.red
-                            ? 100
-                            : color == Colors.green
-                            ? 95
-                            : 90).toStringAsFixed(0)}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Actions
-            PopupMenuButton(
-              onSelected: (value) {
-                if (value == 'delete') {
-                  final objects = ref.read(editorObjectsProvider);
-                  final updated = objects.toList();
-                  updated.removeAt(index);
-                  ref.read(editorObjectsProvider.notifier).state = updated;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'delete', child: Text('Supprimer')),
-              ],
-              child: Icon(
-                Icons.more_vert,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                size: 18,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
-    );
-  }
-
-  Color _getColorForIndex(int index) {
-    final colors = [
-      Colors.orange,
-      Colors.cyan,
-      Colors.pink,
-      Colors.green,
-      Colors.purple,
-      Colors.amber,
-    ];
-    return colors[index % colors.length];
-  }
-
-  Widget _buildImageViewer(BuildContext context) {
-    return Container(
-      color: Colors.grey[900],
-      child: Stack(
+      body: Row(
         children: [
-          // Image
-          Positioned.fill(
-            child: Image.file(
-              File(image.path),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.image_not_supported,
-                        size: 64,
-                        color: Colors.grey[600],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Image non trouvée',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Settings button (top right)
-          Positioned(
-            top: 16,
-            right: 16,
+          _buildSidebar(),
+          Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white),
-                onPressed: () {
-                  // TODO: Ouvrir settings
+              color: Colors.black,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      Center(
+                        child: GestureDetector(
+                          onTapUp: (details) => _handleTap(details, _getImageWidgetSize()),
+                          child: Stack(
+                            children: [
+                              Image.file(
+                                File(widget.image.path),
+                                key: _imageKey,
+                                fit: BoxFit.contain,
+                              ),
+                              
+                              // Overlay des points d'interaction (re-calculés selon la taille réelle)
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final points = ref.watch(interactivePointsProvider);
+                                  final imgSize = _getImageWidgetSize();
+                                  if (imgSize == Size.zero) return const SizedBox.shrink();
+
+                                  return Stack(
+                                    children: points.map((p) => Positioned(
+                                      left: p.x * imgSize.width - 6,
+                                      top: p.y * imgSize.height - 6,
+                                      child: Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: p.isPositive ? Colors.blue : Colors.red,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: Colors.white, width: 2),
+                                          boxShadow: const [BoxShadow(blurRadius: 4, color: Colors.black26)],
+                                        ),
+                                      ),
+                                    )).toList(),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _buildFloatingToolbar(),
+                    ],
+                  );
                 },
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Size _getImageWidgetSize() {
+    final RenderBox? renderBox = _imageKey.currentContext?.findRenderObject() as RenderBox?;
+    return renderBox?.size ?? Size.zero;
+  }
+
+  void _showHelp() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Aide à la segmentation'),
+        content: const Text(
+          '• Inclusion (Bleu) : Cliquez sur l\'objet que vous voulez détourer.\n'
+          '• Exclusion (Rouge) : Cliquez sur les zones à supprimer du masque.\n'
+          '• SAM recalcule automatiquement le masque après chaque clic.',
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Compris'))],
+      ),
+    );
+  }
+
+  Widget _buildSidebar() {
+    final isLoading = ref.watch(segmentationLoadingProvider);
+    final result = ref.watch(currentSegmentationProvider);
+
+    return Container(
+      width: 320,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Objets Détectés', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text('${result?.objects.length ?? 0} segments trouvés', style: Theme.of(context).textTheme.bodySmall),
+              ],
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: result == null 
+              ? _buildInstructions()
+              : _buildObjectList(result),
+          ),
+          if (isLoading) const LinearProgressIndicator(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: FilledButton.icon(
+              onPressed: result != null ? () => Navigator.pop(context, result) : null,
+              icon: const Icon(Icons.check),
+              label: const Text('Valider l\'édition'),
+              style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.mouse, size: 48, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Commencez par cliquer sur l\'image pour définir l\'objet.', textAlign: TextAlign.center),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildObjectList(SegmentationResult result) {
+    return ListView.builder(
+      itemCount: result.objects.length,
+      itemBuilder: (context, index) {
+        final obj = result.objects[index];
+        return ListTile(
+          dense: true,
+          leading: CircleAvatar(
+            radius: 12,
+            backgroundColor: Colors.blue.withValues(alpha: 0.2),
+            child: Text('${index + 1}', style: const TextStyle(fontSize: 10)),
+          ),
+          title: Text(obj.label),
+          subtitle: Text('${(obj.confidence * 100).toStringAsFixed(1)}% confiance'),
+        );
+      },
+    );
+  }
+
+  Widget _buildFloatingToolbar() {
+    return Positioned(
+      bottom: 30,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black.withValues(alpha: 0.3))],
+            border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _modeToggle(
+                icon: Icons.add_circle,
+                label: 'Inclure',
+                isSelected: _isPositiveMode,
+                color: Colors.blue,
+                onTap: () => setState(() => _isPositiveMode = true),
+              ),
+              const SizedBox(width: 12),
+              _modeToggle(
+                icon: Icons.remove_circle,
+                label: 'Exclure',
+                isSelected: !_isPositiveMode,
+                color: Colors.red,
+                onTap: () => setState(() => _isPositiveMode = false),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: VerticalDivider(width: 20, thickness: 1),
+              ),
+              IconButton(
+                icon: const Icon(Icons.undo),
+                onPressed: _undoPoint,
+                tooltip: 'Annuler',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_sweep),
+                onPressed: _clearPoints,
+                tooltip: 'Tout effacer',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _modeToggle({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isSelected ? color : Colors.transparent),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: isSelected ? color : Colors.grey, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? color : Colors.grey,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

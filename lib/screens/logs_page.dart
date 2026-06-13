@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/services/log_service.dart';
 
 final logsProvider = FutureProvider<List<LogEntry>>((ref) async {
@@ -22,7 +23,6 @@ class LogsPage extends ConsumerWidget {
 
     return Column(
       children: [
-          // Header avec gradient
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

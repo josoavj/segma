@@ -1,57 +1,31 @@
-# 📖 Documentation SEGMA SAM3
+# 📖 Centre de Documentation SEGMA
 
-Bienvenue! Cette documentation explique comment utiliser SEGMA avec SAM3.
+Bienvenue dans la documentation officielle de **SEGMA**, l'outil professionnel de segmentation d'images assisté par l'IA (SAM 3).
 
-## 🚀 Par Durée
+## 🚀 Mise en Route
 
-### 5 Minutes
-[setup/QUICK_START.md](setup/QUICK_START.md)
+Pour démarrer rapidement avec SEGMA, suivez nos guides structurés par étapes :
 
-### 30 Minutes
-[setup/INSTALLATION.md](setup/INSTALLATION.md)
+1.  **[Démarrage Rapide](setup/QUICK_START.md)** : Configurez votre environnement et lancez votre première segmentation en 5 minutes.
+2.  **[Guide d'Installation](setup/INSTALLATION.md)** : Instructions détaillées pour une installation complète (Backend & Frontend).
 
-### 1 Heure
-[guides/ARCHITECTURE.md](guides/ARCHITECTURE.md) + [guides/PROMPTS_GUIDE.md](guides/PROMPTS_GUIDE.md)
+## 🎓 Guides d'Utilisation
 
-## 📁 Dossiers
+Approfondissez vos connaissances sur les capacités de SEGMA :
 
-**`setup/`** - Installation et configuration
+-   **[Architecture Technique](../ARCHITECTURE.md)** : Comprendre comment le client Flutter communique avec le moteur SAM 3.
+-   **[Guide des Prompts](guides/PROMPTS_GUIDE.md)** : Apprenez à rédiger des prompts textuels efficaces pour obtenir des masques précis.
+-   **Segmentation Interactive** : Découvrez comment utiliser l'éditeur pour affiner vos résultats par simple clic (Inclusion/Exclusion).
 
-- QUICK_START.md - Démarrage rapide
-- INSTALLATION.md - Guide complet
+## 🆘 Support & Dépannage
 
-**`guides/`** - Concepts et utilisation
+-   **[FAQ & Troubleshooting](troubleshooting/FAQ.md)** : Solutions aux erreurs courantes (CUDA, Réseau, Installation).
 
-- ARCHITECTURE.md - Comment fonctionne SAM3
-- PROMPTS_GUIDE.md - Écrire de bons prompts texte
+## 🛠️ Automatisation
 
-**`troubleshooting/`** - Aide et dépannage
-
-- FAQ.md - Questions fréquentes
-
-## 🎯 Par Cas d'Usage
-
-**Je viens de commencer?**
-→ [setup/QUICK_START.md](setup/QUICK_START.md)
-
-**J'ai une erreur?**
-→ [troubleshooting/FAQ.md](troubleshooting/FAQ.md)
-
-**Je veux comprendre SAM3?**
-→ [guides/ARCHITECTURE.md](guides/ARCHITECTURE.md)
-
-**Je veux écrire de bons prompts?**
-→ [guides/PROMPTS_GUIDE.md](guides/PROMPTS_GUIDE.md)
-
-## 🔗 Navigation Rapide
-
-- [QUICK_START.md](setup/QUICK_START.md) - 5 min
-- [INSTALLATION.md](setup/INSTALLATION.md) - 30 min
-- [ARCHITECTURE.md](guides/ARCHITECTURE.md) - Concepts
-- [PROMPTS_GUIDE.md](guides/PROMPTS_GUIDE.md) - Prompts
-- [FAQ.md](troubleshooting/FAQ.md) - Questions rapides
-- [GUIDE_NAVIGATION.md](GUIDE_NAVIGATION.md) - Navigation
+Le projet inclut plusieurs scripts pour faciliter la maintenance dans le dossier `/scripts` :
+-   `setup_hf.sh` : Authentification HuggingFace pour le téléchargement du modèle.
+-   `install_sam3.sh` : Installation automatisée des dépendances de vision.
 
 ---
-
-**Commencez par**: [setup/QUICK_START.md](setup/QUICK_START.md)
+*SEGMA - Intelligence Artificielle au service de la Vision par Ordinateur.*
