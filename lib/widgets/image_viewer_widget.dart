@@ -6,6 +6,7 @@ import 'package:image/image.dart' as img;
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/providers/file_provider.dart';
+import 'package:segma/screens/segmentation_editor_page.dart';
 
 /// Écran complet pour la visualisation d'image avec segmentation (interface moderne)
 class ImageViewerScreen extends StatelessWidget {
@@ -339,6 +340,28 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                                   ],
                                 ),
                               ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Bouton Éditeur Interactif
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            // Naviguer vers l'éditeur interactif
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => SegmentationEditorPage(image: widget.image),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.touch_app),
+                          label: const Text('Éditeur Interactif'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.blue[300],
+                            side: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
