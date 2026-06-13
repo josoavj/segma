@@ -12,7 +12,14 @@ import 'config/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialisation des services
   await logService.initialize();
+  
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
