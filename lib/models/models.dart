@@ -152,18 +152,20 @@ class SegmentationResult {
   }
 }
 
-/// Requête de segmentation par prompt
+/// Requête de segmentation par prompt ou interactive
 class SegmentationRequest {
   final String imagePath;
   final String prompt;
   final double confidenceThreshold;
   final String? saveDir;
+  final List<InteractivePoint>? points;
 
   SegmentationRequest({
     required this.imagePath,
     required this.prompt,
     this.confidenceThreshold = 0.0,
     this.saveDir,
+    this.points,
   });
 
   Map<String, dynamic> toJson() {
@@ -172,6 +174,26 @@ class SegmentationRequest {
       'prompt': prompt,
       'confidence_threshold': confidenceThreshold,
       if (saveDir != null) 'save_dir': saveDir,
+      if (points != null) 'points': points!.map((p) => p.toJson()).toList(),
     };
   }
+}
+
+/// Point d'interaction pour SAM
+class InteractivePoint {
+  final double x; // Coordonnée X (pixel ou normalisée selon backend)
+  final double y; // Coordonnée Y
+  final bool isPositive; // true = inclusion, false = exclusion
+
+  InteractivePoint({
+    required this.x,
+    required this.y,
+    this.isPositive = true,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'x': x,
+    'y': y,
+    'label': isPositive ? 1 : 0,
+  };
 }
