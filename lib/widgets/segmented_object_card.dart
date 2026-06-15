@@ -7,11 +7,11 @@ class SegmentedObjectCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const SegmentedObjectCard({
-    Key? key,
+    super.key,
     required this.object,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
