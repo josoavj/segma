@@ -1,5 +1,4 @@
 import os
-import torch
 import logging
 import uvicorn
 from fastapi import FastAPI
@@ -7,17 +6,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
-# Configuration globale avant tout import de modèles
-if not torch.cuda.is_available():
+def get_device_status() -> str:
+    """Détecte le device disponible sans imposer PyTorch à l'import de l'app."""
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return f"🎮 GPU: {torch.cuda.get_device_name(0)}"
+    except ModuleNotFoundError:
+        pass
+
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
-    device_status = "🖥️ CPU"
-else:
-    device_status = f"🎮 GPU: {torch.cuda.get_device_name(0)}"
+    return "🖥️ CPU"
 
 # Import local de tes modules harmonisés
 from app.models.model_manager import model_manager
 from app.api import api_router
-from config import settings
+from config import ensure_runtime_dirs, settings
 
 # Configuration du logging
 logging.basicConfig(
@@ -32,10 +37,12 @@ async def lifespan(app: FastAPI):
     logger.info("╔════════════════════════════════════════════════════════════╗")
     logger.info("║           DÉMARRAGE DU MOTEUR SEGMA (SAM 3)                ║")
     logger.info("╚════════════════════════════════════════════════════════════╝")
+    ensure_runtime_dirs()
     
     # Pré-chargement du modèle SAM 3 via le manager pour éviter la latence à la 1ère requête
-    logger.info(f"Système détecté : {device_status}")
+    logger.info(f"Système détecté : {get_device_status()}")
     try:
+        model_manager.load_model()
         model_info = model_manager.get_model_info()
         logger.info(f"✓ Modèle {model_info['model_type']} prêt sur {model_info['device']}")
     except Exception as e:
@@ -55,7 +62,11 @@ app = FastAPI(
 # Configuration CORS améliorée
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [settings.CORS_ORIGINS],
+    allow_origins=(
+        settings.CORS_ORIGINS
+        if isinstance(settings.CORS_ORIGINS, list)
+        else [settings.CORS_ORIGINS]
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

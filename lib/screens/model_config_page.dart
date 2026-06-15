@@ -4,7 +4,7 @@ import 'package:segma/config/backend_config.dart' as backend_config;
 import 'package:segma/providers/segmentation_provider.dart';
 
 class ModelConfigPage extends ConsumerWidget {
-  const ModelConfigPage({Key? key}) : super(key: key);
+  const ModelConfigPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

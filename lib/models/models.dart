@@ -152,20 +152,18 @@ class SegmentationResult {
   }
 }
 
-/// Requête de segmentation par prompt ou interactive
+/// Requête de segmentation par prompt texte.
 class SegmentationRequest {
   final String imagePath;
   final String prompt;
   final double confidenceThreshold;
   final String? saveDir;
-  final List<InteractivePoint>? points;
 
   SegmentationRequest({
     required this.imagePath,
     required this.prompt,
     this.confidenceThreshold = 0.0,
     this.saveDir,
-    this.points,
   });
 
   Map<String, dynamic> toJson() {
@@ -174,7 +172,6 @@ class SegmentationRequest {
       'prompt': prompt,
       'confidence_threshold': confidenceThreshold,
       if (saveDir != null) 'save_dir': saveDir,
-      if (points != null) 'points': points!.map((p) => p.toJson()).toList(),
     };
   }
 }

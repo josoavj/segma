@@ -1,10 +1,10 @@
 import logging
 import numpy as np
 import os
+import re
 from pathlib import Path
-from app.exceptions import SegmentationException, ImageProcessingException
-from app.models.sam3.image_processor import ImageProcessor
-from app.services.object_detector import get_object_detector
+
+from app.exceptions import SegmentationException
 from app.models.model_manager import model_manager
 
 logger = logging.getLogger(__name__)
@@ -13,23 +13,62 @@ class SegmentationService:
     """Service orchestrateur pour la segmentation SAM 3 et l'étiquetage YOLO"""
     
     def __init__(self):
-        # On récupère le wrapper SAM 3 via le manager singleton
-        self.sam3_wrapper = model_manager.get_model()
-        self.detector = get_object_detector()
+        self._detector = None
+
+    @property
+    def sam3_wrapper(self):
+        return model_manager.get_model()
+
+    @property
+    def detector(self):
+        if self._detector is None:
+            from app.services.object_detector import get_object_detector
+
+            self._detector = get_object_detector()
+        return self._detector
+
+    def _normalize_text_prompt(self, prompt: str) -> str:
+        """Transforme une question utilisateur en concept segmentable par SAM 3."""
+        cleaned_prompt = prompt.strip()
+        normalized = re.sub(r"\s+", " ", cleaned_prompt)
+
+        query_patterns = [
+            r"^(?:ou|où)\s+(?:est|sont)\s+(?:le|la|les|l'|un|une|des)?\s*(.+?)[?.!]*$",
+            r"^where\s+(?:is|are)\s+(?:the|a|an)?\s*(.+?)[?.!]*$",
+            (
+                r"^(?:montre|montrez|trouve|trouvez|detecte|détecte|segmente)"
+                r"\s+(?:moi\s+)?(?:le|la|les|l'|un|une|des)?\s*(.+?)[?.!]*$"
+            ),
+            r"^(?:show|find|detect|segment)\s+(?:me\s+)?(?:the|a|an)?\s*(.+?)[?.!]*$",
+        ]
+
+        for pattern in query_patterns:
+            match = re.match(pattern, normalized, flags=re.IGNORECASE)
+            if match:
+                concept = match.group(1).strip(" .?!")
+                return concept or cleaned_prompt
+
+        return cleaned_prompt
 
     async def segment_by_prompt(
         self,
         image_path: str,
         prompt: str,
         confidence_threshold: float = 0.25,
-        save_dir: str = None
+        save_dir: str = None,
     ) -> dict:
         """
         Pipeline complet : Charge l'image -> Segment avec SAM 3 -> 
         Étiquette avec YOLO -> Sauvegarde en .bin
         """
         try:
-            logger.info(f"🚀 Démarrage Pipeline SAM 3 pour: {image_path} (Prompt: '{prompt}')")
+            concept_prompt = self._normalize_text_prompt(prompt)
+            logger.info(
+                "🚀 Démarrage Pipeline SAM 3 pour: %s (Prompt: '%s')",
+                image_path,
+                concept_prompt,
+            )
+            from app.models.sam3.image_processor import ImageProcessor
             
             # 1. Chargement de l'image via ImageProcessor
             image = ImageProcessor.load_image(image_path)
@@ -45,12 +84,15 @@ class SegmentationService:
             
             seg_dir.mkdir(parents=True, exist_ok=True)
 
-            # 3. Inférence SAM 3 (Promptable Concept Segmentation)
-            # Utilise la méthode native du wrapper harmonisé
-            raw_masks = self.sam3_wrapper.segment_by_text(image, prompt, threshold=confidence_threshold)
+            # 3. Inférence SAM 3 par concept textuel.
+            raw_masks = self.sam3_wrapper.segment_by_text(
+                image,
+                concept_prompt,
+                threshold=confidence_threshold,
+            )
             
             if not raw_masks:
-                logger.warning(f"Aucun objet trouvé pour le concept '{prompt}'")
+                logger.warning(f"Aucun objet trouvé pour le concept '{concept_prompt}'")
                 return {
                     "image_path": image_path,
                     "resolution": f"{width}x{height}",
@@ -85,7 +127,7 @@ class SegmentationService:
                 # Construction de l'objet de retour
                 objects_data.append({
                     "object_id": idx,
-                    "label": labels_map.get(idx, prompt), # Priorité au label YOLO
+                    "label": labels_map.get(idx, concept_prompt), # Priorité au label YOLO
                     "confidence": float(obj["score"]),
                     "bbox": obj["bbox"],
                     "mask_path": str(mask_path.absolute()),

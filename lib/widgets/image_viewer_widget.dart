@@ -41,6 +41,7 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     super.initState();
     _searchController = TextEditingController();
     _promptController = TextEditingController(text: 'all objects in the image');
+    ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
     _loadImageSize();
   }
 

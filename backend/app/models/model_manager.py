@@ -1,10 +1,18 @@
 import logging
-import torch
-from typing import Optional, Dict
-from app.models.sam3.sam3_wrapper import SAM3Wrapper
+from typing import Dict, Optional, TYPE_CHECKING
+from app.exceptions import ModelNotLoadedException
 from config import settings
 
+if TYPE_CHECKING:
+    from app.models.sam3.sam3_wrapper import SAM3Wrapper
+
 logger = logging.getLogger(__name__)
+
+
+def _get_torch():
+    import torch
+
+    return torch
 
 class ModelManager:
     """Singleton pour gérer le cycle de vie des modèles IA (SAM 3)"""
@@ -21,18 +29,20 @@ class ModelManager:
         if self._initialized:
             return
         
-        self.sam3_model: Optional[SAM3Wrapper] = None
-        self.device = self._get_device()
+        self.sam3_model: Optional["SAM3Wrapper"] = None
+        self.device = settings.DEVICE.lower()
         self.is_loaded = False
-        
-        # Chargement immédiat au démarrage du serveur
-        self._load_model()
         self._initialized = True
     
-    def _get_device(self) -> str:
+    def _get_device(self, requested_device: Optional[str] = None) -> str:
         """Détermine le device à utiliser (cuda ou cpu)"""
         # On priorise le réglage du .env mais on valide la capacité réelle
-        req_device = settings.DEVICE.lower()
+        req_device = (requested_device or settings.DEVICE).lower()
+        try:
+            torch = _get_torch()
+        except ModuleNotFoundError:
+            logger.warning("PyTorch non disponible, repli sur CPU")
+            return "cpu"
         
         if req_device == "cuda" and torch.cuda.is_available():
             logger.info(f"✓ CUDA détecté: {torch.cuda.get_device_name(0)}")
@@ -45,9 +55,15 @@ class ModelManager:
         logger.warning(f"⚠️ {req_device.upper()} non disponible, repli sur CPU")
         return "cpu"
     
-    def _load_model(self):
+    def load_model(self):
         """Charge le modèle SAM 3 via le wrapper"""
         try:
+            if self.sam3_model is not None and self.is_loaded:
+                return
+
+            from app.models.sam3.sam3_wrapper import SAM3Wrapper
+
+            self.device = self._get_device(self.device)
             logger.info(f"📥 Initialisation de SAM 3 sur {self.device}...")
             # SAM3Wrapper gère déjà son propre try/except interne
             self.sam3_model = SAM3Wrapper(device=self.device)
@@ -61,16 +77,25 @@ class ModelManager:
             logger.error(f"❌ Erreur critique au chargement du manager: {e}")
             self.is_loaded = False
     
-    def get_model(self) -> SAM3Wrapper:
+    def get_model(self) -> "SAM3Wrapper":
         """Retourne l'instance unique du modèle"""
         if self.sam3_model is None or not self.is_loaded:
-            self._load_model()
+            self.load_model()
+        if self.sam3_model is None or not self.is_loaded:
+            raise ModelNotLoadedException("Le modèle SAM 3 n'est pas chargé.")
         return self.sam3_model
     
     def get_model_info(self) -> Dict:
         """Retourne les métadonnées pour l'endpoint /health"""
+        try:
+            torch = _get_torch()
+            cuda_available = torch.cuda.is_available()
+        except ModuleNotFoundError:
+            torch = None
+            cuda_available = False
+
         device_name = "CPU"
-        if self.device == "cuda" and torch.cuda.is_available():
+        if self.device == "cuda" and cuda_available:
             device_name = torch.cuda.get_device_name(0)
         elif self.device == "mps":
             device_name = "Apple Silicon GPU (MPS)"
@@ -82,7 +107,7 @@ class ModelManager:
             "is_loaded": self.is_loaded,
             "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
             "available_models": [settings.SAM3_MODEL_ID],
-            "cuda_available": torch.cuda.is_available(),
+            "cuda_available": cuda_available,
             "api_version": "3.0.0"
         }
 
@@ -98,33 +123,42 @@ class ModelManager:
         if target_device not in {"cpu", "cuda", "mps"}:
             raise ValueError("Device invalide. Utiliser cpu, cuda ou mps.")
 
-        if target_device == "cuda" and not torch.cuda.is_available():
+        try:
+            torch = _get_torch()
+            cuda_available = torch.cuda.is_available()
+            mps_available = torch.backends.mps.is_available()
+        except ModuleNotFoundError:
+            cuda_available = False
+            mps_available = False
+
+        if target_device == "cuda" and not cuda_available:
             logger.warning("CUDA demandé mais indisponible, repli sur CPU")
             target_device = "cpu"
-        elif target_device == "mps" and not torch.backends.mps.is_available():
+        elif target_device == "mps" and not mps_available:
             logger.warning("MPS demandé mais indisponible, repli sur CPU")
             target_device = "cpu"
 
         self.device = target_device
         self.is_loaded = False
         self.sam3_model = None
-        self._load_model()
+        self.load_model()
 
         return {
             "status": "ok" if self.is_loaded else "error",
             "model_type": settings.SAM3_MODEL_ID,
             "device": self.device,
             "is_loaded": self.is_loaded,
-            "cuda_available": torch.cuda.is_available(),
+            "cuda_available": cuda_available,
         }
     
     def _get_gpu_memory_info(self) -> float:
         """Calcul de la VRAM totale en Go pour monitoring"""
         try:
+            torch = _get_torch()
             if torch.cuda.is_available():
                 props = torch.cuda.get_device_properties(0)
                 return round(props.total_memory / (1024 ** 3), 2)
-        except:
+        except Exception:
             pass
         return 0.0
 

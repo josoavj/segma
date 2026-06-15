@@ -33,12 +33,17 @@ class Settings:
     UPLOAD_DIR = os.getenv("UPLOAD_DIR", str(BASE_DIR / "data" / "uploads"))
     OUTPUT_DIR = os.getenv("OUTPUT_DIR", str(BASE_DIR / "data" / "masks"))
     
-    # Création automatique des dossiers si absents
-    for path in [UPLOAD_DIR, OUTPUT_DIR]:
-        os.makedirs(path, exist_ok=True)
-    
     # --- CORS ---
     # Autoriser localhost pour Flutter Web et l'IP du serveur pour Flutter Mobile
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080,*").split(",")
+    CORS_ORIGINS = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:8080,*",
+    ).split(",")
 
 settings = Settings()
+
+
+def ensure_runtime_dirs() -> None:
+    """Crée les dossiers nécessaires à l'exécution du backend."""
+    for path in [settings.UPLOAD_DIR, settings.OUTPUT_DIR]:
+        os.makedirs(path, exist_ok=True)
