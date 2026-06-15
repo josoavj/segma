@@ -7,7 +7,7 @@ import 'package:segma/widgets/segmented_object_card.dart';
 class SegmentationPage extends ConsumerStatefulWidget {
   final String imagePath;
 
-  const SegmentationPage({Key? key, required this.imagePath}) : super(key: key);
+  const SegmentationPage({super.key, required this.imagePath});
 
   @override
   ConsumerState<SegmentationPage> createState() => _SegmentationPageState();
