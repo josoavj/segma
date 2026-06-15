@@ -71,19 +71,17 @@ class BackendService {
     }
   }
 
-  /// Segmente une image avec un prompt texte ou des points interactifs
+  /// Segmente une image avec un prompt texte SAM 3.
   Future<SegmentationResult> segmentByPrompt(
     String imagePath,
     String prompt, {
     double confidenceThreshold = 0.25,
-    List<InteractivePoint>? points,
   }) async {
     try {
       final request = SegmentationRequest(
         imagePath: imagePath,
         prompt: prompt,
         confidenceThreshold: confidenceThreshold,
-        points: points,
       );
 
       final response = await dio.post(
@@ -100,21 +98,6 @@ class BackendService {
     } on DioException catch (e) {
       throw Exception('Erreur réseau: ${e.message}');
     }
-  }
-
-  /// Méthode spécialisée pour la segmentation interactive par points
-  Future<SegmentationResult> segmentInteractive(
-    String imagePath,
-    List<InteractivePoint> points, {
-    String prompt = 'object',
-    double confidenceThreshold = 0.25,
-  }) async {
-    return segmentByPrompt(
-      imagePath,
-      prompt,
-      confidenceThreshold: confidenceThreshold,
-      points: points,
-    );
   }
 
   /// Obtient les informations du modèle SAM actuellement chargé
