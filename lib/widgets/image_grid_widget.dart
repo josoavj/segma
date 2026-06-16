@@ -84,7 +84,7 @@ class ImageGridWidget extends ConsumerWidget {
                               BoxShadow(
                                 color: Theme.of(
                                   context,
-                                ).primaryColor.withOpacity(0.3),
+                                ).primaryColor.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -125,7 +125,7 @@ class ImageGridWidget extends ConsumerWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.6),
+                                Colors.black.withValues(alpha: 0.6),
                               ],
                             ),
                           ),
