@@ -46,12 +46,12 @@ class FolderTreeWidget extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).primaryColor.withOpacity(0.2)
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
                 border: isSelected
                     ? Border.all(
-                        color: Theme.of(context).primaryColor.withOpacity(0.4),
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
                         width: 1,
                       )
                     : null,
