@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
 import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/services/file_service.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
 import 'package:segma/widgets/image_grid_widget.dart';
 import 'package:segma/widgets/image_viewer_widget.dart';
+import '../providers/service_providers.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -299,7 +299,7 @@ class HomePage extends ConsumerWidget {
           child: FolderPickerWidget(
             onFolderSelected: (path) async {
               // Charger directement le dossier sans changer selectedFolderPathProvider
-              final folder = await FileService.loadFolderStructure(path);
+              final folder = await ref.read(fileServiceProvider).loadFolderStructure(path);
               // Ajouter le nouveau dossier à la liste au lieu de le remplacer
               final customFolders = ref.read(customFoldersProvider);
               if (!customFolders.contains(path)) {
@@ -334,7 +334,7 @@ class HomePage extends ConsumerWidget {
       child: InkWell(
         onTap: () async {
           // Charger directement le dossier sans changer selectedFolderPathProvider
-          final folder = await FileService.loadFolderStructure(path);
+          final folder = await ref.read(fileServiceProvider).loadFolderStructure(path);
           ref.read(selectedFolderProvider.notifier).state = folder;
           ref.read(selectedImageProvider.notifier).state = null;
         },
@@ -398,7 +398,7 @@ class HomePage extends ConsumerWidget {
       child: InkWell(
         onTap: () async {
           // Charger directement le dossier sans changer selectedFolderPathProvider
-          final folder = await FileService.loadFolderStructure(path);
+          final folder = await ref.read(fileServiceProvider).loadFolderStructure(path);
           ref.read(selectedFolderProvider.notifier).state = folder;
           ref.read(selectedImageProvider.notifier).state = null;
         },

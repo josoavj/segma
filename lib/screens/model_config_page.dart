@@ -146,7 +146,7 @@ class ModelConfigPage extends ConsumerWidget {
                       _changeModel(context, ref, model, currentDevice);
                     },
                   );
-                }).toList(),
+                }),
                 const SizedBox(height: 24),
 
                 // Sélection du device
@@ -209,11 +209,11 @@ class ModelTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const ModelTile({
-    Key? key,
+    super.key,
     required this.model,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -286,11 +286,11 @@ class DeviceTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const DeviceTile({
-    Key? key,
+    super.key,
     required this.device,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
