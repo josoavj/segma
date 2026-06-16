@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
-import 'package:segma/services/file_service.dart';
-import 'package:segma/services/folder_paths_service.dart';
+import 'package:segma/providers/service_providers.dart';
 
 /// Provider pour le chemin du dossier sélectionné (initialisé sur Documents de l'utilisateur)
 class SelectedFolderPath extends AsyncNotifier<String> {
   @override
   Future<String> build() async {
-    return await FolderPathsService.getDocumentsPath();
+    final pathsService = ref.watch(folderPathsServiceProvider);
+    return await pathsService.getDocumentsPath();
   }
 
   void setPath(String path) {
@@ -20,32 +20,27 @@ final selectedFolderPathProvider = AsyncNotifierProvider<SelectedFolderPath, Str
 
 final folderStructureProvider = FutureProvider<FolderModel>((ref) async {
   final folderPath = await ref.watch(selectedFolderPathProvider.future);
-  return FileService.loadFolderStructure(folderPath);
+  final fileService = ref.watch(fileServiceProvider);
+  return fileService.loadFolderStructure(folderPath);
 });
 
-final selectedFolderProvider = StateProvider<FolderModel?>((ref) {
-  return null;
-});
+final selectedFolderProvider = StateProvider<FolderModel?>((ref) => null);
 
 final folderImagesProvider = FutureProvider.family<List<ImageModel>, String>((
   ref,
   folderPath,
 ) async {
-  return FileService.loadImagesFromFolder(folderPath);
+  final fileService = ref.watch(fileServiceProvider);
+  return fileService.loadImagesFromFolder(folderPath);
 });
 
-final selectedImageProvider = StateProvider<ImageModel?>((ref) {
-  return null;
-});
+final selectedImageProvider = StateProvider<ImageModel?>((ref) => null);
 
-final customFoldersProvider = StateProvider<List<String>>((ref) {
-  return [];
-});
+final customFoldersProvider = StateProvider<List<String>>((ref) => []);
 
-final segmentationModeProvider = StateProvider<bool>((ref) {
-  return false; // true quand on est en mode segmentation
-});
+final segmentationModeProvider = StateProvider<bool>((ref) => false);
 
 final standardFoldersProvider = FutureProvider<Map<String, String>>((ref) async {
-  return FolderPathsService.getStandardFolders();
+  final pathsService = ref.watch(folderPathsServiceProvider);
+  return pathsService.getStandardFolders();
 });
