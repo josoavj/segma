@@ -52,7 +52,7 @@ flutter test
 ```
 
 ## 📄 Licence
-En contribuant à SEGMA, vous acceptez que vos contributions soient placées sous la licence du projet définie dans le [README.md](README.md).
+En contribuant à SEGMA, vous acceptez que vos contributions soient placées sous la licence **MIT** du projet.
 
 ---
 Développé par **Josoa VONJINIAINA**.
