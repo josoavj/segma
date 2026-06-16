@@ -26,7 +26,7 @@ SEGMA est conçu avec une architecture "Security-First" pour protéger les actif
 
 Si vous découvrez une faille de sécurité, veuillez suivre ces étapes :
 
-1.  Envoyez un rapport détaillé par email à : **[Votre Email ou josoa.dev@example.com]**.
+1.  Envoyez un rapport détaillé par email à : **[josoavonjiniaina13@gmail.com]**.
 2.  Incluez une description de la faille, les étapes pour la reproduire et, si possible, une suggestion de correction.
 3.  Vous recevrez un accusé de réception sous **48 heures**.
 4.  Une correction sera déployée en priorité, et vous serez tenu informé de l'avancement.
