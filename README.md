@@ -45,4 +45,4 @@ flutter build linux --release --dart-define=BACKEND_URL=http://VOTRE_IP:8000
 
 ## 📄 Licence
 
-Ce projet est sous licence propriétaire. Développé par **Josoa VONJINIAINA**.
+Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
