@@ -46,9 +46,11 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+      }
     } finally {
       setState(() {
         _isLoading = false;
