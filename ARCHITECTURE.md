@@ -18,6 +18,7 @@ Moteur d'exécution pour SAM 3.
     - `GET /api/v3/health` : État du serveur.
     - `POST /api/v3/upload` : Envoi d'images.
     - `POST /api/v3/segment` : Segmentation hybride (Texte + Points).
+    - `POST /api/v3/segment/batch` : Traitement par lot asynchrone (Streaming NDJSON).
     - `GET /api/v3/model/info` : Statut du GPU et du modèle chargé.
 
 ## 📦 Structure du Code Source
@@ -44,6 +45,7 @@ Moteur d'exécution pour SAM 3.
 
 ## 🚀 Optimisations de Production
 
+- **Streaming Temps Réel** : Le traitement par lot utilise le protocole NDJSON pour envoyer les résultats au fil de l'eau, évitant les timeouts et permettant une UI réactive.
 - **Mise en cache** : Les images ne sont pas ré-uploadées inutilement.
 - **Isolats de Rendu** : Utilisation de `RepaintBoundary` pour isoler les animations d'interface du contenu d'image statique.
 - **Sécurité** : Les logs techniques sont automatiquement désactivés en mode production pour protéger la vie privée des utilisateurs.

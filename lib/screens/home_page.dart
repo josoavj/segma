@@ -7,7 +7,9 @@ import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
 import 'package:segma/widgets/image_grid_widget.dart';
 import 'package:segma/widgets/image_viewer_widget.dart';
+import '../providers/batch_segmentation_provider.dart';
 import '../providers/service_providers.dart';
+import '../widgets/batch_progress_dialog.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -140,7 +142,24 @@ class HomePage extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _buildFolderButtons(context, ref),
                 const SizedBox(height: 12),
-                _buildCustomFolderButton(context, ref),
+              // Bouton Batch Processing
+              Consumer(
+                builder: (context, ref, child) {
+                  final selectedFolder = ref.watch(selectedFolderProvider);
+                  return ElevatedButton.icon(
+                    onPressed: selectedFolder == null
+                        ? null
+                        : () => _showBatchProcessDialog(context, ref, selectedFolder),
+                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    label: const Text('Traiter le dossier'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildCustomFolderButton(context, ref),
               ],
             ),
           ),
@@ -286,6 +305,19 @@ class HomePage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _showBatchProcessDialog(BuildContext context, WidgetRef ref, FolderModel folder) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const BatchProgressDialog(),
+    );
+    
+    final prompt = ref.read(segmentationPromptProvider);
+    final threshold = ref.read(confidenceThresholdProvider);
+    
+    ref.read(batchSegmentationProvider.notifier).processFolder(folder.path, prompt, threshold);
   }
 
   void _showFolderPickerDialog(BuildContext context, WidgetRef ref) {
