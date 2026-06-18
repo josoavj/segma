@@ -1,13 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
-import 'package:segma/config/backend_config.dart';
-import 'package:segma/services/backend_service.dart';
-
-// Service backend
-final backendServiceProvider = Provider<BackendService>((ref) {
-  return BackendService(baseUrl: AppConfig.backendUrl);
-});
+import 'package:segma/providers/service_providers.dart';
 
 // État de chargement de la segmentation
 final segmentationLoadingProvider = StateProvider<bool>((ref) => false);
