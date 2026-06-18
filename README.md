@@ -8,6 +8,7 @@ SEGMA est une solution de pointe pour la segmentation d'images, combinant la pui
 - **Segmentation SAM 3 Interactive** : 
     - **Mode Texte** : Segmentez des objets via des prompts en langage naturel.
     - **Mode Interactif** : Affinez vos masques en cliquant directement sur l'image (Inclusion/Exclusion).
+- **Traitement par Lot (Batch)** : Segmentez l'intégralité d'un dossier en un seul clic avec un suivi de progression en temps réel (Streaming NDJSON).
 - **Éditeur de Précision** : Interface dédiée pour l'ajustement des segments en temps réel avec retour visuel.
 - **Gestion de l'Historique** : Suivez et triez vos segmentations par date, confiance ou nom de fichier.
 - **Performance Industrielle** : Support natif du GPU (CUDA) via un backend haute performance en FastAPI.
