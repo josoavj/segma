@@ -50,13 +50,40 @@ class SegmentationService:
 
         return cleaned_prompt
 
-    async def segment_by_prompt(
+    async def segment_batch(
         self,
-        image_path: str,
+        image_paths: list[str],
         prompt: str,
         confidence_threshold: float = 0.25,
-        save_dir: str = None,
-    ) -> dict:
+    ):
+        """
+        Traite une liste d'images en streaming.
+        Génère un itérateur JSON pour le suivi en temps réel.
+        """
+        total = len(image_paths)
+        for idx, path in enumerate(image_paths):
+            try:
+                result = await self.segment_by_prompt(
+                    image_path=path,
+                    prompt=prompt,
+                    confidence_threshold=confidence_threshold
+                )
+                yield {
+                    "status": "success",
+                    "current": idx + 1,
+                    "total": total,
+                    "image_path": path,
+                    "result": result
+                }
+            except Exception as e:
+                logger.error(f"Erreur batch sur {path}: {e}")
+                yield {
+                    "status": "error",
+                    "current": idx + 1,
+                    "total": total,
+                    "image_path": path,
+                    "error": str(e)
+                }
         """
         Pipeline complet : Charge l'image -> Segment avec SAM 3 -> 
         Étiquette avec YOLO -> Sauvegarde en .bin
