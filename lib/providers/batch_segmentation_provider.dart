@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:dio/dio.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
@@ -51,9 +52,11 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
     state = BatchState(isProcessing: true, total: 0);
 
     try {
-      final dio = Dio(); // On utilise une instance locale pour le streaming
+      final backendService = ref.read(backendServiceProvider);
+      final dio = Dio(); 
+      
       final response = await dio.post(
-        '${ref.read(backendServiceProvider).baseUrl}/api/v3/segment/batch',
+        '${backendService.baseUrl}/api/v3/segment/batch',
         data: {
           'image_path': folderPath,
           'prompt': prompt,
@@ -62,25 +65,34 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
         options: Options(responseType: ResponseType.stream),
       );
 
-      final stream = response.data.stream;
+      final stream = response.data.stream as Stream<List<int>>;
       
       await for (final chunk in stream.transform(utf8.decoder).transform(const LineSplitter())) {
         if (chunk.trim().isEmpty) continue;
         
-        final Map<String, dynamic> update = jsonDecode(chunk);
-        
-        if (update['status'] == 'success') {
-          final result = SegmentationResult.fromJson(update['result']);
+        try {
+          final Map<String, dynamic> update = jsonDecode(chunk);
           
-          state = state.copyWith(
-            current: update['current'],
-            total: update['total'],
-            currentImage: update['image_path'],
-            results: [...state.results, result],
-          );
-          
-          // Ajouter à l'historique global
-          ref.read(segmentationHistoryProvider.notifier).update((history) => [...history, result]);
+          if (update['status'] == 'success') {
+            final result = SegmentationResult.fromJson(update['result']);
+            
+            state = state.copyWith(
+              current: update['current'],
+              total: update['total'],
+              currentImage: update['image_path'],
+              results: [...state.results, result],
+            );
+            
+            ref.read(segmentationHistoryProvider.notifier).update((history) => [...history, result]);
+          } else if (update['status'] == 'error') {
+             state = state.copyWith(
+              current: update['current'],
+              total: update['total'],
+              error: update['error'],
+            );
+          }
+        } catch (e) {
+          continue;
         }
       }
     } catch (e) {
