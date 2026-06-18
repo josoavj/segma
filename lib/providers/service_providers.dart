@@ -3,7 +3,6 @@ import 'package:segma/services/backend_service.dart';
 import 'package:segma/services/file_service.dart';
 import 'package:segma/services/log_service.dart';
 import 'package:segma/config/backend_config.dart';
-
 import 'package:segma/services/folder_paths_service.dart';
 
 /// Provider pour le service de Logs
