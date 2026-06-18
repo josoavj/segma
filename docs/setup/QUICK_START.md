@@ -43,6 +43,18 @@ flutter pub get
 flutter run -d linux # ou windows
 ```
 
+## 🎯 Utilisation des fonctionnalités clés
+
+### Segmentation Simple
+1. Sélectionnez une image dans la grille.
+2. Saisissez un prompt (ex: "car") et validez.
+3. Utilisez l'éditeur pour affiner avec des clics.
+
+### Traitement par Lot (Batch)
+1. Sélectionnez un dossier dans la barre latérale.
+2. Cliquez sur le bouton **"Traiter le dossier"**.
+3. Suivez la progression en temps réel via la boîte de dialogue.
+
 ---
 
 ## ✅ Vérification du Setup
