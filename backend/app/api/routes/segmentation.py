@@ -18,8 +18,35 @@ router = APIRouter(prefix="/api/v3", tags=["segmentation"])
 segmentation_service = SegmentationService()
 upload_service = UploadService()
 
-@router.post("/segment", response_model=SegmentationResponse)
-async def segment_by_prompt(request: SegmentationRequest):
+from fastapi.responses import StreamingResponse
+import json
+
+@router.post("/segment/batch")
+async def segment_batch(request: SegmentationRequest):
+    """Traitement par lot d'un dossier complet avec streaming des résultats."""
+    # Si image_path est un dossier, on liste les images
+    if os.path.isdir(request.image_path):
+        paths = [
+            os.path.join(request.image_path, f)
+            for f in os.listdir(request.image_path)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+        ]
+    else:
+        paths = [request.image_path]
+
+    if not paths:
+        raise HTTPException(status_code=400, detail="Aucune image trouvée.")
+
+    async def event_generator():
+        async for update in segmentation_service.segment_batch(
+            image_paths=paths,
+            prompt=request.prompt,
+            confidence_threshold=request.confidence_threshold
+        ):
+            # On envoie chaque résultat suivi d'un saut de ligne (NDJSON)
+            yield json.dumps(update) + "\n"
+
+    return StreamingResponse(event_generator(), media_type="application/x-ndjson")
     """Segmente une image par prompt texte (SAM 3 - Promptable Concept Segmentation)"""
     
     # Validation du chemin de l'image
