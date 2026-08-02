@@ -53,10 +53,9 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
 
     try {
       final backendService = ref.read(backendServiceProvider);
-      final dio = Dio(); 
       
-      final response = await dio.post(
-        '${backendService.baseUrl}/api/v3/segment/batch',
+      final response = await backendService.dio.post(
+        '/api/v3/segment/batch',
         data: {
           'image_path': folderPath,
           'prompt': prompt,
