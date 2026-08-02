@@ -325,26 +325,29 @@ class ModernSidebar extends ConsumerWidget {
                 )
               : null,
         ),
-        child: ListTile(
-          leading: Icon(
-            isSelected ? _getSelectedIcon(page) : _getUnselectedIcon(page),
-            color: isSelected
-                ? scheme.onPrimaryContainer
-                : scheme.onSurfaceVariant,
-            size: 20,
-          ),
-          title: Text(
-            page.label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? scheme.onPrimaryContainer : scheme.onSurface,
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            leading: Icon(
+              isSelected ? _getSelectedIcon(page) : _getUnselectedIcon(page),
+              color: isSelected
+                  ? scheme.onPrimaryContainer
+                  : scheme.onSurfaceVariant,
+              size: 20,
             ),
-          ),
-          onTap: onTap,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
+            title: Text(
+              page.label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? scheme.onPrimaryContainer : scheme.onSurface,
+              ),
+            ),
+            onTap: onTap,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 4,
+            ),
           ),
         ),
       ),

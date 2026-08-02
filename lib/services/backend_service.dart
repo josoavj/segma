@@ -8,22 +8,23 @@ class BackendService {
   final Dio dio;
   final String baseUrl;
 
-  BackendService({required this.baseUrl})
-    : dio = Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          connectTimeout: AppConfig.apiTimeout,
-          receiveTimeout: AppConfig.uploadTimeout,
-          sendTimeout: AppConfig.uploadTimeout,
-          headers: {
-            'X-Client-Platform': Platform.operatingSystem,
-            'X-App-Version': '1.0.0',
-          },
-        ),
-      ) {
-    if (!kReleaseMode) {
-      dio.interceptors.add(LogInterceptor(
-        responseBody: true, 
+  BackendService({required this.baseUrl, Dio? dio})
+      : dio = dio ??
+            Dio(
+              BaseOptions(
+                baseUrl: baseUrl,
+                connectTimeout: AppConfig.apiTimeout,
+                receiveTimeout: AppConfig.uploadTimeout,
+                sendTimeout: AppConfig.uploadTimeout,
+                headers: {
+                  'X-Client-Platform': Platform.operatingSystem,
+                  'X-App-Version': '1.0.0',
+                },
+              ),
+            ) {
+    if (!kReleaseMode && dio == null) {
+      this.dio.interceptors.add(LogInterceptor(
+        responseBody: true,
         requestBody: true,
         error: true,
       ));

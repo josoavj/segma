@@ -98,6 +98,7 @@ class FolderPathsService {
       'Документы': '📄 Documents',
       '文档': '📄 Documents',
       'pictures': '🖼️ Images',
+      'Pictures': '🖼️ Images',
       'Photos': '🖼️ Images',
       'Images': '🖼️ Images',
       'Изображения': '🖼️ Images',
