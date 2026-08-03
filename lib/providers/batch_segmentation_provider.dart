@@ -64,7 +64,8 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
         options: Options(responseType: ResponseType.stream),
       );
 
-      final stream = response.data.stream as Stream<List<int>>;
+      final responseBody = response.data as ResponseBody;
+      final stream = responseBody.stream.cast<List<int>>();
       
       await for (final chunk in stream.transform(utf8.decoder).transform(const LineSplitter())) {
         if (chunk.trim().isEmpty) continue;
