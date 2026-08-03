@@ -8,7 +8,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:segma/providers/batch_segmentation_provider.dart';
 import 'package:segma/services/backend_service.dart';
 import 'package:segma/providers/service_providers.dart';
-import 'package:segma/models/models.dart';
 
 class MockBackendService extends Mock implements BackendService {}
 class MockDio extends Mock implements Dio {}
@@ -53,7 +52,7 @@ void main() {
         }
       };
       
-      final ndjson = jsonEncode(update) + '\n';
+      final ndjson = '${jsonEncode(update)}\n';
       // Utiliser un Stream.value pour éviter les timeouts
       final stream = Stream.value(Uint8List.fromList(utf8.encode(ndjson)));
       
