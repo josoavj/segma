@@ -248,7 +248,7 @@ class _ErrorMessage extends StatelessWidget {
           const Row(
             children: [
               Icon(Icons.error_outline, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 'Erreur de segmentation',
                 style: TextStyle(
