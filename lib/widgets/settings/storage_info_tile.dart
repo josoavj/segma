@@ -54,14 +54,14 @@ class _StorageInfoTileState extends State<StorageInfoTile> {
           future: _storageFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SettingsTile(
+              return SettingsTile(
                 title: 'Espace utilisé',
                 subtitle: 'Calcul...',
                 trailing: SizedBox(
                   width: 80,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
+                    child: const LinearProgressIndicator(
                       backgroundColor: Colors.grey,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         Colors.blue,
