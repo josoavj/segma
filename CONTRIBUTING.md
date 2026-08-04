@@ -45,11 +45,12 @@ Nous suivons la norme **Conventional Commits**. Chaque commit doit être précis
 - `perf(...)` : Amélioration des performances.
 
 ## 🧪 Tests
-Avant de soumettre, vérifiez que votre code ne casse pas l'existant :
+Avant de soumettre, vérifiez que votre code ne casse pas l'existant. Chaque nouvelle fonctionnalité doit être accompagnée de ses tests :
 ```bash
 flutter analyze
 flutter test
 ```
+Consultez le [Guide des Tests](docs/guides/TESTING.md) pour apprendre à écrire des tests pour SEGMA.
 
 ## 📄 Licence
 En contribuant à SEGMA, vous acceptez que vos contributions soient placées sous la licence **MIT** du projet.
