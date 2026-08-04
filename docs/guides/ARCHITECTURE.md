@@ -303,7 +303,7 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 
 ## Architecture dans SEGMA
 
-```
+```text
 ┌─ Backend (FastAPI)
 │
 ├─ segmentation_service.py
@@ -312,21 +312,21 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 │
 └─ sam3_model.py
    ├─ SAM3Model class
-   ├─ segment_by_text_prompt()
-   ├─ segment_by_point()
-   ├─ segment_by_box()
    └─ get_sam3_model() [singleton]
 
 ┌─ Frontend (Flutter)
 │
-├─ segmentation_provider.dart
-│  ├─ Watch SAM3 segmentation
-│  └─ Cache results
+├─ lib/providers/
+│  └─ segmentation_provider.dart  # Logique métier
 │
-└─ image_viewer_widget.dart
-   ├─ Display image
-   ├─ Show bounding boxes
-   └─ Real-time search
+├─ lib/widgets/
+│  ├─ common/                     # UI Partagée
+│  ├─ home/                       # Widgets Home
+│  ├─ image_viewer/               # Overlays et Sidebars
+│  └─ layout/                     # Structure principale
+│
+└─ lib/screens/
+   └─ home_page.dart              # Pages simplifiées
 ```
 
 ---

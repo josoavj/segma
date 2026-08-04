@@ -40,9 +40,23 @@ flutter build linux --release --dart-define=BACKEND_URL=http://VOTRE_IP:8000
 
 ## 🏗️ Architecture Technique
 
-- **Frontend** : Flutter 3.6+, Riverpod (Gestion d'état), Dio (Réseau).
+- **Frontend** : Flutter 3.6+, Riverpod (Gestion d'état), Dio (Réseau). Architecture modulaire organisée par composants (`common`, `layout`, `image_viewer`).
 - **Backend** : FastAPI, PyTorch, Segment Anything Model 3.
 - **Déploiement** : Prêt pour Docker (Dockerfile inclus).
+
+## 🧪 Tests
+
+SEGMA inclut une suite de tests complète couvrant les modèles, les services et la logique métier.
+
+```bash
+# Lancer tous les tests
+flutter test
+
+# Lancer les tests avec couverture (génère un dossier coverage/)
+flutter test --coverage
+```
+
+Consultez le [Guide des Tests](docs/guides/TESTING.md) pour plus de détails.
 
 ## 📄 Licence
 

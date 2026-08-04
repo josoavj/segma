@@ -15,6 +15,7 @@ Approfondissez vos connaissances sur les capacités de SEGMA :
 
 -   **[Architecture Technique](../ARCHITECTURE.md)** : Comprendre comment le client Flutter communique avec le moteur SAM 3.
 -   **[Guide des Prompts](guides/PROMPTS_GUIDE.md)** : Apprenez à rédiger des prompts textuels efficaces pour obtenir des masques précis.
+-   **[Architecture de Test](guides/TESTING.md)** : Tout savoir sur la suite de tests et comment y contribuer.
 -   **Segmentation Interactive** : Découvrez comment utiliser l'éditeur pour affiner vos résultats par simple clic (Inclusion/Exclusion).
 
 ## 🆘 Support & Dépannage

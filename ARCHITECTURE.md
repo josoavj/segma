@@ -25,15 +25,32 @@ Moteur d'exécution pour SAM 3.
 
 ### Flutter (`lib/`)
 - `config/` : Configuration dynamique (URLs, Timeouts).
-- `models/` : Modèles de données typés (SegmentationResult, InteractivePoint).
-- `providers/` : Logique métier (Navigation, Fichiers, Segmentation).
-- `screens/` : Pages de l'interface utilisateur.
-- `services/` : Services de bas niveau (Fichiers, Logs, Réseau).
-- `widgets/` : Composants UI réutilisables et Overlay graphiques.
+- `models/` : Modèles de données typés.
+- `providers/` : Logique métier et gestion d'état réactive (Riverpod).
+- `screens/` : Points d'entrée des pages (épurés).
+- `services/` : Services d'infrastructure (API, Système de fichiers, Logs).
+- `widgets/` : Composants UI organisés par modules :
+    - `common/` : Boutons, tuiles et cartes réutilisables.
+    - `home/` : Composants spécifiques à la page d'accueil.
+    - `image_viewer/` : Panneaux et overlays du visualiseur d'images.
+    - `layout/` : Structure globale (Sidebar, Background).
+    - `dialogs/` : Boîtes de dialogue et popups.
+- `utils/` : Fonctions utilitaires (formatage, UI).
 
 ### Backend (`backend/`)
 - `main.py` : Point d'entrée FastAPI.
-- `requirements.txt` : Dépendances (PyTorch, FastAPI, SAM 3).
+- `app/` : Logique métier Python (Services, API, Modèles SAM3).
+- `requirements.txt` : Dépendances IA.
+
+## 🧪 Architecture de Test
+
+Le projet utilise une suite de tests structurée dans le dossier `test/` :
+
+1.  **Tests Unitaires (`test/unit/`)** : validation des modèles et des services en isolation.
+2.  **Tests de Providers (`test/providers/`)** : validation de la logique métier et des flux de données (ex: streaming NDJSON).
+3.  **Tests de Widgets (`test/widgets/`)** : validation du rendu et des interactions UI.
+
+L'utilisation de `mocktail` permet de simuler le backend et le système de fichiers pour des tests rapides et déterministes.
 
 ## 🔌 Flux d'Interaction Interactif
 
