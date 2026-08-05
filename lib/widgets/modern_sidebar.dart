@@ -311,43 +311,40 @@ class ModernSidebar extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? scheme.primaryContainer.withValues(alpha: 0.75)
-              : Colors.transparent,
+      child: Material(
+        color: isSelected
+            ? scheme.primaryContainer.withValues(alpha: 0.75)
+            : Colors.transparent,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
-          border: isSelected
-              ? Border.all(
+          side: isSelected
+              ? BorderSide(
                   color: scheme.primary.withValues(alpha: 0.45),
                   width: 1,
                 )
-              : null,
+              : BorderSide.none,
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: ListTile(
-            leading: Icon(
-              isSelected ? _getSelectedIcon(page) : _getUnselectedIcon(page),
-              color: isSelected
-                  ? scheme.onPrimaryContainer
-                  : scheme.onSurfaceVariant,
-              size: 20,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          leading: Icon(
+            isSelected ? _getSelectedIcon(page) : _getUnselectedIcon(page),
+            color: isSelected
+                ? scheme.onPrimaryContainer
+                : scheme.onSurfaceVariant,
+            size: 20,
+          ),
+          title: Text(
+            page.label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              color: isSelected ? scheme.onPrimaryContainer : scheme.onSurface,
             ),
-            title: Text(
-              page.label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? scheme.onPrimaryContainer : scheme.onSurface,
-              ),
-            ),
-            onTap: onTap,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 4,
-            ),
+          ),
+          onTap: onTap,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
           ),
         ),
       ),
