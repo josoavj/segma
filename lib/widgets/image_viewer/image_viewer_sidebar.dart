@@ -22,16 +22,17 @@ class ImageViewerSidebar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: 340,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: scheme.surface,
         border: Border(
           right: BorderSide(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -44,7 +45,7 @@ class ImageViewerSidebar extends ConsumerWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
@@ -54,22 +55,22 @@ class ImageViewerSidebar extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1F4A8A).withValues(alpha: 0.42),
+                    color: scheme.primaryContainer.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_awesome,
-                    color: Color(0xFF8FD1FF),
+                    color: scheme.primary,
                     size: 18,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Segmentation',
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
                   ),
                 ),
               ],
@@ -83,47 +84,25 @@ class ImageViewerSidebar extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Section du prompt
-                  _buildSectionTitle('Prompt'),
+                  _buildSectionTitle(context, 'Prompt'),
                   const SizedBox(height: 10),
                   TextField(
                     controller: promptController,
                     minLines: 3,
                     maxLines: 5,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(fontSize: 13, color: scheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Exemple: "person", "car", "all objects"',
-                      hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
                       prefixIcon: Padding(
                         padding: const EdgeInsets.fromLTRB(12, 0, 0, 16),
                         child: Icon(
                           Icons.edit_note,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           size: 20,
                         ),
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                          color: Colors.blue,
-                          width: 2,
-                        ),
-                      ),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.03),
+                      fillColor: scheme.surfaceContainerHigh.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -142,9 +121,9 @@ class ImageViewerSidebar extends ConsumerWidget {
                     icon: const Icon(Icons.touch_app),
                     label: const Text('Éditeur Interactif'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue[300],
+                      foregroundColor: scheme.primary,
                       side: BorderSide(
-                        color: Colors.blue.withValues(alpha: 0.5),
+                        color: scheme.primary.withValues(alpha: 0.5),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -154,21 +133,10 @@ class ImageViewerSidebar extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   // Séparateur
-                  Container(
-                    height: 1,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: 0.1),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                  ),
+                  Divider(color: scheme.outlineVariant.withValues(alpha: 0.3)),
                   const SizedBox(height: 24),
                   // Section des objets détectés
-                  _buildSectionTitle('Résultats'),
+                  _buildSectionTitle(context, 'Résultats'),
                   const SizedBox(height: 10),
                   // Champ de recherche
                   if (currentSeg != null && currentSeg!.objects.isNotEmpty)
@@ -176,42 +144,23 @@ class ImageViewerSidebar extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: TextField(
                         controller: searchController,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
                           fontSize: 13,
+                          color: scheme.onSurface,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Filtrer les objets...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
                           prefixIcon: Icon(
                             Icons.filter_list,
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                             size: 18,
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Colors.blue),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withValues(alpha: 0.03),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
+                          filled: true,
+                          fillColor: scheme.surfaceContainerHigh.withValues(alpha: 0.3),
                         ),
                       ),
                     ),
@@ -227,22 +176,24 @@ class ImageViewerSidebar extends ConsumerWidget {
   }
 
   Widget _buildSegmentButton(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         gradient: isLoading
             ? LinearGradient(
                 colors: [
-                  Colors.blue.withValues(alpha: 0.5),
-                  Colors.cyan.withValues(alpha: 0.5),
+                  scheme.primary.withValues(alpha: 0.5),
+                  scheme.secondary.withValues(alpha: 0.5),
                 ],
               )
             : LinearGradient(
-                colors: [Colors.blue.shade600, Colors.blue.shade700],
+                colors: [scheme.primary, scheme.primary.withValues(alpha: 0.85)],
               ),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.3),
+            color: scheme.primary.withValues(alpha: 0.25),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -259,21 +210,21 @@ class ImageViewerSidebar extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isLoading)
-                  const SizedBox(
+                  SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                      valueColor: AlwaysStoppedAnimation(scheme.onPrimary),
                     ),
                   )
                 else
-                  const Icon(Icons.search, color: Colors.white, size: 20),
+                  Icon(Icons.search, color: scheme.onPrimary, size: 20),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'Segmenter',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: scheme.onPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -290,9 +241,9 @@ class ImageViewerSidebar extends ConsumerWidget {
     if (currentSeg != null && currentSeg!.objects.isNotEmpty) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.03),
+          color: scheme.surfaceContainerLowest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
         ),
         constraints: const BoxConstraints(maxHeight: 300),
         child: ListenableBuilder(
@@ -315,7 +266,7 @@ class ImageViewerSidebar extends ConsumerWidget {
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: scheme.outlineVariant.withValues(alpha: 0.2),
                         width: 0.5,
                       ),
                     ),
@@ -332,13 +283,13 @@ class ImageViewerSidebar extends ConsumerWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.blue.withValues(alpha: 0.2),
-                            Colors.cyan.withValues(alpha: 0.1),
+                            scheme.primary.withValues(alpha: 0.2),
+                            scheme.secondary.withValues(alpha: 0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.blue.withValues(alpha: 0.3),
+                          color: scheme.primary.withValues(alpha: 0.3),
                           width: 0.5,
                         ),
                       ),
@@ -346,7 +297,7 @@ class ImageViewerSidebar extends ConsumerWidget {
                         child: Text(
                           '${object.objectId}',
                           style: TextStyle(
-                            color: scheme.onPrimaryContainer,
+                            color: scheme.primary,
                             fontWeight: FontWeight.bold,
                             fontSize: 11,
                           ),
@@ -355,8 +306,8 @@ class ImageViewerSidebar extends ConsumerWidget {
                     ),
                     title: Text(
                       object.label,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: scheme.onSurface,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -364,7 +315,7 @@ class ImageViewerSidebar extends ConsumerWidget {
                     subtitle: Text(
                       '${(object.confidence * 100).toStringAsFixed(0)}%',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: scheme.onSurfaceVariant,
                         fontSize: 11,
                       ),
                     ),
@@ -387,7 +338,7 @@ class ImageViewerSidebar extends ConsumerWidget {
           'Lancez une segmentation\npour voir les résultats',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.4),
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
             fontSize: 12,
             fontStyle: FontStyle.italic,
           ),
@@ -400,7 +351,7 @@ class ImageViewerSidebar extends ConsumerWidget {
           'Aucun objet détecté',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.4),
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
             fontSize: 12,
           ),
         ),
@@ -409,22 +360,23 @@ class ImageViewerSidebar extends ConsumerWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
           width: 3,
           height: 18,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: scheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 10),
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: scheme.onSurface,
             fontSize: 13,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -433,4 +385,5 @@ class ImageViewerSidebar extends ConsumerWidget {
       ],
     );
   }
+}
 }
