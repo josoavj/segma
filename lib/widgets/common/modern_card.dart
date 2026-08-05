@@ -15,27 +15,38 @@ class ModernCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: isDark ? 0 : 2,
+      shadowColor: scheme.shadow.withValues(alpha: 0.05),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark
+              ? scheme.outline.withValues(alpha: 0.18)
+              : scheme.outlineVariant.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           gradient: gradient ??
               LinearGradient(
-                colors: [
-                  Color.lerp(scheme.surface, scheme.primaryContainer, 0.45)!,
-                  Color.lerp(scheme.surface, scheme.secondaryContainer, 0.40)!,
-                ],
+                colors: isDark
+                    ? [
+                        Color.lerp(scheme.surface, scheme.primaryContainer, 0.45)!,
+                        Color.lerp(scheme.surface, scheme.secondaryContainer, 0.40)!,
+                      ]
+                    : [
+                        scheme.surfaceContainer,
+                        scheme.surface,
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-          border: Border.all(
-            color: scheme.outline.withValues(alpha: 0.25),
-            width: 1,
-          ),
         ),
         child: Padding(
           padding: padding ?? const EdgeInsets.all(16),
