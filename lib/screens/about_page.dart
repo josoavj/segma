@@ -22,210 +22,307 @@ class AboutPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-              // Logo/Icon
-              Container(
-                width: 200,
-                height: 160,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: Image.asset(
-                    'assets/logo/Segma.png',
-                    width: 200,
-                    height: 160,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: Icon(
-                            Icons.image_search,
-                            size: 80,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Title
-              Text(
-                'SEGMA',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 32,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-
-              // Subtitle
-              Text(
-                'Image Segmentation with SAM',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-
-              // Version
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.7),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-                child: Text(
-                  'Version 1.0.0',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Description Card
-              _SectionCard(
-                title: 'À propos',
-                icon: Icons.info,
-                iconColor: scheme.primary,
-                iconBackgroundColor: scheme.tertiaryContainer,
-                child: Text(
-                  'SEGMA est une application de segmentation d\'images '
-                  'utilisant le modèle Segment Anything (SAM) de Meta. '
-                  'Elle permet une segmentation interactive et précise des objets dans les images.\n\n'
-                  'Avec SEGMA, vous pouvez:\n'
-                  '✓ Charger et explorer des images\n'
-                  '✓ Segmenter les objets par simple clic\n'
-                  '✓ Afficher et gérer les résultats\n'
-                  '✓ Suivre l\'historique des segmentations\n'
-                  '✓ Exporter les données\n'
-                  '✓ Consulter les logs d\'activité',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Technologies Card
-              _SectionCard(
-                title: 'Technologies',
-                icon: Icons.code,
-                iconColor: scheme.primary,
-                iconBackgroundColor: scheme.secondaryContainer,
-                child: Column(
-                  children: [
-                    _buildTechCard(
-                      context,
-                      name: 'Flutter & Dart',
-                      description: 'Interface utilisateur moderne et réactive',
-                      icon: Icons.mobile_friendly,
-                      color: scheme.primary,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTechCard(
-                      context,
-                      name: 'Python & FastAPI',
-                      description: 'Backend haute performance',
-                      icon: Icons.api,
-                      color: scheme.tertiary,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTechCard(
-                      context,
-                      name: 'Meta SAM',
-                      description: 'Modèle de segmentation avancé',
-                      icon: Icons.image_search,
-                      color: scheme.secondary,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTechCard(
-                      context,
-                      name: 'PyTorch',
-                      description: 'Framework d\'apprentissage automatique',
-                      icon: Icons.analytics,
-                      color: scheme.error,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Developers Card
-              _SectionCard(
-                title: 'Développé par',
-                icon: Icons.person,
-                iconColor: scheme.onPrimaryContainer,
-                iconBackgroundColor: scheme.primaryContainer,
-                child: _buildDeveloperCard(
-                  context,
-                  name: 'Josoa VONJINIAINA',
-                  role: 'Développeur Principal',
-                  profileUrl: 'https://github.com/josoavj',
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Footer
-              Column(
-                children: [
-                  Divider(color: Theme.of(context).dividerColor),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Tous droits réservés © 2026 - SEGMA',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Made with Flutter & Python',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
+            // Logo/Icon
+            Container(
+              width: 200,
+              height: 160,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+                    blurRadius: 25,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
-            ],
-          ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: Image.asset(
+                  'assets/logo/Segma.png',
+                  width: 200,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: scheme.surfaceContainer,
+                      child: Center(
+                        child: Icon(
+                          Icons.image_search,
+                          size: 80,
+                          color: scheme.primary,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Title
+            Text(
+              'SEGMA',
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: scheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+
+            // Subtitle
+            Text(
+              'Image Segmentation with SAM 3',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+
+            // Version Tag
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: scheme.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Text(
+                'Version 3.0.0',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: scheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
+
+            // Description Card
+            _SectionCard(
+              title: 'À propos',
+              icon: Icons.info_outline,
+              iconColor: scheme.primary,
+              iconBackgroundColor: scheme.primaryContainer.withValues(alpha: 0.4),
+              child: Text(
+                'SEGMA est une solution professionnelle de segmentation d\'images '
+                'utilisant le modèle SAM 3 de Meta. Elle combine l\'intelligence '
+                'artificielle et une interface intuitive pour isoler n\'importe quel '
+                'objet avec une précision chirurgicale.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.6,
+                  color: scheme.onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Technologies Card
+            _SectionCard(
+              title: 'Technologies',
+              icon: Icons.auto_awesome_mosaic,
+              iconColor: scheme.secondary,
+              iconBackgroundColor: scheme.secondaryContainer.withValues(alpha: 0.4),
+              child: Column(
+                children: [
+                  _buildTechCard(
+                    context,
+                    name: 'Flutter & Dart',
+                    description: 'Interface graphique multiplateforme',
+                    icon: Icons.bolt,
+                    color: Colors.blue,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTechCard(
+                    context,
+                    name: 'FastAPI & Python',
+                    description: 'Traitement asynchrone haute performance',
+                    icon: Icons.api,
+                    color: Colors.teal,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTechCard(
+                    context,
+                    name: 'Meta SAM 3',
+                    description: 'Segment Anything Model de dernière génération',
+                    icon: Icons.psychology,
+                    color: Colors.deepPurple,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Developers Card
+            _SectionCard(
+              title: 'Équipe',
+              icon: Icons.groups_outlined,
+              iconColor: scheme.tertiary,
+              iconBackgroundColor: scheme.tertiaryContainer.withValues(alpha: 0.4),
+              child: _buildDeveloperCard(
+                context,
+                name: 'Josoa VONJINIAINA',
+                role: 'Lead Developer & Architect',
+                profileUrl: 'https://github.com/josoavj',
+              ),
+            ),
+            const SizedBox(height: 48),
+
+            // Footer
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Column(
+                children: [
+                  Divider(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+                  const SizedBox(height: 24),
+                  Text(
+                    '© 2026 SEGMA Project',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Propulsé par l\'IA de Meta et Flutter',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
     );
   }
+
+  Widget _buildTechCard(
+    BuildContext context, {
+    required String name,
+    required String description,
+    required IconData icon,
+    required Color color,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark 
+            ? scheme.surfaceContainerHigh.withValues(alpha: 0.4)
+            : Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.2 : 0.15),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeveloperCard(
+    BuildContext context, {
+    required String name,
+    required String role,
+    String? profileUrl,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark 
+            ? scheme.surfaceContainerHigh.withValues(alpha: 0.4)
+            : Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: scheme.primaryContainer,
+            child: Icon(Icons.person, color: scheme.primary, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  role,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (profileUrl != null)
+            IconButton(
+              onPressed: () => _launchURL(profileUrl),
+              icon: Icon(Icons.open_in_new, color: scheme.primary, size: 20),
+              tooltip: 'GitHub',
+            ),
+        ],
+      ),
+    );
+  }
+}
 
   Widget _buildTechCard(
     BuildContext context, {
