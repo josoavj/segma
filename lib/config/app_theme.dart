@@ -12,28 +12,37 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: _blue,
+        onPrimary: Colors.white,
         secondary: _cyan,
-        surface: Color(0xCCFFFFFF),
-        onSurface: Color(0xFF16213A),
+        surface: const Color(0xFFF8FAFF),
+        onSurface: const Color(0xFF1A1C1E),
+        surfaceContainer: Colors.white.withValues(alpha: 0.95),
+        surfaceContainerHigh: Colors.white.withValues(alpha: 0.85),
+        outline: const Color(0xFFC4C7CF),
+        outlineVariant: const Color(0xFFDEE2EB),
       ),
       scaffoldBackgroundColor: Colors.transparent,
       fontFamilyFallback: const ['Poppins', 'SF Pro Display', 'Roboto'],
-      textTheme: textTheme,
+      textTheme: textTheme.apply(
+        bodyColor: const Color(0xFF1A1C1E),
+        displayColor: const Color(0xFF1A1C1E),
+      ),
       primaryTextTheme: textTheme,
-      iconTheme: const IconThemeData(color: Color(0xFF2A3A56)),
-      primaryIconTheme: const IconThemeData(color: Color(0xFF2A3A56)),
+      iconTheme: const IconThemeData(color: Color(0xFF44474E)),
+      primaryIconTheme: const IconThemeData(color: Color(0xFF44474E)),
       actionIconTheme: const ActionIconThemeData(
         backButtonIconBuilder: _themedActionIcon,
         closeButtonIconBuilder: _themedActionIcon,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,
-        backgroundColor: const Color(0x99FFFFFF),
-        foregroundColor: const Color(0xFF16213A),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Color(0xFF1A1C1E),
         surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Color(0xFF44474E)),
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: Colors.transparent,
@@ -46,79 +55,74 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: const Color(0xB3FFFFFF),
-        shadowColor: Colors.white.withValues(alpha: 0.08),
+        color: Colors.white,
+        shadowColor: const Color(0x0A000000),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.50),
+          side: const BorderSide(
+            color: Color(0xFFE0E2EC),
             width: 1,
           ),
         ),
       ),
       listTileTheme: ListTileThemeData(
-        tileColor: const Color(0x80FFFFFF),
+        tileColor: Colors.white.withValues(alpha: 0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 4,
+        backgroundColor: _blue,
+        foregroundColor: Colors.white,
       ),
-      dividerTheme: DividerThemeData(
-        color: const Color(0xFFB6C5DF).withValues(alpha: 0.55),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE0E2EC),
         thickness: 1,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0x99FFFFFF),
+        fillColor: Colors.white.withValues(alpha: 0.8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: const Color(0xFFBFD2F0).withValues(alpha: 0.80),
-          ),
+          borderSide: const BorderSide(color: Color(0xFFC4C7CF)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: const Color(0xFFBFD2F0).withValues(alpha: 0.80),
-          ),
+          borderSide: const BorderSide(color: Color(0xFFDEE2EB)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _blue, width: 1.2),
+          borderSide: const BorderSide(color: _blue, width: 1.5),
         ),
+        hintStyle: const TextStyle(color: Color(0xFF74777F)),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: const Color(0xCCFFFFFF),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.55),
-            width: 1,
-          ),
+          side: const BorderSide(color: Color(0xFFE0E2EC), width: 1),
         ),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: const Color(0xCCFFFFFF),
+        color: Colors.white,
+        elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.50),
-            width: 1,
-          ),
+          side: const BorderSide(color: Color(0xFFE0E2EC), width: 1),
         ),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return _blue;
+            return Colors.white;
           }
-          return const Color(0xFF8E9AB4);
+          return const Color(0xFF74777F);
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const Color(0xFF9BC3FF);
+            return _blue;
           }
-          return const Color(0xFFC8D1E4);
+          return const Color(0xFFE0E2EC);
         }),
       ),
     );
