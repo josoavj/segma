@@ -284,7 +284,11 @@ class HomeSidebar extends ConsumerWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: Colors.transparent,
+      color: isDarkMode
+          ? Colors.grey[800]?.withValues(alpha: 0.5)
+          : Colors.white.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
           final folder = await ref
@@ -293,20 +297,14 @@ class HomeSidebar extends ConsumerWidget {
           ref.read(selectedFolderProvider.notifier).state = folder;
           ref.read(selectedImageProvider.notifier).state = null;
         },
-        borderRadius: BorderRadius.circular(8),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: isDarkMode
-                ? Colors.grey[800]?.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.1),
             border: Border.all(
               color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
               width: 1,
             ),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
@@ -349,7 +347,11 @@ class HomeSidebar extends ConsumerWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: Colors.transparent,
+      color: isDarkMode
+          ? Colors.grey[800]?.withValues(alpha: 0.5)
+          : Colors.white.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
           final folder = await ref
@@ -358,15 +360,8 @@ class HomeSidebar extends ConsumerWidget {
           ref.read(selectedFolderProvider.notifier).state = folder;
           ref.read(selectedImageProvider.notifier).state = null;
         },
-        borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: isDarkMode
-                ? Colors.grey[800]?.withValues(alpha: 0.5)
-                : Colors.white.withValues(alpha: 0.1),
-          ),
           child: Row(
             children: [
               Icon(
