@@ -14,24 +14,33 @@ class SettingsSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: scheme.outline.withValues(alpha: 0.32),
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
-        color: Theme.of(context).colorScheme.surface,
+        color: scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
               child: Text(
                 title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: scheme.primary,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             Column(children: children),
@@ -64,7 +73,7 @@ class SettingsTile extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: scheme.outline.withValues(alpha: 0.22),
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -74,7 +83,7 @@ class SettingsTile extends StatelessWidget {
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 8,
+            vertical: 4,
           ),
           title: Text(
             title,
