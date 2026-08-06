@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
+import 'package:segma/services/notification_service.dart';
 import 'package:segma/config/backend_config.dart' as backend_config;
 
 class ModelConfigurationTile extends ConsumerStatefulWidget {
@@ -33,24 +34,13 @@ class _ModelConfigurationTileState
       await ref.read(changeModelProvider((model, device)).future);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Modèle changé: $model sur $device'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        ref.read(notificationServiceProvider.notifier).success('Modèle changé: $model sur $device');
         // Invalider les providers pour forcer la mise à jour
         ref.invalidate(modelInfoProvider);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
       }
     } finally {
       if (mounted) {
