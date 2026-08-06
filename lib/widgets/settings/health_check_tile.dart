@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/widgets/common/settings_ui.dart';
+import 'package:segma/services/notification_service.dart';
+import 'package:segma/models/notification_model.dart';
 
 class HealthCheckTile extends ConsumerWidget {
   const HealthCheckTile({super.key});
@@ -30,9 +32,7 @@ class HealthCheckTile extends ConsumerWidget {
         trailing: Icon(Icons.error, color: scheme.error),
         onTap: () async {
           ref.invalidate(healthCheckProvider);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Reconnexion en cours...')),
-          );
+          ref.read(notificationServiceProvider.notifier).info('Reconnexion en cours...');
         },
       ),
       data: (health) {
@@ -76,11 +76,10 @@ class HealthCheckTile extends ConsumerWidget {
           ),
           onTap: () {
             ref.invalidate(healthCheckProvider);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Status: $status'),
-                duration: const Duration(seconds: 2),
-              ),
+            final type = isHealthy ? NotificationType.success : NotificationType.error;
+            ref.read(notificationServiceProvider.notifier).show(
+              'Status: $status',
+              type: type,
             );
           },
         );
