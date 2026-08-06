@@ -7,6 +7,8 @@ class ModernSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentPage = ref.watch(currentPageProvider);
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
 
@@ -16,23 +18,23 @@ class ModernSidebar extends ConsumerWidget {
       width: isCollapsed ? 80 : 280,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
+          color: isDark
               ? const Color(0x3320304F)
-              : const Color(0xA3FFFFFF),
+              : scheme.surface.withValues(alpha: 0.7),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).brightness == Brightness.dark
+              color: isDark
                   ? Colors.black.withValues(alpha: 0.22)
-                  : const Color(0xFFB8D8FF).withValues(alpha: 0.24),
+                  : scheme.primary.withValues(alpha: 0.12),
               blurRadius: 28,
               offset: const Offset(8, 0),
             ),
           ],
           border: Border(
             right: BorderSide(
-              color: Theme.of(context).brightness == Brightness.dark
+              color: isDark
                   ? Colors.white.withValues(alpha: 0.16)
-                  : const Color(0xFFD5E2F7).withValues(alpha: 0.85),
+                  : scheme.outlineVariant.withValues(alpha: 0.6),
               width: 1,
             ),
           ),
@@ -101,6 +103,8 @@ class ModernSidebar extends ConsumerWidget {
   }
 
   Widget _buildExpandedHeader(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -110,27 +114,31 @@ class ModernSidebar extends ConsumerWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue[400]!, Colors.blue[600]!],
+                colors: [scheme.primary, scheme.primary.withValues(alpha: 0.8)],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.image_search,
-              color: Colors.white,
+              color: scheme.onPrimary,
               size: 24,
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'SEGMA',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: scheme.onSurface,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Image Segmentation',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[500],
+              color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -140,17 +148,19 @@ class ModernSidebar extends ConsumerWidget {
   }
 
   Widget _buildCollapsedHeader(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue[400]!, Colors.blue[600]!],
+            colors: [scheme.primary, scheme.primary.withValues(alpha: 0.8)],
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.image_search, color: Colors.white, size: 24),
+        child: Icon(Icons.image_search, color: scheme.onPrimary, size: 24),
       ),
     );
   }
@@ -205,6 +215,7 @@ class ModernSidebar extends ConsumerWidget {
   }
 
   Widget _buildExpandedFooter(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
     final isDarkTheme = ref.watch(themeNotifierProvider);
     final toggleIconColor = isDarkTheme
         ? const Color(0xFFFFC857)
@@ -251,7 +262,7 @@ class ModernSidebar extends ConsumerWidget {
           // Version
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.05),
+              color: scheme.surfaceContainerHigh.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -259,7 +270,7 @@ class ModernSidebar extends ConsumerWidget {
               'v1.0.0',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey[500],
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
