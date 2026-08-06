@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/config/backend_config.dart' as backend_config;
 import 'package:segma/providers/segmentation_provider.dart';
+import 'package:segma/services/notification_service.dart';
 
 class ModelConfigPage extends ConsumerWidget {
   const ModelConfigPage({super.key});
@@ -184,21 +185,13 @@ class ModelConfigPage extends ConsumerWidget {
     String model,
     String device,
   ) async {
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(changeModelProvider((model, device)).future);
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Modèle changé: $model sur $device'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      ref.read(notificationServiceProvider.notifier).success('Modèle changé: $model sur $device');
       // Invalider le cache pour recharger les infos
       ref.invalidate(modelInfoProvider);
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
-      );
+      ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
     }
   }
 }
