@@ -35,7 +35,7 @@ class ToastOverlay extends ConsumerWidget {
                   end: Offset.zero,
                 ).animate(CurvedAnimation(
                   parent: animation,
-                  curve: Curves.outBack,
+                  curve: Curves.easeOutBack,
                 )),
                 child: child,
               ),
