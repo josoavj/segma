@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/widgets/common/settings_ui.dart';
+import 'package:segma/services/notification_service.dart';
 
 class ModelInfoTile extends ConsumerWidget {
   const ModelInfoTile({super.key});
@@ -54,13 +55,7 @@ class ModelInfoTile extends ConsumerWidget {
                 color: scheme.primary,
               ),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Allez à "Configuration du modèle" pour changer',
-                    ),
-                  ),
-                );
+                ref.read(notificationServiceProvider.notifier).info('Allez à "Configuration du modèle" pour changer');
               },
             ),
             SettingsTile(
