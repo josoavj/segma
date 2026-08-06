@@ -140,6 +140,7 @@ class _SegmentationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fileName = segmentation.imagePath.split('/').last;
     
     final totalPixels = segmentation.objects.fold(0, (sum, obj) => sum + obj.pixelsCount);
@@ -223,8 +224,11 @@ class _SegmentationCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.62),
+              color: scheme.surface.withValues(alpha: isDark ? 0.62 : 0.4),
               borderRadius: BorderRadius.circular(8),
+              border: isDark 
+                  ? null 
+                  : Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
             ),
             child: Column(
               children: [

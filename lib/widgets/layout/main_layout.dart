@@ -7,6 +7,10 @@ import 'package:segma/screens/settings_page.dart';
 import 'package:segma/screens/logs_page.dart';
 import 'package:segma/screens/about_page.dart';
 import 'package:segma/widgets/modern_sidebar.dart';
+import 'package:segma/widgets/common/toast_overlay.dart';
+import 'package:segma/widgets/dialogs/importance_dialog.dart';
+import 'package:segma/services/notification_service.dart';
+import 'package:segma/models/notification_model.dart';
 
 class MainLayout extends ConsumerWidget {
   const MainLayout({super.key});
@@ -16,34 +20,57 @@ class MainLayout extends ConsumerWidget {
     final currentPage = ref.watch(currentPageProvider);
     final isCollapsed = ref.watch(sidebarCollapsedProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Tooltip(
-            message: isCollapsed ? 'Développer' : 'Réduire',
-            child: IconButton(
-              icon: Icon(isCollapsed ? Icons.unfold_more : Icons.unfold_less),
-              onPressed: () {
-                ref.read(sidebarCollapsedProvider.notifier).state = !isCollapsed;
-              },
+    // Écouter les notifications critiques
+    ref.listen<AppNotification?>(notificationServiceProvider, (previous, next) {
+      if (next != null && next.type == NotificationType.critical) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => ImportanceDialog(
+            message: next.message,
+            type: next.type,
+          ),
+        ).then((_) {
+          // Une fois le dialogue fermé, on peut effacer la notification
+          ref.read(notificationServiceProvider.notifier).dismiss();
+        });
+      }
+    });
+
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            elevation: 0,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Tooltip(
+                message: isCollapsed ? 'Développer' : 'Réduire',
+                child: IconButton(
+                  icon: Icon(isCollapsed ? Icons.unfold_more : Icons.unfold_less),
+                  onPressed: () {
+                    ref.read(sidebarCollapsedProvider.notifier).state = !isCollapsed;
+                  },
+                ),
+              ),
             ),
+            title: Text(
+              currentPage.label,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: Colors.transparent,
+          ),
+          body: Row(
+            children: [
+              const ModernSidebar(),
+              Expanded(child: _buildPage(currentPage)),
+            ],
           ),
         ),
-        title: Text(
-          currentPage.label,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.transparent,
-      ),
-      body: Row(
-        children: [
-          const ModernSidebar(),
-          Expanded(child: _buildPage(currentPage)),
-        ],
-      ),
+        // Overlay de notifications (bulles)
+        const ToastOverlay(),
+      ],
     );
   }
 

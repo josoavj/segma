@@ -24,9 +24,9 @@ class AppBackground extends StatelessWidget {
                         Color(0xFF102A43),
                       ]
                     : const [
-                        Color(0xFFF1F6FF),
-                        Color(0xFFE3F9FF),
-                        Color(0xFFF5F2FF),
+                        Color(0xFFF3F7FF),
+                        Color(0xFFEDFCFF),
+                        Color(0xFFF9F6FF),
                       ],
               ),
             ),
@@ -43,7 +43,7 @@ class AppBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: isDark
                     ? const Color(0xFF6CA8FF).withValues(alpha: 0.18)
-                    : const Color(0xFF4A8DFF).withValues(alpha: 0.12),
+                    : const Color(0xFF4A8DFF).withValues(alpha: 0.08),
               ),
             ),
           ),
@@ -59,7 +59,7 @@ class AppBackground extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: isDark
                     ? const Color(0xFF7D8BFF).withValues(alpha: 0.16)
-                    : const Color(0xFF59E1FF).withValues(alpha: 0.14),
+                    : const Color(0xFF59E1FF).withValues(alpha: 0.10),
               ),
             ),
           ),

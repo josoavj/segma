@@ -19,14 +19,14 @@ class ModernCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: isDark ? 0 : 2,
-      shadowColor: scheme.shadow.withValues(alpha: 0.05),
+      elevation: isDark ? 0 : 3,
+      shadowColor: scheme.primary.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: isDark
               ? scheme.outline.withValues(alpha: 0.18)
-              : scheme.outlineVariant.withValues(alpha: 0.5),
+              : scheme.outlineVariant.withValues(alpha: 0.6),
           width: 1,
         ),
       ),
@@ -41,8 +41,8 @@ class ModernCard extends StatelessWidget {
                         Color.lerp(scheme.surface, scheme.secondaryContainer, 0.40)!,
                       ]
                     : [
-                        scheme.surfaceContainer,
-                        scheme.surface,
+                        scheme.surfaceContainerLowest,
+                        Color.lerp(scheme.surfaceContainerLowest, scheme.primaryContainer, 0.08)!,
                       ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

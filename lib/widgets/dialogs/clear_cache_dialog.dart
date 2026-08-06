@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:segma/services/notification_service.dart';
 
-class ClearCacheDialog extends StatelessWidget {
+class ClearCacheDialog extends ConsumerWidget {
   const ClearCacheDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
 
     return AlertDialog(
@@ -34,21 +36,11 @@ class ClearCacheDialog extends StatelessWidget {
               }
 
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Cache vidé ✓'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                ref.read(notificationServiceProvider.notifier).success('Cache vidé ✓');
               }
             } catch (e) {
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erreur: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
               }
             }
           },

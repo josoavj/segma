@@ -324,147 +324,6 @@ class AboutPage extends ConsumerWidget {
   }
 }
 
-  Widget _buildTechCard(
-    BuildContext context, {
-    required String name,
-    required String description,
-    required IconData icon,
-    required Color color,
-  }) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Color.lerp(scheme.surface, color, 0.14),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Color.lerp(
-            scheme.outline,
-            color,
-            0.35,
-          )!.withValues(alpha: 0.75),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Color.lerp(scheme.surface, color, 0.24),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: Color.lerp(scheme.onSurface, color, 0.62),
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Tech Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeveloperCard(
-    BuildContext context, {
-    required String name,
-    required String role,
-    String? profileUrl,
-  }) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Avatar
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: scheme.primaryContainer,
-            child: Icon(
-              Icons.person,
-              color: scheme.onPrimaryContainer,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Developer Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  role,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (profileUrl != null) ...[
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    child: FilledButton.icon(
-                      onPressed: () => _launchURL(profileUrl),
-                      icon: const Icon(Icons.open_in_new, size: 16),
-                      label: const Text('Voir le profil'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        textStyle: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -486,10 +345,10 @@ class _SectionCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: scheme.outline.withValues(alpha: 0.34),
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -517,6 +376,7 @@ class _SectionCard extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: scheme.onSurface,
                   ),
                 ),
               ],

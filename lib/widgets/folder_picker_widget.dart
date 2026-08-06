@@ -1,16 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:segma/services/notification_service.dart';
 
-class FolderPickerWidget extends StatefulWidget {
+class FolderPickerWidget extends ConsumerStatefulWidget {
   final Function(String) onFolderSelected;
 
   const FolderPickerWidget({super.key, required this.onFolderSelected});
 
   @override
-  State<FolderPickerWidget> createState() => _FolderPickerWidgetState();
+  ConsumerState<FolderPickerWidget> createState() => _FolderPickerWidgetState();
 }
 
-class _FolderPickerWidgetState extends State<FolderPickerWidget> {
+class _FolderPickerWidgetState extends ConsumerState<FolderPickerWidget> {
   late String currentPath;
   List<FileSystemEntity> _entities = [];
   bool _isLoading = false;
@@ -47,9 +49,7 @@ class _FolderPickerWidgetState extends State<FolderPickerWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+        ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
       }
     } finally {
       setState(() {
