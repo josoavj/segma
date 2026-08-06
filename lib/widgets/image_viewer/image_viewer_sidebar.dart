@@ -22,9 +22,8 @@ class ImageViewerSidebar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: 340,
@@ -385,5 +384,4 @@ class ImageViewerSidebar extends ConsumerWidget {
       ],
     );
   }
-}
 }
