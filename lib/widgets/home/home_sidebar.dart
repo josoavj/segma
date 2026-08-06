@@ -21,9 +21,11 @@ class HomeSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       width: 280,
-      color: Theme.of(context).colorScheme.surface,
+      color: scheme.surface,
       child: Column(
         children: [
           // En-tête avec sélecteur de dossier
@@ -31,8 +33,8 @@ class HomeSidebar extends ConsumerWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                  scheme.primary,
+                  scheme.primary.withValues(alpha: 0.8),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -44,13 +46,13 @@ class HomeSidebar extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.folder_special, color: Colors.white, size: 24),
+                    Icon(Icons.folder_special, color: scheme.onPrimary, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Dossiers',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
+                          color: scheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -71,6 +73,8 @@ class HomeSidebar extends ConsumerWidget {
                       icon: const Icon(Icons.auto_awesome, size: 18),
                       label: const Text('Traiter le dossier'),
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: scheme.secondaryContainer,
+                        foregroundColor: scheme.onSecondaryContainer,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     );
@@ -82,7 +86,7 @@ class HomeSidebar extends ConsumerWidget {
             ),
           ),
 
-          const Divider(height: 1),
+          Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.5)),
 
           // Arborescence des dossiers
           Expanded(
@@ -106,6 +110,7 @@ class HomeSidebar extends ConsumerWidget {
   }
 
   Widget _buildFolderButtons(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
     final standardFoldersAsync = ref.watch(standardFoldersProvider);
 
     return standardFoldersAsync.when(
@@ -136,7 +141,7 @@ class HomeSidebar extends ConsumerWidget {
             // Dossiers personnalisés
             if (customFolders.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+              Divider(color: scheme.onPrimary.withValues(alpha: 0.2), height: 1),
               const SizedBox(height: 12),
             ],
             ...customFolders.asMap().entries.map((entry) {
@@ -167,10 +172,10 @@ class HomeSidebar extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const Center(
+      loading: () => Center(
         child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(color: scheme.onPrimary, strokeWidth: 2),
         ),
       ),
       error: (err, stack) => Padding(
@@ -178,7 +183,7 @@ class HomeSidebar extends ConsumerWidget {
         child: Text(
           'Erreur chargement dossiers',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: scheme.onPrimary.withValues(alpha: 0.7),
             fontSize: 12,
           ),
         ),
@@ -187,6 +192,8 @@ class HomeSidebar extends ConsumerWidget {
   }
 
   Widget _buildCustomFolderButton(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -197,21 +204,21 @@ class HomeSidebar extends ConsumerWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: scheme.onPrimary.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.add_circle_outline, size: 18, color: Colors.white),
-              SizedBox(width: 8),
+              Icon(Icons.add_circle_outline, size: 18, color: scheme.onPrimary),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Ajouter un dossier',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: scheme.onPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -344,12 +351,13 @@ class HomeSidebar extends ConsumerWidget {
     String label,
     String path,
   ) {
+    final scheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isDarkMode
-          ? Colors.grey[800]?.withValues(alpha: 0.5)
-          : Colors.white.withValues(alpha: 0.1),
+          ? scheme.surfaceContainerHigh.withValues(alpha: 0.5)
+          : scheme.surfaceContainer.withValues(alpha: 0.6),
       borderRadius: BorderRadius.circular(8),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -367,7 +375,7 @@ class HomeSidebar extends ConsumerWidget {
               Icon(
                 Icons.folder_outlined,
                 size: 18,
-                color: Theme.of(context).primaryColor,
+                color: scheme.primary,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -375,6 +383,7 @@ class HomeSidebar extends ConsumerWidget {
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w500,
+                    color: scheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -382,7 +391,7 @@ class HomeSidebar extends ConsumerWidget {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ],
           ),
