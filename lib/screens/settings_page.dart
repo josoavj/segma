@@ -8,6 +8,7 @@ import 'package:segma/widgets/settings/model_info_tile.dart';
 import 'package:segma/widgets/settings/storage_info_tile.dart';
 import 'package:segma/widgets/settings/model_configuration_tile.dart';
 import 'package:segma/widgets/dialogs/clear_cache_dialog.dart';
+import 'package:segma/services/notification_service.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -60,9 +61,7 @@ class SettingsPage extends ConsumerWidget {
                   title: 'URL du serveur',
                   subtitle: AppConfig.backendUrl,
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('URL: ${AppConfig.backendUrl}')),
-                    );
+                    ref.read(notificationServiceProvider.notifier).info('URL: ${AppConfig.backendUrl}');
                   },
                 ),
                 SettingsTile(
@@ -144,11 +143,7 @@ class SettingsPage extends ConsumerWidget {
                     color: scheme.primary,
                   ),
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Vous avez la dernière version ✓'),
-                      ),
-                    );
+                    ref.read(notificationServiceProvider.notifier).success('Vous avez la dernière version ✓');
                   },
                 ),
                 const SettingsTile(
