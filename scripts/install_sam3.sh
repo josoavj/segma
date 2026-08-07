@@ -7,17 +7,17 @@ set -e
 VENV_PATH="/home/shadowcraft/.pyenv"
 PROJECT_PATH="/home/shadowcraft/Projets/segma"
 
-echo "🚀 Installation SAM3 pour SEGMA"
+echo "[INIT] Installation SAM3 pour SEGMA"
 echo "=================================="
 echo ""
-echo "✅ venv trouvé: $VENV_PATH"
-echo "✅ Python: $($VENV_PATH/bin/python --version)"
+echo "[SUCCESS] venv trouvé: $VENV_PATH"
+echo "[SUCCESS] Python: $($VENV_PATH/bin/python --version)"
 echo ""
 
 # Activer le venv
 source $VENV_PATH/bin/activate
 
-echo "📦 Packages actuels:"
+echo "[DEPENDENCY] Packages actuels:"
 pip list | grep -E "torch|fastapi|sam"
 
 echo ""
@@ -37,13 +37,13 @@ pip install python-multipart==0.0.6
 pip install uvicorn==0.27.0
 
 echo ""
-echo "✅ Installation complète!"
+echo "[SUCCESS] Installation complète!"
 echo ""
-echo "📦 Packages finaux:"
+echo "[DEPENDENCY] Packages finaux:"
 $VENV_PATH/bin/pip list | grep -E "torch|fastapi|sam|huggingface"
 
 echo ""
-echo "🔐 Prochaine étape: Authentification HuggingFace"
+echo "[AUTH] Prochaine étape: Authentification HuggingFace"
 echo ""
 echo "   $VENV_PATH/bin/huggingface-cli login"
 echo ""
