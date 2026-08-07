@@ -4,7 +4,7 @@ set -e
 BACKEND_DIR="/home/shadowcraft/Projets/segma/backend"
 PYENV_BIN="/home/shadowcraft/.pyenv/bin/python"
 
-echo "🚀 Lancement du serveur backend SAM3 & YOLO..."
+echo "[BACKEND] Lancement du serveur backend SAM3 & YOLO..."
 echo "Backend: $BACKEND_DIR"
 
 cd "$BACKEND_DIR"
