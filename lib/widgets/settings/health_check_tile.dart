@@ -28,7 +28,7 @@ class HealthCheckTile extends ConsumerWidget {
       ),
       error: (err, _) => SettingsTile(
         title: 'Vérifier la connexion',
-        subtitle: 'Erreur de connexion ❌',
+        subtitle: 'Erreur de connexion',
         trailing: Icon(Icons.error, color: scheme.error),
         onTap: () async {
           ref.invalidate(healthCheckProvider);
@@ -40,7 +40,7 @@ class HealthCheckTile extends ConsumerWidget {
         final isHealthy = status == 'healthy';
         return SettingsTile(
           title: 'Vérifier la connexion',
-          subtitle: isHealthy ? 'Connecté ✓' : 'Déconnecté',
+          subtitle: isHealthy ? 'Connecté' : 'Déconnecté',
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(

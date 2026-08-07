@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🎮 Test détection automatique GPU/CPU pour SAM3
+# [GPU] Test détection automatique GPU/CPU pour SAM3
 
 set -e
 
 echo "════════════════════════════════════════════════════════════════════════════"
-echo "🎮 TEST DÉTECTION AUTOMATIQUE GPU/CPU - SAM3"
+echo "[GPU] TEST DÉTECTION AUTOMATIQUE GPU/CPU - SAM3"
 echo "════════════════════════════════════════════════════════════════════════════"
 echo ""
 
@@ -16,18 +16,18 @@ if [ ! -d "$VENV_PATH" ]; then
 fi
 
 if [ ! -d "$VENV_PATH" ]; then
-    echo "❌ Erreur: Virtualenv non trouvé"
+    echo "[ERROR] Erreur: Virtualenv non trouvé"
     exit 1
 fi
 
-echo "✓ Venv trouvé: $VENV_PATH"
+echo "[SUCCESS] Venv trouvé: $VENV_PATH"
 echo ""
 
 # Activer le venv
 source "$VENV_PATH/bin/activate"
 
 # Test détection
-echo "🔍 Test 1: Détection du device Python"
+echo "[CHECK] Test 1: Détection du device Python"
 echo "────────────────────────────────────────────"
 python << 'PYEOF'
 import torch
@@ -37,19 +37,19 @@ print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"CUDA compiled: {torch.version.cuda is not None}")
 
 if torch.cuda.is_available():
-    print(f"\n🎮 GPU DÉTECTÉ:")
+    print(f"\n[GPU] GPU DÉTECTÉ:")
     print(f"   Device name: {torch.cuda.get_device_name(0)}")
     print(f"   VRAM: {torch.cuda.get_device_properties(0).total_memory / (1024**3):.1f}GB")
     print(f"   Compute capability: {torch.cuda.get_device_capability(0)}")
     print(f"   CUDA version: {torch.version.cuda}")
 else:
-    print(f"\n🖥️  AUCUN GPU - Utilisation du CPU")
+    print(f"\n[CPU] AUCUN GPU - Utilisation du CPU")
     print(f"   CPU cores: {torch.get_num_threads()}")
 
 PYEOF
 
 echo ""
-echo "🔍 Test 2: Détection SAM3Model"
+echo "[CHECK] Test 2: Détection SAM3Model"
 echo "────────────────────────────────────────────"
 cd /home/shadowcraft/Projets/segma/backend && python << 'PYEOF'
 import sys
@@ -70,7 +70,7 @@ print(f"   Capabilities: {', '.join(info['capabilities'])}")
 PYEOF
 
 echo ""
-echo "🔍 Test 3: Détection ModelManager"
+echo "[CHECK] Test 3: Détection ModelManager"
 echo "────────────────────────────────────────────"
 cd /home/shadowcraft/Projets/segma/backend && python << 'PYEOF'
 import sys
@@ -92,16 +92,16 @@ PYEOF
 
 echo ""
 echo "════════════════════════════════════════════════════════════════════════════"
-echo "✅ TEST DÉTECTION COMPLÉTÉ"
+echo "[SUCCESS] TEST DÉTECTION COMPLÉTÉ"
 echo "════════════════════════════════════════════════════════════════════════════"
 echo ""
-echo "📝 Résumé:"
+echo "[INFO] Résumé:"
 echo "   • Si GPU détecté → SAM3 utilise CUDA automatiquement"
 echo "   • Si pas de GPU → SAM3 utilise CPU automatiquement"
 echo "   • Détection se fait au démarrage du backend"
 echo ""
-echo "💡 Pour utiliser GPU: Assurez-vous d'avoir:"
-echo "   ✓ PyTorch compilé avec support CUDA"
-echo "   ✓ Drivers NVIDIA installés"
-echo "   ✓ CUDA Toolkit compatible"
+echo "[TIP] Pour utiliser GPU: Assurez-vous d'avoir:"
+echo "   [SUCCESS] PyTorch compilé avec support CUDA"
+echo "   [SUCCESS] Drivers NVIDIA installés"
+echo "   [SUCCESS] CUDA Toolkit compatible"
 echo ""

@@ -120,7 +120,13 @@ class AboutPage extends ConsumerWidget {
                 'SEGMA est une solution professionnelle de segmentation d\'images '
                 'utilisant le modèle SAM 3 de Meta. Elle combine l\'intelligence '
                 'artificielle et une interface intuitive pour isoler n\'importe quel '
-                'objet avec une précision chirurgicale.',
+                'objet avec une précision chirurgicale.\n\n'
+                '• Charger et explorer des images\n'
+                '• Segmenter les objets par simple clic\n'
+                '• Afficher et gérer les résultats\n'
+                '• Suivre l\'historique des segmentations\n'
+                '• Exporter les données\n'
+                '• Consulter les logs d\'activité',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   height: 1.6,
                   color: scheme.onSurface.withValues(alpha: 0.8),

@@ -123,20 +123,20 @@ class HomeSidebar extends ConsumerWidget {
             _buildFolderButton(
               context,
               ref,
-              '📄 Documents',
+              'Documents',
               folders['documents']!,
             ),
             const SizedBox(height: 8),
-            _buildFolderButton(context, ref, '🖼️ Images', folders['images']!),
+            _buildFolderButton(context, ref, 'Images', folders['images']!),
             const SizedBox(height: 8),
             _buildFolderButton(
               context,
               ref,
-              '⬇️ Téléchargements',
+              'Téléchargements',
               folders['downloads']!,
             ),
             const SizedBox(height: 8),
-            _buildFolderButton(context, ref, '🖥️ Bureau', folders['desktop']!),
+            _buildFolderButton(context, ref, 'Bureau', folders['desktop']!),
 
             // Dossiers personnalisés
             if (customFolders.isNotEmpty) ...[
@@ -157,7 +157,7 @@ class HomeSidebar extends ConsumerWidget {
                   child: _buildCustomFolderDisplayButton(
                     context,
                     ref,
-                    '📁 $folderName',
+                    folderName,
                     path,
                     onRemove: () {
                       ref.read(customFoldersProvider.notifier).state = [

@@ -1,4 +1,4 @@
-#SEGMA API V3 - Guide d'Utilisation Complet
+# SEGMA API V3 - Guide d'Utilisation Complet
 
 Ce guide détaille comment interagir avec le moteur de segmentation **SAM 3 (Promptable Concept Segmentation)** et **YOLOv8**.
 

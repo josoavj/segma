@@ -1,4 +1,4 @@
-# 🏗️ ARCHITECTURE SAM3
+# ARCHITECTURE SAM3
 
 ## Vue d'Ensemble
 
@@ -45,10 +45,10 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 
 **Capacités SAM1:**
 
-- ✅ Segmentation par points
-- ✅ Segmentation par boxes
-- ❌ **Segmentation par texte - IMPOSSIBLE**
-- ❌ Open vocabulary
+- Segmentation par points
+- Segmentation par boxes
+- [NO] Segmentation par texte - IMPOSSIBLE
+- Open vocabulary
 
 ---
 
@@ -97,12 +97,12 @@ SAM3 (Segment Anything Model 3) est un modèle de segmentation universal de Meta
 
 **Capacités SAM3:**
 
-- ✅ Segmentation par points
-- ✅ Segmentation par boxes
-- ✅ **Segmentation par texte - RÉEL!** 
-- ✅ Open vocabulary (270K+ concepts)
-- ✅ Video tracking (optionnel)
-- ✅ ~75-80% accuracy (vs 60% SAM1)
+- Segmentation par points
+- Segmentation par boxes
+- Segmentation par texte - RÉEL!
+- Open vocabulary (270K+ concepts)
+- Video tracking (optionnel)
+- ~75-80% accuracy (vs 60% SAM1)
 
 ---
 
@@ -335,11 +335,11 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 
 | Feature | SAM1 | SAM3 | SEGMA Now |
 |---------|------|------|-----------|
-| Text Prompts | ❌ | ✅ | ✅ |
-| Point Prompts | ✅ | ✅ | ✅ |
-| Box Prompts | ✅ | ✅ | ✅ |
-| Open Vocab | ❌ | ✅ | ✅ |
-| Video | ❌ | ✅ | ⏳ |
+| Text Prompts | NO | YES | YES |
+| Point Prompts | YES | YES | YES |
+| Box Prompts | YES | YES | YES |
+| Open Vocab | NO | YES | YES |
+| Video | NO | YES | PENDING |
 | Accuracy | 60% | 75-80% | 75-80% |
 | Package | `segment-anything` | `sam3` | `sam3` |
 
@@ -349,6 +349,6 @@ model.segment_by_box(image, x1=50, y1=100, x2=300, y2=400)
 
 Pour une meilleure compréhension:
 
-👉 [MIGRATION_SAM3.md](MIGRATION_SAM3.md) - Ce qui a changé
-👉 [PROMPTS_GUIDE.md](PROMPTS_GUIDE.md) - Comment écrire de bons prompts
-👉 [API_ENDPOINTS.md](API_ENDPOINTS.md) - API documentation
+[MIGRATION_SAM3.md](MIGRATION_SAM3.md) - Ce qui a changé
+[PROMPTS_GUIDE.md](PROMPTS_GUIDE.md) - Comment écrire de bons prompts
+[API_ENDPOINTS.md](API_ENDPOINTS.md) - API documentation

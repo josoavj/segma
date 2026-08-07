@@ -1,4 +1,4 @@
-# 📚 Guide d'Installation Complète
+# Guide d'Installation Complète
 
 Ce guide détaille l'installation de SEGMA et de ses composants (Backend Python et Frontend Flutter).
 
@@ -69,7 +69,7 @@ flutter run -d linux # ou windows
 
 ---
 
-## 🛠️ Dépannage Courant
+## Dépannage Courant
 
 ### CUDA non détecté
 Si le backend affiche `device: cpu` alors que vous avez un GPU :

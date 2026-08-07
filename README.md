@@ -2,7 +2,7 @@
 
 SEGMA est une solution de pointe pour la segmentation d'images, combinant la puissance de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
 
-## 🌟 Fonctionnalités Clés
+## Fonctionnalités Clés
 
 - **Exploration Intelligente** : Arborescence de fichiers dynamique avec détection automatique des dossiers système (Documents, Images).
 - **Segmentation SAM 3 Interactive** : 
@@ -14,7 +14,7 @@ SEGMA est une solution de pointe pour la segmentation d'images, combinant la pui
 - **Performance Industrielle** : Support natif du GPU (CUDA) via un backend haute performance en FastAPI.
 - **Sécurité & Logs** : Système de journalisation robuste avec rotation automatique et protection des données sensibles en production.
 
-## 🚀 Installation Rapide
+## Installation Rapide
 
 ### 1. Backend (Python)
 Le serveur gère l'exécution du modèle SAM 3.
@@ -38,13 +38,13 @@ flutter run -d linux
 flutter build linux --release --dart-define=BACKEND_URL=http://VOTRE_IP:8000
 ```
 
-## 🏗️ Architecture Technique
+## Architecture Technique
 
 - **Frontend** : Flutter 3.6+, Riverpod (Gestion d'état), Dio (Réseau). Architecture modulaire organisée par composants (`common`, `layout`, `image_viewer`).
 - **Backend** : FastAPI, PyTorch, Segment Anything Model 3.
 - **Déploiement** : Prêt pour Docker (Dockerfile inclus).
 
-## 🧪 Tests
+## Tests
 
 SEGMA inclut une suite de tests complète couvrant les modèles, les services et la logique métier.
 
@@ -58,6 +58,6 @@ flutter test --coverage
 
 Consultez le [Guide des Tests](docs/guides/TESTING.md) pour plus de détails.
 
-## 📄 Licence
+## Licence
 
 Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
