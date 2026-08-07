@@ -1,8 +1,8 @@
-# 🧪 Architecture et Guide des Tests
+# Architecture et Guide des Tests
 
 SEGMA accorde une grande importance à la fiabilité du code. Cette documentation explique comment fonctionne la suite de tests et comment y contribuer.
 
-## 📂 Organisation des Tests
+## Organisation des Tests
 
 Le dossier `test/` à la racine du projet est organisé de manière hiérarchique :
 
@@ -17,7 +17,7 @@ test/
 
 ---
 
-## 🚀 Lancement des Tests
+## Lancement des Tests
 
 ### Ligne de commande
 Pour lancer tous les tests :
@@ -39,7 +39,7 @@ flutter test --coverage
 
 ---
 
-## 🛠️ Outils utilisés
+## Outils utilisés
 
 - **flutter_test** : Framework de base fourni par Flutter.
 - **mocktail** : Pour créer des mocks facilement sans génération de code.
@@ -47,7 +47,7 @@ flutter test --coverage
 
 ---
 
-## 📝 Comment ajouter un test ?
+## Comment ajouter un test ?
 
 ### 1. Mocking d'un service
 Si vous testez un provider qui dépend d'un service, créez un Mock :
@@ -72,9 +72,9 @@ Pour les fonctions asynchrones complexes (comme le traitement par lot), utilisez
 
 ---
 
-## ⚠️ Standards de Qualité
+## Standards de Qualité
 
-> [!IMPORTANT]
+> [IMPORTANT]
 > - Chaque nouveau service ou provider **doit** avoir un fichier de test associé.
 > - Les tests ne doivent jamais dépendre d'un serveur backend réel ou de fichiers utilisateur réels. Utilisez des dossiers temporaires (`Directory.systemTemp`).
 > - La suite de tests doit passer intégralement avant toute Pull Request.
