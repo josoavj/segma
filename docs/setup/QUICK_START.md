@@ -1,8 +1,8 @@
-# 🚀 Démarrage Rapide
+# Démarrage Rapide
 
 Ce guide vous aide à lancer SEGMA sur votre environnement local en quelques étapes simples.
 
-## 📋 Prérequis
+## Prérequis
 
 Avant de commencer, assurez-vous d'avoir :
 - **Python 3.10+** (avec `pip`)
@@ -11,7 +11,7 @@ Avant de commencer, assurez-vous d'avoir :
 
 ---
 
-## 🛠️ Étapes de Lancement
+## Étapes de Lancement
 
 ### 1. Authentification HuggingFace
 Le modèle SAM 3 est hébergé sur HuggingFace. Vous devez vous authentifier une seule fois :
@@ -43,7 +43,7 @@ flutter pub get
 flutter run -d linux # ou windows
 ```
 
-## 🎯 Utilisation des fonctionnalités clés
+## Utilisation des fonctionnalités clés
 
 ### Segmentation Simple
 1. Sélectionnez une image dans la grille.
@@ -57,7 +57,7 @@ flutter run -d linux # ou windows
 
 ---
 
-## ✅ Vérification du Setup
+## Vérification du Setup
 
 Une fois le serveur lancé, vous pouvez vérifier son état via cette commande :
 ```bash
@@ -74,7 +74,7 @@ curl http://localhost:8000/api/v3/health
 
 ---
 
-## 💡 Conseils de Productivité
+## Conseils de Productivité
 
 1. **Premier lancement** : Le premier traitement d'image sera plus long car SAM 3 télécharge les poids du modèle (~2.4 Go). Soyez patient.
 2. **GPU NVIDIA** : Pour une expérience fluide dans l'éditeur interactif, un GPU avec support CUDA est fortement recommandé.
