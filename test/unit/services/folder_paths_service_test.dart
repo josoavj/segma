@@ -10,11 +10,10 @@ void main() {
 
   group('FolderPathsService Tests', () {
     test('getFolderLabel should return localized labels', () {
-      expect(service.getFolderLabel('Documents'), contains('Documents'));
-      // Fix: Pictures should return Images
-      expect(service.getFolderLabel('Pictures'), contains('Images'));
-      expect(service.getFolderLabel('Downloads'), contains('Téléchargements'));
-      expect(service.getFolderLabel('Bureau'), contains('Bureau'));
+      expect(service.getFolderLabel('Documents'), 'Documents');
+      expect(service.getFolderLabel('Pictures'), 'Images');
+      expect(service.getFolderLabel('Downloads'), 'Téléchargements');
+      expect(service.getFolderLabel('Bureau'), 'Bureau');
     });
 
     test('getFolderLabel should return basename for unknown folders', () {
