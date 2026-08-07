@@ -2,7 +2,7 @@
 
 SEGMA utilise une architecture client-serveur découplée pour offrir une expérience fluide de segmentation d'IA haute performance.
 
-## 🏗️ Architecture Globale
+## Architecture Globale
 
 ### 1. Frontend (Flutter)
 Interface utilisateur réactive et multiplateforme (Linux/Windows).
@@ -21,7 +21,7 @@ Moteur d'exécution pour SAM 3.
     - `POST /api/v3/segment/batch` : Traitement par lot asynchrone (Streaming NDJSON).
     - `GET /api/v3/model/info` : Statut du GPU et du modèle chargé.
 
-## 📦 Structure du Code Source
+## Structure du Code Source
 
 ### Flutter (`lib/`)
 - `config/` : Configuration dynamique (URLs, Timeouts).
@@ -42,7 +42,7 @@ Moteur d'exécution pour SAM 3.
 - `app/` : Logique métier Python (Services, API, Modèles SAM3).
 - `requirements.txt` : Dépendances IA.
 
-## 🧪 Architecture de Test
+## Architecture de Test
 
 Le projet utilise une suite de tests structurée dans le dossier `test/` :
 
@@ -52,7 +52,7 @@ Le projet utilise une suite de tests structurée dans le dossier `test/` :
 
 L'utilisation de `mocktail` permet de simuler le backend et le système de fichiers pour des tests rapides et déterministes.
 
-## 🔌 Flux d'Interaction Interactif
+## Flux d'Interaction Interactif
 
 1. **Chargement** : L'utilisateur sélectionne une image. Elle est uploadée une seule fois sur le backend.
 2. **Interaction** : L'utilisateur clique sur l'image (Inclusion ou Exclusion).
@@ -60,7 +60,7 @@ L'utilisation de `mocktail` permet de simuler le backend et le système de fichi
 4. **Calcul** : SAM 3 traite l'image avec les nouveaux points en utilisant le cache d'embedding.
 5. **Rendu** : Flutter reçoit le nouveau masque et le dessine instantanément via un overlay.
 
-## 🚀 Optimisations de Production
+## Optimisations de Production
 
 - **Streaming Temps Réel** : Le traitement par lot utilise le protocole NDJSON pour envoyer les résultats au fil de l'eau, évitant les timeouts et permettant une UI réactive.
 - **Mise en cache** : Les images ne sont pas ré-uploadées inutilement.
