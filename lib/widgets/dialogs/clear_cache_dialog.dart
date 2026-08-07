@@ -36,7 +36,7 @@ class ClearCacheDialog extends ConsumerWidget {
               }
 
               if (context.mounted) {
-                ref.read(notificationServiceProvider.notifier).success('Cache vidé ✓');
+                ref.read(notificationServiceProvider.notifier).success('Cache vidé');
               }
             } catch (e) {
               if (context.mounted) {
