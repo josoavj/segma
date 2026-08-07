@@ -1,4 +1,4 @@
-# ❓ FAQ - SAM3 SEGMA
+# FAQ - SAM3 SEGMA
 
 ## Questions Générales
 
@@ -110,11 +110,11 @@ Bouton: "I have read the license and agree with the terms"
 
 **R**: Termes génériques en **anglais**:
 
-- ✅ "cars"
-- ✅ "people"
-- ✅ "trees"
-- ❌ "Toyota Camry"
-- ❌ "la voiture" (français)
+- "cars"
+- "people"
+- "trees"
+- "Toyota Camry" (Non recommandé)
+- "la voiture" (français) (Non recommandé)
 
 ### Q: Le français marche?
 
@@ -271,7 +271,7 @@ LOGLEVEL=DEBUG /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload --log-
 
 **R**:
 
-1. Utiliser GPU ✅
+1. Utiliser GPU
 2. Réduire taille image
 3. Utiliser ViT-B au lieu de ViT-H
 
@@ -370,4 +370,4 @@ tail -100 /tmp/segma.log
 
 ---
 
-**💡 Besoin d'aide? Consultez les guides complets dans docs/**
+**Besoin d'aide? Consultez les guides complets dans docs/**
