@@ -143,7 +143,7 @@ class SettingsPage extends ConsumerWidget {
                     color: scheme.primary,
                   ),
                   onTap: () {
-                    ref.read(notificationServiceProvider.notifier).success('Vous avez la dernière version ✓');
+                    ref.read(notificationServiceProvider.notifier).success('Vous avez la dernière version');
                   },
                 ),
                 const SettingsTile(
