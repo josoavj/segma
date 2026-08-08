@@ -182,6 +182,8 @@ class AboutPage extends ConsumerWidget {
                 name: 'Josoa VONJINIAINA',
                 role: 'Lead Developer & Architect',
                 profileUrl: 'https://github.com/josoavj',
+                portfolioUrl: 'https://josoavj-portfolio.vercel.app/',
+                imageUrl: 'https://github.com/josoavj.png',
               ),
             ),
             const SizedBox(height: 48),
@@ -278,6 +280,8 @@ class AboutPage extends ConsumerWidget {
     required String name,
     required String role,
     String? profileUrl,
+    String? portfolioUrl,
+    String? imageUrl,
   }) {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -293,11 +297,27 @@ class AboutPage extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: scheme.primaryContainer,
-            child: Icon(Icons.person, color: scheme.primary, size: 28),
-          ),
+          if (imageUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                imageUrl,
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                  radius: 28,
+                  backgroundColor: scheme.primaryContainer,
+                  child: Icon(Icons.person, color: scheme.primary, size: 28),
+                ),
+              ),
+            )
+          else
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: scheme.primaryContainer,
+              child: Icon(Icons.person, color: scheme.primary, size: 28),
+            ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -315,6 +335,21 @@ class AboutPage extends ConsumerWidget {
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
+                if (portfolioUrl != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: InkWell(
+                      onTap: () => _launchURL(portfolioUrl),
+                      child: Text(
+                        'Portfolio',
+                        style: TextStyle(
+                          color: scheme.primary,
+                          fontSize: 12,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
