@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["system"])
 
 # Version alignée avec SAM 3
-API_VERSION = "3.0.0"
+API_VERSION = "1.0.0"
 
 @router.get("/api/v3/health", response_model=HealthResponse)
 async def health():
