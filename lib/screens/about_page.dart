@@ -101,7 +101,7 @@ class AboutPage extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                'Version 3.0.0',
+                'Version 1.0.0',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: scheme.primary,
