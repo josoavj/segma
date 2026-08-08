@@ -108,7 +108,7 @@ class ModelManager:
             "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
             "available_models": [settings.SAM3_MODEL_ID],
             "cuda_available": cuda_available,
-            "api_version": "3.0.0"
+            "api_version": "1.0.0"
         }
 
     def change_model(self, model_type: Optional[str] = None, device: Optional[str] = None) -> Dict:

@@ -45,7 +45,7 @@ class HealthResponse(BaseModel):
     device: str = Field(..., description="Dispositif actif (cpu/cuda)")
     model_loaded: bool = Field(..., description="Indique si SAM 3 est en mémoire")
     model_type: str = Field("SAM 3", description="Version du modèle")
-    api_version: str = Field("3.0.0")
+    api_version: str = Field("1.0.0")
 
 # --- Schemas pour la gestion dynamique (Optionnel) ---
 

@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="SEGMA API v3",
     description="Segmentation d'images haute précision avec SAM 3 (PCS) & YOLOv8",
-    version="3.0.0",
+    version="1.0.0",
     lifespan=lifespan
 )
 
