@@ -31,7 +31,7 @@ curl -X GET http://localhost:8000/api/v3/health
   "device": "cuda",
   "model_loaded": true,
   "model_type": "SAM 3",
-  "api_version": "3.0.0"
+  "api_version": "1.0.0"
 }
 
 ```
@@ -167,4 +167,4 @@ Pour afficher les masques sur mobile :
 
 ---
 
-**Version API** : 3.0.0 (Janvier 2026)
+**Version API** : 1.0.0 (Janvier 2026)
