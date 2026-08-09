@@ -180,7 +180,7 @@ class AboutPage extends ConsumerWidget {
               child: _buildDeveloperCard(
                 context,
                 name: 'Josoa VONJINIAINA',
-                role: 'Lead Developer & Architect',
+                role: 'Fullstack Developer | Lead Architect',
                 profileUrl: 'https://github.com/josoavj',
                 portfolioUrl: 'https://josoavj-portfolio.vercel.app/',
                 imageUrl: 'https://github.com/josoavj.png',
@@ -337,15 +337,30 @@ class AboutPage extends ConsumerWidget {
                 ),
                 if (portfolioUrl != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: InkWell(
-                      onTap: () => _launchURL(portfolioUrl),
-                      child: Text(
-                        'Portfolio',
-                        style: TextStyle(
-                          color: scheme.primary,
-                          fontSize: 12,
-                          decoration: TextDecoration.underline,
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      color: scheme.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(6),
+                      child: InkWell(
+                        onTap: () => _launchURL(portfolioUrl),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.language, size: 14, color: scheme.primary),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Voir mon Portfolio',
+                                style: TextStyle(
+                                  color: scheme.primary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

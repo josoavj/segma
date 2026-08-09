@@ -19,23 +19,29 @@ class ModernSidebar extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: isDark
-              ? const Color(0x3320304F)
+              ? scheme.surface.withValues(alpha: 0.45)
               : scheme.surface.withValues(alpha: 0.7),
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.22)
+                  ? Colors.black.withValues(alpha: 0.35)
                   : scheme.primary.withValues(alpha: 0.12),
-              blurRadius: 28,
-              offset: const Offset(8, 0),
+              blurRadius: 30,
+              offset: const Offset(4, 0),
             ),
+            if (isDark)
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.05),
+                blurRadius: 15,
+                offset: const Offset(2, 0),
+              ),
           ],
           border: Border(
             right: BorderSide(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.16)
+                  ? scheme.primary.withValues(alpha: 0.25)
                   : scheme.outlineVariant.withValues(alpha: 0.6),
-              width: 1,
+              width: 1.2,
             ),
           ),
         ),

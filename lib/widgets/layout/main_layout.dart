@@ -48,9 +48,10 @@ class MainLayout extends ConsumerWidget {
               child: Tooltip(
                 message: isCollapsed ? 'Développer' : 'Réduire',
                 child: IconButton(
-                  icon: Icon(isCollapsed ? Icons.unfold_more : Icons.unfold_less),
+                  icon: Icon(isCollapsed ? Icons.menu : Icons.menu_open),
                   onPressed: () {
-                    ref.read(sidebarCollapsedProvider.notifier).state = !isCollapsed;
+                    ref.read(sidebarCollapsedProvider.notifier).state =
+                        !isCollapsed;
                   },
                 ),
               ),
