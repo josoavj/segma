@@ -74,20 +74,18 @@ class BackendService {
 
   /// Segmente une image avec un prompt texte SAM 3.
   Future<SegmentationResult> segmentByPrompt(
-    String imagePath,
+    String filename,
     String prompt, {
     double confidenceThreshold = 0.25,
   }) async {
     try {
-      final request = SegmentationRequest(
-        imagePath: imagePath,
-        prompt: prompt,
-        confidenceThreshold: confidenceThreshold,
-      );
-
       final response = await dio.post(
         '/api/v3/segment',
-        data: request.toJson(),
+        data: {
+          'filename': filename,
+          'prompt': prompt,
+          'confidence_threshold': confidenceThreshold,
+        },
       );
 
       if (response.statusCode == 200) {
