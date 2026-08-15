@@ -6,6 +6,7 @@ from pathlib import Path
 
 from app.exceptions import SegmentationException
 from app.models.model_manager import model_manager
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -52,19 +53,37 @@ class SegmentationService:
 
     async def segment_batch(
         self,
-        image_paths: list[str],
+        folder_path: str,
         prompt: str,
         confidence_threshold: float = 0.25,
     ):
         """
-        Traite une liste d'images en streaming.
+        Traite un dossier d'images en streaming.
         Génère un itérateur JSON pour le suivi en temps réel.
         """
+        # Sécurisation du dossier
+        safe_folder_name = Path(folder_path).name
+        input_dir = Path(settings.UPLOAD_DIR) / safe_folder_name
+
+        if not input_dir.exists() or not input_dir.is_dir():
+             yield {
+                "status": "error",
+                "current": 0,
+                "total": 0,
+                "error": f"Dossier {safe_folder_name} non trouvé."
+            }
+             return
+
+        image_paths = [
+            f for f in os.listdir(input_dir)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+        ]
+
         total = len(image_paths)
-        for idx, path in enumerate(image_paths):
+        for idx, filename in enumerate(image_paths):
             try:
                 result = await self.segment_by_prompt(
-                    image_path=path,
+                    filename=f"{safe_folder_name}/{filename}" if "/" in folder_path else filename,
                     prompt=prompt,
                     confidence_threshold=confidence_threshold
                 )
@@ -72,43 +91,54 @@ class SegmentationService:
                     "status": "success",
                     "current": idx + 1,
                     "total": total,
-                    "image_path": path,
+                    "image_path": filename,
                     "result": result
                 }
             except Exception as e:
-                logger.error(f"Erreur batch sur {path}: {e}")
+                logger.error(f"Erreur batch sur {filename}: {e}")
                 yield {
                     "status": "error",
                     "current": idx + 1,
                     "total": total,
-                    "image_path": path,
+                    "image_path": filename,
                     "error": str(e)
                 }
+
+    async def segment_by_prompt(
+        self,
+        filename: str,
+        prompt: str,
+        confidence_threshold: float = 0.25,
+    ):
         """
         Pipeline complet : Charge l'image -> Segment avec SAM 3 -> 
         Étiquette avec YOLO -> Sauvegarde en .bin
         """
         try:
+            # Sécurisation du chemin : on ne permet que l'accès au dossier d'upload
+            # On nettoie le filename pour éviter les injections de type ../
+            safe_filename = os.path.normpath(filename).lstrip(os.sep)
+            image_path = Path(settings.UPLOAD_DIR) / safe_filename
+
+            if not image_path.exists():
+                raise SegmentationException(f"L'image {safe_filename} n'existe pas sur le serveur.")
+
             concept_prompt = self._normalize_text_prompt(prompt)
             logger.info(
                 "🚀 Démarrage Pipeline SAM 3 pour: %s (Prompt: '%s')",
-                image_path,
+                safe_filename,
                 concept_prompt,
             )
             from app.models.sam3.image_processor import ImageProcessor
             
             # 1. Chargement de l'image via ImageProcessor
-            image = ImageProcessor.load_image(image_path)
+            image = ImageProcessor.load_image(str(image_path))
             height, width = image.shape[:2]
 
-            # 2. Détermination du répertoire de stockage (Contrainte client)
-            if not save_dir:
-                image_name = Path(image_path).stem
-                # On crée un dossier dédié par image pour ne pas mélanger les .bin
-                seg_dir = Path(image_path).parent / f".segmentation_{image_name}"
-            else:
-                seg_dir = Path(save_dir)
-            
+            # 2. Détermination du répertoire de stockage
+            image_stem = image_path.stem
+            # On crée un dossier dédié par image pour ne pas mélanger les .bin
+            seg_dir = Path(settings.OUTPUT_DIR) / f"seg_{image_stem}"
             seg_dir.mkdir(parents=True, exist_ok=True)
 
             # 3. Inférence SAM 3 par concept textuel.
@@ -121,7 +151,7 @@ class SegmentationService:
             if not raw_masks:
                 logger.warning(f"Aucun objet trouvé pour le concept '{concept_prompt}'")
                 return {
-                    "image_path": image_path,
+                    "image_path": safe_filename,
                     "resolution": f"{width}x{height}",
                     "objects_count": 0,
                     "objects": [],
@@ -162,7 +192,7 @@ class SegmentationService:
                 })
 
             return {
-                "image_path": image_path,
+                "image_path": safe_filename,
                 "resolution": f"{width}x{height}",
                 "objects_count": len(objects_data),
                 "objects": objects_data,
