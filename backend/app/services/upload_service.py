@@ -1,3 +1,4 @@
+import aiofiles
 import os
 import uuid
 from pathlib import Path
@@ -28,19 +29,26 @@ class UploadService:
         if extension not in self.allowed_extensions:
             raise UploadValidationError("Seuls JPG, PNG et BMP sont supportés.")
 
-        content = await file.read()
-        if not content:
-            raise UploadValidationError("Le fichier uploadé est vide.")
-
-        if len(content) > settings.MAX_FILE_SIZE:
-            raise UploadValidationError("L'image est trop lourde.", status_code=413)
+        # On ne charge pas tout en mémoire d'un coup (content = await file.read())
+        # On stream le contenu pour économiser de la RAM sur les gros fichiers
 
         ensure_runtime_dirs()
         stored_filename = f"{uuid.uuid4().hex}{extension}"
         file_path = Path(settings.UPLOAD_DIR) / stored_filename
 
-        with open(file_path, "wb") as output:
-            output.write(content)
+        # Utilisation de aiofiles pour ne pas bloquer le thread principal
+        async with aiofiles.open(file_path, "wb") as output:
+            while chunk := await file.read(1024 * 1024):  # 1MB chunks
+                await output.write(chunk)
+
+        file_size = os.path.getsize(file_path)
+        if file_size > settings.MAX_FILE_SIZE:
+            os.remove(file_path)
+            raise UploadValidationError("L'image est trop lourde.", status_code=413)
+
+        if file_size == 0:
+            os.remove(file_path)
+            raise UploadValidationError("Le fichier uploadé est vide.")
 
         try:
             from PIL import Image
@@ -55,8 +63,8 @@ class UploadService:
 
         return ImageUploadResponse(
             filename=stored_filename,
-            image_path=os.path.abspath(file_path),
+            image_path=stored_filename,  # On ne renvoie que le nom du fichier pour la sécurité
             width=width,
             height=height,
-            size_mb=round(len(content) / (1024 * 1024), 2),
+            size_mb=round(file_size / (1024 * 1024), 2),
         )
