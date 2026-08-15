@@ -24,22 +24,9 @@ import json
 @router.post("/segment/batch")
 async def segment_batch(request: SegmentationRequest):
     """Traitement par lot d'un dossier complet avec streaming des résultats."""
-    # Si image_path est un dossier, on liste les images
-    if os.path.isdir(request.image_path):
-        paths = [
-            os.path.join(request.image_path, f)
-            for f in os.listdir(request.image_path)
-            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
-        ]
-    else:
-        paths = [request.image_path]
-
-    if not paths:
-        raise HTTPException(status_code=400, detail="Aucune image trouvée.")
-
     async def event_generator():
         async for update in segmentation_service.segment_batch(
-            image_paths=paths,
+            folder_path=request.filename,
             prompt=request.prompt,
             confidence_threshold=request.confidence_threshold
         ):
@@ -47,15 +34,12 @@ async def segment_batch(request: SegmentationRequest):
             yield json.dumps(update) + "\n"
 
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
+
+
+@router.post("/segment", response_model=SegmentationResponse)
+async def segment_image(request: SegmentationRequest):
     """Segmente une image par prompt texte (SAM 3 - Promptable Concept Segmentation)"""
-    
-    # Validation du chemin de l'image
-    if not request.image_path or not os.path.exists(request.image_path):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Image non trouvée au chemin: {request.image_path}",
-        )
-    
+
     # Validation du prompt (SAM 3 nécessite un concept clair)
     if not request.prompt or len(request.prompt.strip()) < 2:
         raise HTTPException(status_code=400, detail="Le prompt est trop court pour être traité.")
@@ -63,14 +47,10 @@ async def segment_batch(request: SegmentationRequest):
     try:
         # Appel du service (maintenant asynchrone pour ne pas bloquer l'API)
         result = await segmentation_service.segment_by_prompt(
-            image_path=request.image_path,
+            filename=request.filename,
             prompt=request.prompt,
             confidence_threshold=request.confidence_threshold,
-            save_dir=request.save_dir,
         )
-        
-        # Le format de retour est compatible avec SegmentationResponse
-        # Note: SegmentationService gère déjà la sauvegarde en .bin
         return result
         
     except Exception as e:

@@ -4,10 +4,9 @@ from typing import Optional, List, Dict
 
 class SegmentationRequest(BaseModel):
     """Requête de segmentation par prompt texte (SAM 3 PCS)"""
-    image_path: str = Field(..., description="Chemin absolu de l'image sur le serveur")
+    filename: str = Field(..., description="Nom du fichier image dans le dossier d'upload")
     prompt: str = Field(..., description="Concept textuel à segmenter (ex: 'boulons rouillés')")
     confidence_threshold: float = Field(0.25, ge=0.0, le=1.0, description="Seuil de confiance")
-    save_dir: Optional[str] = Field(None, description="Répertoire de destination pour les .bin")
 
 
 class SegmentedObject(BaseModel):
