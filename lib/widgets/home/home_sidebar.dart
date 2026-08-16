@@ -8,6 +8,8 @@ import 'package:segma/providers/service_providers.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
 import 'package:segma/widgets/batch_progress_dialog.dart';
+import 'package:segma/utils/error_handler.dart';
+import 'package:segma/services/notification_service.dart';
 
 class HomeSidebar extends ConsumerWidget {
   final FolderModel folderStructure;
@@ -181,11 +183,12 @@ class HomeSidebar extends ConsumerWidget {
       error: (err, stack) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          'Erreur chargement dossiers',
+          AppErrorHandler.getFriendlyMessage(err),
           style: TextStyle(
             color: scheme.onPrimary.withValues(alpha: 0.7),
-            fontSize: 12,
+            fontSize: 11,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -259,20 +262,24 @@ class HomeSidebar extends ConsumerWidget {
           height: 400,
           child: FolderPickerWidget(
             onFolderSelected: (path) async {
-              final folder = await ref
-                  .read(fileServiceProvider)
-                  .loadFolderStructure(path);
-              final customFolders = ref.read(customFoldersProvider);
-              if (!customFolders.contains(path)) {
-                ref.read(customFoldersProvider.notifier).state = [
-                  ...customFolders,
-                  path,
-                ];
-              }
-              ref.read(selectedFolderProvider.notifier).state = folder;
-              ref.read(selectedImageProvider.notifier).state = null;
-              if (context.mounted) {
-                Navigator.pop(context);
+              try {
+                final folder = await ref
+                    .read(fileServiceProvider)
+                    .loadFolderStructure(path);
+                final customFolders = ref.read(customFoldersProvider);
+                if (!customFolders.contains(path)) {
+                  ref.read(customFoldersProvider.notifier).state = [
+                    ...customFolders,
+                    path,
+                  ];
+                }
+                ref.read(selectedFolderProvider.notifier).state = folder;
+                ref.read(selectedImageProvider.notifier).state = null;
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e, stack) {
+                ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
               }
             },
           ),
@@ -298,11 +305,15 @@ class HomeSidebar extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
-          final folder = await ref
-              .read(fileServiceProvider)
-              .loadFolderStructure(path);
-          ref.read(selectedFolderProvider.notifier).state = folder;
-          ref.read(selectedImageProvider.notifier).state = null;
+          try {
+            final folder = await ref
+                .read(fileServiceProvider)
+                .loadFolderStructure(path);
+            ref.read(selectedFolderProvider.notifier).state = folder;
+            ref.read(selectedImageProvider.notifier).state = null;
+          } catch (e, stack) {
+            ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -362,11 +373,15 @@ class HomeSidebar extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
-          final folder = await ref
-              .read(fileServiceProvider)
-              .loadFolderStructure(path);
-          ref.read(selectedFolderProvider.notifier).state = folder;
-          ref.read(selectedImageProvider.notifier).state = null;
+          try {
+            final folder = await ref
+                .read(fileServiceProvider)
+                .loadFolderStructure(path);
+            ref.read(selectedFolderProvider.notifier).state = folder;
+            ref.read(selectedImageProvider.notifier).state = null;
+          } catch (e, stack) {
+            ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
