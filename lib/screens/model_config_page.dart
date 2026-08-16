@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/config/backend_config.dart' as backend_config;
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/services/notification_service.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class ModelConfigPage extends ConsumerWidget {
   const ModelConfigPage({super.key});
@@ -19,7 +20,7 @@ class ModelConfigPage extends ConsumerWidget {
       ),
       body: modelInfoAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Erreur: $err')),
+        error: (err, stack) => Center(child: Text(AppErrorHandler.getFriendlyMessage(err))),
         data: (modelInfo) {
           final currentModel =
               modelInfo['model_type'] as String? ??
@@ -190,8 +191,8 @@ class ModelConfigPage extends ConsumerWidget {
       ref.read(notificationServiceProvider.notifier).success('Modèle changé: $model sur $device');
       // Invalider le cache pour recharger les infos
       ref.invalidate(modelInfoProvider);
-    } catch (e) {
-      ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
+    } catch (e, stack) {
+      ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
     }
   }
 }
