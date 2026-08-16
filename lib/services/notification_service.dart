@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
 import 'package:segma/models/notification_model.dart';
+import 'package:segma/services/log_service.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class NotificationService extends StateNotifier<AppNotification?> {
   NotificationService() : super(null);
@@ -32,8 +34,27 @@ class NotificationService extends StateNotifier<AppNotification?> {
   /// Affiche un message de succès
   void success(String message) => show(message, type: NotificationType.success);
 
-  /// Affiche un message d'erreur
-  void error(String message) => show(message, type: NotificationType.error);
+  /// Affiche un message d'erreur amical et loggue les détails techniques
+  void error(dynamic messageOrError, {dynamic technicalError, StackTrace? stackTrace, bool critical = false}) {
+    String uiMessage;
+    
+    if (messageOrError is String) {
+      uiMessage = messageOrError;
+    } else {
+      uiMessage = AppErrorHandler.getFriendlyMessage(messageOrError);
+      technicalError ??= messageOrError;
+    }
+
+    // Logging systématique de l'erreur technique
+    if (technicalError != null) {
+      logService.error(
+        "UI Error: $uiMessage | Technical: $technicalError", 
+        stackTrace: stackTrace?.toString()
+      );
+    }
+
+    show(uiMessage, type: critical ? NotificationType.critical : NotificationType.error);
+  }
 
   /// Affiche un avertissement
   void warning(String message) => show(message, type: NotificationType.warning);
