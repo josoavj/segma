@@ -9,6 +9,7 @@ import 'package:segma/widgets/image_viewer/image_viewer_sidebar.dart';
 import 'package:segma/widgets/image_viewer/image_viewer_appbar.dart';
 import 'package:segma/widgets/image_viewer/mask_overlay.dart';
 import 'package:segma/widgets/image_viewer/bounding_boxes_overlay.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   final ImageModel image;
@@ -205,62 +206,10 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                         ),
                       ),
                     ),
-                  if (error != null)
-                    Positioned(
-                      bottom: 24,
-                      left: 24,
-                      right: 24,
-                      child: _ErrorMessage(error: error),
-                    ),
                 ],
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorMessage extends StatelessWidget {
-  final String error;
-  const _ErrorMessage({required this.error});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.red.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white, size: 18),
-              SizedBox(width: 8),
-              Text(
-                'Erreur de segmentation',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(error, style: const TextStyle(color: Colors.white70, fontSize: 11)),
         ],
       ),
     );
