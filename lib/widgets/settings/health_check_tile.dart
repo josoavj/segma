@@ -26,13 +26,13 @@ class HealthCheckTile extends ConsumerWidget {
           ),
         ),
       ),
-      error: (err, _) => SettingsTile(
+      error: (err, stack) => SettingsTile(
         title: 'Vérifier la connexion',
-        subtitle: 'Erreur de connexion',
+        subtitle: 'Problème de connexion',
         trailing: Icon(Icons.error, color: scheme.error),
         onTap: () async {
           ref.invalidate(healthCheckProvider);
-          ref.read(notificationServiceProvider.notifier).info('Reconnexion en cours...');
+          ref.read(notificationServiceProvider.notifier).error(err, stackTrace: stack);
         },
       ),
       data: (health) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/services/log_service.dart';
+import 'package:segma/utils/error_handler.dart';
 
 final logsProvider = FutureProvider<List<LogEntry>>((ref) async {
   return logService.getAllLogs();
@@ -210,13 +211,13 @@ class LogsPage extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.error,
+                      Icons.error_outline,
                       size: 64,
                       color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Erreur: $error',
+                      AppErrorHandler.getFriendlyMessage(error),
                       style: Theme.of(
                         context,
                       ).textTheme.titleMedium?.copyWith(color: scheme.error),
@@ -277,7 +278,10 @@ class _LogEntryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        shape: const Border(),
+        collapsedShape: const Border(),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 
+import 'package:segma/services/notification_service.dart';
+
 class AboutPage extends ConsumerWidget {
   const AboutPage({super.key});
 
-  Future<void> _launchURL(String url) async {
+  Future<void> _launchURL(WidgetRef ref, String url) async {
     try {
       if (Platform.isLinux) {
         await Process.run('xdg-open', [url]);
@@ -14,8 +16,12 @@ class AboutPage extends ConsumerWidget {
       } else if (Platform.isWindows) {
         await Process.run('start', [url], runInShell: true);
       }
-    } catch (e) {
-      debugPrint('Error launching URL: $e');
+    } catch (e, stack) {
+      ref.read(notificationServiceProvider.notifier).error(
+        "Impossible d'ouvrir le lien. Vérifiez votre navigateur.",
+        technicalError: e,
+        stackTrace: stack,
+      );
     }
   }
 
@@ -342,7 +348,7 @@ class AboutPage extends ConsumerWidget {
                       color: scheme.primaryContainer.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(6),
                       child: InkWell(
-                        onTap: () => _launchURL(portfolioUrl),
+                        onTap: () => _launchURL(key as WidgetRef, portfolioUrl),
                         borderRadius: BorderRadius.circular(6),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -370,7 +376,7 @@ class AboutPage extends ConsumerWidget {
           ),
           if (profileUrl != null)
             IconButton(
-              onPressed: () => _launchURL(profileUrl),
+              onPressed: () => _launchURL(key as WidgetRef, profileUrl),
               icon: Icon(Icons.open_in_new, color: scheme.primary, size: 20),
               tooltip: 'GitHub',
             ),

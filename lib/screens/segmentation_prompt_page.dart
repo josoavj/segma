@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/widgets/segmented_object_card.dart';
+import 'package:segma/utils/error_handler.dart';
+import 'package:segma/services/notification_service.dart';
 
 class SegmentationPage extends ConsumerStatefulWidget {
   final String imagePath;
@@ -147,7 +149,7 @@ class _SegmentationPageState extends ConsumerState<SegmentationPage> {
                       color: Colors.red,
                     ),
                     const SizedBox(height: 16),
-                    Text('Erreur: $error'),
+                    Text(AppErrorHandler.getFriendlyMessage(error)),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _performSegmentation,
@@ -269,13 +271,8 @@ class _SegmentationPageState extends ConsumerState<SegmentationPage> {
                                       .where((obj) => obj.isSelected)
                                       .map((obj) => obj.objectId)
                                       .toList();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Objets sélectionnés: ${selected.join(", ")}',
-                                      ),
-                                      duration: const Duration(seconds: 2),
-                                    ),
+                                  ref.read(notificationServiceProvider.notifier).success(
+                                    'Objets sélectionnés: ${selected.join(", ")}',
                                   );
                                   // Ici vous pouvez sauvegarder les masques
                                   Navigator.of(context).pop(selected);

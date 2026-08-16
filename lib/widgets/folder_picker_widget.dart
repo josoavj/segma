@@ -47,9 +47,9 @@ class _FolderPickerWidgetState extends ConsumerState<FolderPickerWidget> {
           currentPath = path;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
       if (mounted) {
-        ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
+        ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
       }
     } finally {
       setState(() {

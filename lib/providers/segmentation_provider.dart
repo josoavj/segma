@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
+import 'package:segma/services/notification_service.dart';
+import 'package:segma/utils/error_handler.dart';
+import 'package:dio/dio.dart';
 
 // État de chargement de la segmentation
 final segmentationLoadingProvider = StateProvider<bool>((ref) => false);
@@ -102,8 +105,14 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
         ref.read(segmentationErrorProvider.notifier).state = null;
 
         return result;
-      } catch (e) {
-        ref.read(segmentationErrorProvider.notifier).state = e.toString();
+      } catch (e, stack) {
+        final friendlyMsg = AppErrorHandler.getFriendlyMessage(e);
+        ref.read(segmentationErrorProvider.notifier).state = friendlyMsg;
+        ref.read(notificationServiceProvider.notifier).error(
+          e, 
+          stackTrace: stack,
+          critical: e is! DioException, // Les erreurs réseau sont rarement "critiques" au sens dialogue bloquant
+        );
         rethrow;
       } finally {
         // Toujours mettre à jour l'état de chargement à la fin

@@ -5,6 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
 import 'package:segma/providers/segmentation_provider.dart';
+import 'package:segma/utils/error_handler.dart';
+import 'package:segma/services/notification_service.dart';
+
+import '../services/log_service.dart';
 
 class BatchState {
   final bool isProcessing;
@@ -85,18 +89,22 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
             
             ref.read(segmentationHistoryProvider.notifier).update((history) => [...history, result]);
           } else if (update['status'] == 'error') {
+             final errorData = update['error'];
              state = state.copyWith(
               current: update['current'],
               total: update['total'],
-              error: update['error'],
+              error: errorData is String ? errorData : AppErrorHandler.getFriendlyMessage(errorData),
             );
           }
         } catch (e) {
           continue;
         }
       }
-    } catch (e) {
-      state = state.copyWith(error: e.toString());
+    } catch (e, stack) {
+      final friendlyMsg = AppErrorHandler.getFriendlyMessage(e);
+      state = state.copyWith(error: friendlyMsg);
+      // On ne lance pas de notification globale car le BatchProgressDialog affiche déjà l'erreur
+      logService.error("Batch Error: $e", stackTrace: stack.toString());
     } finally {
       state = state.copyWith(isProcessing: false);
     }

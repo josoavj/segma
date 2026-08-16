@@ -38,9 +38,13 @@ class ClearCacheDialog extends ConsumerWidget {
               if (context.mounted) {
                 ref.read(notificationServiceProvider.notifier).success('Cache vidé');
               }
-            } catch (e) {
+            } catch (e, stack) {
               if (context.mounted) {
-                ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
+                ref.read(notificationServiceProvider.notifier).error(
+                  "Impossible de vider le cache. Vérifiez les permissions.",
+                  technicalError: e,
+                  stackTrace: stack,
+                );
               }
             }
           },

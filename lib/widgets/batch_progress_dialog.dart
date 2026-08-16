@@ -32,7 +32,11 @@ class BatchProgressDialog extends ConsumerWidget {
           ] else if (state.error != null) ...[
             Icon(Icons.error_outline, color: scheme.error, size: 48),
             const SizedBox(height: 16),
-            Text('Une erreur est survenue : ${state.error}'),
+            Text(
+              state.error!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ] else ...[
             Icon(Icons.check_circle_outline, color: scheme.tertiary, size: 48),
             const SizedBox(height: 16),

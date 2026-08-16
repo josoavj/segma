@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/services/notification_service.dart';
 import 'package:segma/config/backend_config.dart' as backend_config;
+import 'package:segma/utils/error_handler.dart';
 
 class ModelConfigurationTile extends ConsumerStatefulWidget {
   const ModelConfigurationTile({super.key});
@@ -38,9 +39,9 @@ class _ModelConfigurationTileState
         // Invalider les providers pour forcer la mise à jour
         ref.invalidate(modelInfoProvider);
       }
-    } catch (e) {
+    } catch (e, stack) {
       if (mounted) {
-        ref.read(notificationServiceProvider.notifier).error('Erreur: $e');
+        ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
       }
     } finally {
       if (mounted) {
@@ -249,7 +250,7 @@ class _ModelConfigurationTileState
               },
               loading: () => const CircularProgressIndicator(strokeWidth: 2),
               error: (error, _) => Text(
-                'Erreur: $error',
+                AppErrorHandler.getFriendlyMessage(error),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
