@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/widgets/common/settings_ui.dart';
 import 'package:segma/services/notification_service.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class ModelInfoTile extends ConsumerWidget {
   const ModelInfoTile({super.key});
@@ -33,8 +34,8 @@ class ModelInfoTile extends ConsumerWidget {
         children: [
           SettingsTile(
             title: 'Type de modèle',
-            subtitle: 'Erreur: $err',
-            trailing: Icon(Icons.error, color: scheme.error),
+            subtitle: AppErrorHandler.getFriendlyMessage(err),
+            trailing: Icon(Icons.error_outline, color: scheme.error),
           ),
         ],
       ),
