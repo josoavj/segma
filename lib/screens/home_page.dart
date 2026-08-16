@@ -7,6 +7,7 @@ import 'package:segma/widgets/image_grid_widget.dart';
 import 'package:segma/widgets/image_viewer_widget.dart';
 import 'package:segma/widgets/home/home_sidebar.dart';
 import 'package:segma/widgets/home/image_grid_header.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -68,12 +69,12 @@ class HomePage extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.error,
+              Icons.error_outline,
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            Text('Erreur: $error'),
+            Text(AppErrorHandler.getFriendlyMessage(error)),
           ],
         ),
       ),
