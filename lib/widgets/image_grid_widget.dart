@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
+import 'package:segma/utils/error_handler.dart';
 
 class ImageGridWidget extends ConsumerWidget {
   final String folderPath;
@@ -187,7 +188,7 @@ class ImageGridWidget extends ConsumerWidget {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            Text('Erreur: $error'),
+            Text(AppErrorHandler.getFriendlyMessage(error)),
           ],
         ),
       ),
