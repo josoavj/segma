@@ -277,7 +277,10 @@ class _LogEntryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        shape: const Border(),
+        collapsedShape: const Border(),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
