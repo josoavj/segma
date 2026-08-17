@@ -146,7 +146,10 @@ class _SegmentationEditorPageState extends ConsumerState<SegmentationEditorPage>
 
   Size _getImageWidgetSize() {
     final RenderBox? renderBox = _imageKey.currentContext?.findRenderObject() as RenderBox?;
-    return renderBox?.size ?? Size.zero;
+    if (renderBox != null && renderBox.hasSize) {
+      return renderBox.size;
+    }
+    return Size.zero;
   }
 
   void _showHelp() {
