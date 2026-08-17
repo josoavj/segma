@@ -9,45 +9,87 @@ class SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.shadow.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16, bottom: 8),
+          child: Text(
+            title.toUpperCase(),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: scheme.primary.withValues(alpha: 0.8),
+              letterSpacing: 1.2,
+            ),
           ),
-        ],
-      ),
-      child: Material(
-        color: scheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: scheme.primary,
-                  letterSpacing: 0.5,
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? scheme.primary.withValues(alpha: 0.15)
+                  : scheme.outlineVariant.withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: scheme.shadow.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Material(
+            color: isDark
+                ? scheme.surface.withValues(alpha: 0.4)
+                : scheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.antiAlias,
+            child: ListTileTheme(
+              data: ListTileThemeData(
+                tileColor: Colors.transparent,
+                shape: const RoundedRectangleBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                titleTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface,
+                ),
+                subtitleTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                 ),
               ),
+              child: Column(
+                children: _buildChildrenWithDividers(scheme, isDark),
+              ),
             ),
-            Column(children: children),
-          ],
+          ),
         ),
-      ),
+      ],
     );
+  }
+
+  List<Widget> _buildChildrenWithDividers(ColorScheme scheme, bool isDark) {
+    final List<Widget> items = [];
+    for (int i = 0; i < children.length; i++) {
+      items.add(children[i]);
+      if (i < children.length - 1) {
+        items.add(
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: isDark
+                ? scheme.primary.withValues(alpha: 0.1)
+                : scheme.outlineVariant.withValues(alpha: 0.4),
+          ),
+        );
+      }
+    }
+    return items;
   }
 }
 
@@ -67,41 +109,11 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 4,
-          ),
-          title: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-          trailing: trailing,
-          onTap: onTap,
-          horizontalTitleGap: 16,
-        ),
-      ),
+    return ListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: trailing,
+      onTap: onTap,
     );
   }
 }
