@@ -42,7 +42,14 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     super.initState();
     _searchController = TextEditingController();
     _promptController = TextEditingController(text: 'all objects in the image');
-    ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
+    
+    // Utilisation de microtask pour éviter l'erreur de modification pendant le build
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
+      }
+    });
+    
     _loadImageSize();
   }
 
@@ -86,15 +93,19 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     final segmentState = ref.watch(segmentImageProvider);
 
     final currentSeg = segmentState.whenData((data) => data).value;
+    final hasError = segmentState.hasError;
 
-    if (currentSeg == null && !isLoading) {
+    // Déclencher la segmentation seulement si pas déjà en erreur
+    if (currentSeg == null && !isLoading && !hasError) {
       Future.microtask(() {
-        ref
-            .read(segmentImageProvider.notifier)
-            .segment(widget.image.path)
-            .catchError((e) {
-              debugPrint('Erreur segmentation: $e');
-            });
+        if (mounted) {
+          ref
+              .read(segmentImageProvider.notifier)
+              .segment(widget.image.path)
+              .catchError((e) {
+                debugPrint('Erreur segmentation auto: $e');
+              });
+        }
       });
     }
 
