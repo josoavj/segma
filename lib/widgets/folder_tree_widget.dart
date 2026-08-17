@@ -19,109 +19,112 @@ class FolderTreeWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = selectedFolder?.id == folder.id;
     final isExpanded = ref.watch(expandedFoldersProvider(folder.id));
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              onFolderSelected(folder);
-              if (folder.subfolders.isNotEmpty) {
-                ref.read(expandedFoldersProvider(folder.id).notifier).state =
-                    !isExpanded;
-              }
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              margin: EdgeInsets.only(
-                left: level * 8.0,
-                right: 4,
-                top: 3,
-                bottom: 3,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(6),
-                border: isSelected
-                    ? Border.all(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
-                        width: 1,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Material(
+            color: isSelected
+                ? scheme.primary.withValues(alpha: isDark ? 0.25 : 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () {
+                onFolderSelected(folder);
+                if (folder.subfolders.isNotEmpty) {
+                  ref.read(expandedFoldersProvider(folder.id).notifier).state =
+                      !isExpanded;
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.fromLTRB(
+                  8.0 + (level * 12.0),
+                  8,
+                  8,
+                  8,
+                ),
+                decoration: BoxDecoration(
+                  border: isSelected
+                      ? Border.all(
+                          color: scheme.primary.withValues(alpha: 0.4),
+                          width: 1.5,
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    // Icône d'expansion
+                    if (folder.subfolders.isNotEmpty)
+                      AnimatedRotation(
+                        turns: isExpanded ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: isSelected
+                              ? scheme.primary
+                              : scheme.onSurface.withValues(alpha: 0.5),
+                        ),
                       )
-                    : null,
-              ),
-              child: Row(
-                children: [
-                  // Icône d'expansion
-                  if (folder.subfolders.isNotEmpty)
-                    AnimatedRotation(
-                      turns: isExpanded ? 0.25 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Icon(
-                        Icons.chevron_right,
-                        size: 18,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 18),
-                  const SizedBox(width: 4),
-                  // Icône du dossier
-                  Icon(
-                    isExpanded && folder.subfolders.isNotEmpty
-                        ? Icons.folder_open_rounded
-                        : Icons.folder_rounded,
-                    size: 18,
-                    color: isSelected
-                        ? Theme.of(context).primaryColor
-                        : Colors.amber[600],
-                  ),
-                  const SizedBox(width: 8),
-                  // Nom du dossier
-                  Expanded(
-                    child: Text(
-                      folder.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        color: isSelected
-                            ? Theme.of(context).primaryColor
-                            : null,
-                      ),
+                    else
+                      const SizedBox(width: 18),
+                    const SizedBox(width: 6),
+                    // Icône du dossier
+                    Icon(
+                      isExpanded && folder.subfolders.isNotEmpty
+                          ? Icons.folder_open_rounded
+                          : Icons.folder_rounded,
+                      size: 20,
+                      color: isSelected ? scheme.primary : Colors.amber[600],
                     ),
-                  ),
-                  // Nombre de sous-dossiers
-                  if (folder.subfolders.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                    const SizedBox(width: 10),
+                    // Nom du dossier
+                    Expanded(
                       child: Text(
-                        folder.subfolders.length.toString(),
+                        folder.name,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
+                          fontSize: 13,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? scheme.primary : scheme.onSurface,
                         ),
                       ),
                     ),
-                ],
+                    // Badge de contenu (nombre de sous-dossiers ou images)
+                    if (folder.subfolders.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? scheme.primary
+                              : scheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          folder.subfolders.length.toString(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? scheme.onPrimary
+                                : scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
