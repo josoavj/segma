@@ -84,7 +84,6 @@ class SettingsPage extends ConsumerWidget {
               title: 'Modèle SAM',
               children: [
                 const ModelInfoTile(),
-                const Divider(height: 1, indent: 0, endIndent: 0),
                 const ModelConfigurationTile(),
               ],
             ),
