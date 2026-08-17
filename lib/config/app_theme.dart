@@ -79,9 +79,8 @@ class AppTheme {
           ),
         ),
       ),
-      listTileTheme: ListTileThemeData(
-        tileColor: Colors.white.withValues(alpha: 0.6),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      listTileTheme: const ListTileThemeData(
+        tileColor: Colors.transparent,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 3,
@@ -193,9 +192,8 @@ class AppTheme {
           ),
         ),
       ),
-      listTileTheme: ListTileThemeData(
-        tileColor: const Color(0x402A3A63),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      listTileTheme: const ListTileThemeData(
+        tileColor: Colors.transparent,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         elevation: 4,
