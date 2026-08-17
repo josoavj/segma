@@ -9,7 +9,6 @@ import 'package:segma/widgets/image_viewer/image_viewer_sidebar.dart';
 import 'package:segma/widgets/image_viewer/image_viewer_appbar.dart';
 import 'package:segma/widgets/image_viewer/mask_overlay.dart';
 import 'package:segma/widgets/image_viewer/bounding_boxes_overlay.dart';
-import 'package:segma/utils/error_handler.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   final ImageModel image;
@@ -83,7 +82,7 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(segmentationLoadingProvider);
-    final error = ref.watch(segmentationErrorProvider);
+    ref.watch(segmentationErrorProvider);
     final segmentState = ref.watch(segmentImageProvider);
 
     final currentSeg = segmentState.whenData((data) => data).value;
