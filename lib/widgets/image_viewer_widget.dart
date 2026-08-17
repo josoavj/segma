@@ -9,7 +9,6 @@ import 'package:segma/widgets/image_viewer/image_viewer_sidebar.dart';
 import 'package:segma/widgets/image_viewer/image_viewer_appbar.dart';
 import 'package:segma/widgets/image_viewer/mask_overlay.dart';
 import 'package:segma/widgets/image_viewer/bounding_boxes_overlay.dart';
-import 'package:segma/utils/error_handler.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   final ImageModel image;
@@ -43,7 +42,14 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     super.initState();
     _searchController = TextEditingController();
     _promptController = TextEditingController(text: 'all objects in the image');
-    ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
+    
+    // Utilisation de microtask pour éviter l'erreur de modification pendant le build
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
+      }
+    });
+    
     _loadImageSize();
   }
 
@@ -83,19 +89,23 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(segmentationLoadingProvider);
-    final error = ref.watch(segmentationErrorProvider);
+    ref.watch(segmentationErrorProvider);
     final segmentState = ref.watch(segmentImageProvider);
 
     final currentSeg = segmentState.whenData((data) => data).value;
+    final hasError = segmentState.hasError;
 
-    if (currentSeg == null && !isLoading) {
+    // Déclencher la segmentation seulement si pas déjà en erreur
+    if (currentSeg == null && !isLoading && !hasError) {
       Future.microtask(() {
-        ref
-            .read(segmentImageProvider.notifier)
-            .segment(widget.image.path)
-            .catchError((e) {
-              debugPrint('Erreur segmentation: $e');
-            });
+        if (mounted) {
+          ref
+              .read(segmentImageProvider.notifier)
+              .segment(widget.image.path)
+              .catchError((e) {
+                debugPrint('Erreur segmentation auto: $e');
+              });
+        }
       });
     }
 

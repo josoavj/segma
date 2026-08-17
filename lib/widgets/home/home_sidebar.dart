@@ -72,12 +72,20 @@ class HomeSidebar extends ConsumerWidget {
                       onPressed: selectedFolder == null
                           ? null
                           : () => _showBatchProcessDialog(context, ref, selectedFolder),
-                      icon: const Icon(Icons.auto_awesome, size: 18),
-                      label: const Text('Traiter le dossier'),
+                      icon: const Icon(Icons.auto_awesome, size: 16),
+                      label: const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          'Traiter le dossier',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: scheme.secondaryContainer,
                         foregroundColor: scheme.onSecondaryContainer,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: const StadiumBorder(),
+                        elevation: 0,
                       ),
                     );
                   },

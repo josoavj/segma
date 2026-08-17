@@ -43,33 +43,38 @@ class BackendService {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       }
-      throw Exception('Erreur health check: ${response.statusCode}');
-    } on DioException catch (e) {
-      throw Exception('Erreur réseau: ${e.message}');
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        type: DioExceptionType.badResponse,
+      );
+    } catch (e) {
+      rethrow;
     }
   }
 
   /// Upload une image vers le serveur
   Future<Map<String, dynamic>> uploadImage(String imagePath) async {
-    try {
-      final file = File(imagePath);
-      if (!file.existsSync()) {
-        throw Exception('Fichier non trouvé: $imagePath');
-      }
-
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(imagePath),
-      });
-
-      final response = await dio.post('/api/v3/upload', data: formData);
-
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
-      }
-      throw Exception('Erreur upload: ${response.statusCode}');
-    } on DioException catch (e) {
-      throw Exception('Erreur réseau upload: ${e.message}');
+    final file = File(imagePath);
+    if (!file.existsSync()) {
+      throw Exception('Fichier non trouvé: $imagePath');
     }
+
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(imagePath),
+    });
+
+    final response = await dio.post('/api/v3/upload', data: formData);
+
+    if (response.statusCode == 200) {
+      return response.data as Map<String, dynamic>;
+    }
+    
+    throw DioException(
+      requestOptions: response.requestOptions,
+      response: response,
+      type: DioExceptionType.badResponse,
+    );
   }
 
   /// Segmente une image avec un prompt texte SAM 3.
