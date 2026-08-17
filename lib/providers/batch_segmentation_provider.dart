@@ -6,7 +6,6 @@ import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/utils/error_handler.dart';
-import 'package:segma/services/notification_service.dart';
 
 import '../services/log_service.dart';
 
