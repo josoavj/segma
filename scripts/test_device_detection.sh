@@ -4,32 +4,26 @@
 
 set -e
 
+# Charger l'environnement global
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/env_setup.sh"
+
 echo "════════════════════════════════════════════════════════════════════════════"
 echo "[GPU] TEST DÉTECTION AUTOMATIQUE GPU/CPU - SAM3"
 echo "════════════════════════════════════════════════════════════════════════════"
 echo ""
 
-# Déterminer le venv
-VENV_PATH="${VENV_PATH:-./.venv}"
-if [ ! -d "$VENV_PATH" ]; then
-    VENV_PATH="/home/shadowcraft/.pyenv"
+if [ "$VENV_ACTIVE" = true ]; then
+    echo "[SUCCESS] Venv trouvé: $VENV_PATH"
+else
+    echo "[INFO] Utilisation de Python système"
 fi
-
-if [ ! -d "$VENV_PATH" ]; then
-    echo "[ERROR] Erreur: Virtualenv non trouvé"
-    exit 1
-fi
-
-echo "[SUCCESS] Venv trouvé: $VENV_PATH"
 echo ""
-
-# Activer le venv
-source "$VENV_PATH/bin/activate"
 
 # Test détection
 echo "[CHECK] Test 1: Détection du device Python"
 echo "────────────────────────────────────────────"
-python << 'PYEOF'
+"$PYTHON_BIN" << 'PYEOF'
 import torch
 
 print(f"PyTorch version: {torch.__version__}")
@@ -49,30 +43,25 @@ else:
 PYEOF
 
 echo ""
-echo "[CHECK] Test 2: Détection SAM3Model"
+echo "[CHECK] Test 2: Détection SAM3Wrapper"
 echo "────────────────────────────────────────────"
-cd /home/shadowcraft/Projets/segma/backend && python << 'PYEOF'
+cd "$BACKEND_DIR" && "$PYTHON_BIN" << 'PYEOF'
 import sys
 sys.path.insert(0, '.')
 
-from app.models.sam3_model import get_sam3_model
-
-print("Initialisation SAM3...")
-sam3 = get_sam3_model()
-
-info = sam3.get_info()
-print(f"\nSAM3 Info:")
-print(f"   Device utilisé: {sam3.device.upper()}")
-print(f"   Model type: {info['model_type']}")
-print(f"   Is loaded: {info['is_loaded']}")
-print(f"   Capabilities: {', '.join(info['capabilities'])}")
+try:
+    from app.models.sam3.sam3_wrapper import SAM3Wrapper
+    print("Initialisation SAM3Wrapper...")
+    print("[SUCCESS] Import SAM3Wrapper réussi")
+except Exception as e:
+    print(f"[ERROR] Échec import SAM3Wrapper: {e}")
 
 PYEOF
 
 echo ""
 echo "[CHECK] Test 3: Détection ModelManager"
 echo "────────────────────────────────────────────"
-cd /home/shadowcraft/Projets/segma/backend && python << 'PYEOF'
+cd "$BACKEND_DIR" && "$PYTHON_BIN" << 'PYEOF'
 import sys
 sys.path.insert(0, '.')
 
@@ -82,7 +71,7 @@ info = model_manager.get_model_info()
 print(f"ModelManager Info:")
 print(f"   Device: {info['device'].upper()}")
 print(f"   Device name: {info['device_name']}")
-if info['vram_gb']:
+if info.get('vram_gb'):
     print(f"   VRAM: {info['vram_gb']}GB")
 print(f"   Model type: {info['model_type']}")
 print(f"   Is loaded: {info['is_loaded']}")
@@ -94,14 +83,4 @@ echo ""
 echo "════════════════════════════════════════════════════════════════════════════"
 echo "[SUCCESS] TEST DÉTECTION COMPLÉTÉ"
 echo "════════════════════════════════════════════════════════════════════════════"
-echo ""
-echo "[INFO] Résumé:"
-echo "   • Si GPU détecté → SAM3 utilise CUDA automatiquement"
-echo "   • Si pas de GPU → SAM3 utilise CPU automatiquement"
-echo "   • Détection se fait au démarrage du backend"
-echo ""
-echo "[TIP] Pour utiliser GPU: Assurez-vous d'avoir:"
-echo "   [SUCCESS] PyTorch compilé avec support CUDA"
-echo "   [SUCCESS] Drivers NVIDIA installés"
-echo "   [SUCCESS] CUDA Toolkit compatible"
 echo ""
