@@ -1,31 +1,35 @@
 # Guide d'Installation Complète
 
-Ce guide détaille l'installation de SEGMA et de ses composants (Backend Python et Frontend Flutter).
+Ce guide détaille l'installation de SEGMA. Nous recommandons l'utilisation des scripts automatisés pour une expérience simplifiée.
 
-## 1. Environnement Backend (Python)
+## ⚙️ Méthode Recommandée (Scripts)
 
-### Prérequis
-- Python 3.10 ou supérieur
-- Un GPU NVIDIA (optionnel mais recommandé pour CUDA)
+Le projet utilise un système de détection d'environnement intelligent.
 
-### Installation manuelle
+### 1. Initialisation
 ```bash
-cd backend
-
-# Création de l'environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Mise à jour des outils de base
-pip install --upgrade pip setuptools wheel
-
-# Installation des dépendances principales
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121  # Pour CUDA 12.1
-pip install fastapi uvicorn pillow opencv-python numpy huggingface-hub python-multipart
-
-# Installation de SAM 3
-pip install 'git+https://github.com/facebookresearch/segment-anything.git'
+bash scripts/init_project.sh
 ```
+Ce script va :
+- Détecter ou créer un environnement virtuel (`.venv`).
+- Installer toutes les dépendances Python nécessaires.
+- Vérifier la compatibilité CUDA.
+- Configurer les raccourcis de commande.
+
+### 2. Configuration Personnalisée (Optionnel)
+Si vous utilisez un environnement spécifique (ex: `pyenv`), créez un fichier `scripts/local_env.sh` (ce fichier est ignoré par Git) :
+```bash
+export VENV_PATH="/votre/chemin/vers/.pyenv"
+```
+
+---
+
+## 🛠️ Installation Manuelle
+
+Si vous préférez tout gérer vous-même :
+
+### 1. Environnement Backend (Python)
+...
 
 ### Authentification HuggingFace
 Le modèle SAM 3 nécessite une licence acceptée sur HuggingFace.

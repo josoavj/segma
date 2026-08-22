@@ -22,17 +22,11 @@ huggingface-cli login
 *Note: Acceptez les conditions d'utilisation du modèle ici : [facebook/sam3](https://huggingface.co/facebook/sam3)*
 
 ### 2. Démarrer le Serveur (Backend)
-Le backend gère l'intelligence artificielle.
+Utilisez le script portable qui détecte automatiquement votre configuration :
 ```bash
-cd backend
-# Créer et activer l'environnement virtuel
-python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
-# Installer les dépendances
-pip install -r requirements.txt
-# Lancer le serveur
-uvicorn main:app --host 0.0.0.0 --port 8000
+bash scripts/run_server.sh
 ```
+*(Alternative si alias installés : `segma-backend`)*
 
 ### 3. Lancer l'Application (Frontend)
 Dans un nouveau terminal :
