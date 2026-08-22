@@ -16,27 +16,19 @@ SEGMA est une solution de pointe pour la segmentation d'images, combinant la pui
 
 ## Installation Rapide
 
-### 1. Backend (Python)
-Le serveur gère l'exécution du modèle SAM 3.
+### 1. Initialisation automatique (Recommandé)
+Le projet inclut des scripts intelligents pour configurer votre environnement automatiquement.
 ```bash
-cd backend
-pip install -r requirements.txt
-python main.py
+# À la racine du projet
+bash scripts/init_project.sh
 ```
+*Ce script installera SAM 3, vérifiera votre installation CUDA et configurera vos alias de commande.*
+
+### 2. Démarrage des Services
+- **Backend** : `bash scripts/run_server.sh` (ou `segma-backend` si les alias sont installés).
+- **Frontend** : `flutter run -d linux` (ou `segma-flutter`).
+
 *Note: Un GPU NVIDIA avec CUDA est recommandé pour une réactivité optimale.*
-
-### 2. Frontend (Flutter)
-Compilez l'application pour votre plateforme (Linux, Windows).
-```bash
-# Installation des dépendances
-flutter pub get
-
-# Lancement en mode développement
-flutter run -d linux
-
-# Build de production avec URL backend personnalisée
-flutter build linux --release --dart-define=BACKEND_URL=http://VOTRE_IP:8000
-```
 
 ## Architecture Technique
 
