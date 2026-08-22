@@ -1,13 +1,14 @@
 #!/bin/bash
-# Script pour configurer SAM3 avec votre venv
+# Script pour configurer SAM3 avec l'environnement détecté
 
-VENV_PATH="/home/shadowcraft/.pyenv"
-PROJECT_PATH="/home/shadowcraft/Projets/segma"
+# Charger l'environnement global
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/env_setup.sh"
 
 echo ""
-echo "=================================================="
+echo "════════════════════════════════════════════════════════════════════════════"
 echo "  [AUTH] CONFIGURATION HUGGINGFACE POUR SAM3"
-echo "=================================================="
+echo "════════════════════════════════════════════════════════════════════════════"
 echo ""
 echo "SAM3 nécessite un token HuggingFace pour télécharger le modèle."
 echo ""
@@ -16,27 +17,28 @@ echo ""
 echo "1. Allez sur: https://huggingface.co/settings/tokens"
 echo "2. Créez un nouveau token (type: Read)"
 echo "3. Copier le token"
-echo "4. Exécutez:"
+echo "4. Exécutez le login ci-dessous"
 echo ""
-echo "   $VENV_PATH/bin/huggingface-cli login"
-echo ""
-echo "5. Collez votre token quand demandé"
-echo ""
-echo "6. [WARNING] IMPORTANT: Acceptez les conditions du modèle SAM3:"
+echo "5. [WARNING] IMPORTANT: Acceptez les conditions du modèle SAM3:"
 echo "   https://huggingface.co/facebook/sam3"
-echo "   (Bouton 'I have read the license and agree with the terms')"
-echo ""
-echo "7. Une fois configuré, testez:"
-echo ""
-echo "   cd $PROJECT_PATH/backend"
-echo "   $VENV_PATH/bin/python test_sam3.py"
-echo ""
-echo "=================================================="
 echo ""
 
 # Proposer de commencer l'authentification
 read -p "Voulez-vous configurer HuggingFace maintenant? (o/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Oo]$ ]]; then
-    $VENV_PATH/bin/huggingface-cli login
+    # Essayer de trouver huggingface-cli dans le venv
+    HF_CLI="$VENV_PATH/bin/huggingface-cli"
+    if [ ! -f "$HF_CLI" ]; then
+        HF_CLI="huggingface-cli" # Fallback système
+    fi
+
+    "$HF_CLI" login
 fi
+
+echo ""
+echo "=================================================="
+echo "[INFO] Pour tester la configuration:"
+echo "   bash scripts/test_sam3.sh"
+echo "=================================================="
+echo ""
