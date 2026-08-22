@@ -1,51 +1,57 @@
 #!/bin/bash
-# Script d'installation SAM3 pour venv existant
-# Utilise: /home/shadowcraft/.pyenv
+# Script d'installation SAM3 pour venv détecté
 
 set -e
 
-VENV_PATH="/home/shadowcraft/.pyenv"
-PROJECT_PATH="/home/shadowcraft/Projets/segma"
+# Charger l'environnement global
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/env_setup.sh"
 
-echo "[INIT] Installation SAM3 pour SEGMA"
-echo "=================================="
+echo "════════════════════════════════════════════════════════════════════════════"
+echo "[INIT] INSTALLATION SAM3 POUR SEGMA"
+echo "════════════════════════════════════════════════════════════════════════════"
 echo ""
-echo "[SUCCESS] venv trouvé: $VENV_PATH"
-echo "[SUCCESS] Python: $($VENV_PATH/bin/python --version)"
+
+if [ "$VENV_ACTIVE" = true ]; then
+    echo "[SUCCESS] Virtualenv détecté: $VENV_PATH"
+else
+    echo "[WARNING] Aucun virtualenv détecté. Installation sur Python système."
+    echo "          Il est recommandé d'utiliser un venv."
+fi
+
+echo "[INFO] Version Python: $($PYTHON_BIN --version)"
 echo ""
 
-# Activer le venv
-source $VENV_PATH/bin/activate
-
-echo "[DEPENDENCY] Packages actuels:"
-pip list | grep -E "torch|fastapi|sam"
-
-echo ""
-echo "⚡ Installation de SAM3 et dépendances..."
-
-# Installer les dépendances manquantes
-pip install -U pip setuptools wheel
-
-# Installer SAM3 et dépendances critiques
-pip install sam3>=1.0
-pip install huggingface-hub>=0.20.0
-pip install pillow>=9.0
-pip install opencv-python>=4.8.0
-pip install numpy>=1.24.0
-pip install pydantic>=2.7.0
-pip install python-multipart==0.0.6
-pip install uvicorn==0.27.0
+# Mise à jour des outils de base
+echo "⚡ Mise à jour de pip..."
+"$PYTHON_BIN" -m pip install -U pip setuptools wheel
 
 echo ""
-echo "[SUCCESS] Installation complète!"
-echo ""
-echo "[DEPENDENCY] Packages finaux:"
-$VENV_PATH/bin/pip list | grep -E "torch|fastapi|sam|huggingface"
+echo "⚡ Installation des dépendances critiques..."
 
+# Installer les dépendances depuis requirements.txt si présent, sinon liste manuelle
+if [ -f "$BACKEND_DIR/requirements.txt" ]; then
+    "$PYTHON_BIN" -m pip install -r "$BACKEND_DIR/requirements.txt"
+else
+    # Liste de secours
+    "$PYTHON_BIN" -m pip install "sam3>=1.0" \
+        "huggingface-hub>=0.20.0" \
+        "pillow>=9.0" \
+        "opencv-python>=4.8.0" \
+        "numpy>=1.24.0" \
+        "pydantic>=2.7.0" \
+        "python-multipart==0.0.6" \
+        "uvicorn==0.27.0"
+fi
+
+echo ""
+echo "════════════════════════════════════════════════════════════════════════════"
+echo "[SUCCESS] INSTALLATION TERMINÉE!"
+echo "════════════════════════════════════════════════════════════════════════════"
+echo ""
+echo "[INFO] Résumé des packages installés:"
+"$PYTHON_BIN" -m pip list | grep -E "torch|fastapi|sam|huggingface"
 echo ""
 echo "[AUTH] Prochaine étape: Authentification HuggingFace"
+echo "       Exécutez: bash scripts/setup_hf.sh"
 echo ""
-echo "   $VENV_PATH/bin/huggingface-cli login"
-echo ""
-echo "   Puis acceptez les conditions sur:"
-echo "   https://huggingface.co/facebook/sam3"
