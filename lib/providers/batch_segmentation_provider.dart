@@ -6,6 +6,7 @@ import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/utils/error_handler.dart';
+import 'package:segma/utils/data_parser.dart';
 
 import '../services/log_service.dart';
 
@@ -14,7 +15,7 @@ class BatchState {
   final int current;
   final int total;
   final String? currentImage;
-  final List<SegmentationResult> results;
+  final int successCount;
   final String? error;
 
   BatchState({
@@ -22,7 +23,7 @@ class BatchState {
     this.current = 0,
     this.total = 0,
     this.currentImage,
-    this.results = const [],
+    this.successCount = 0,
     this.error,
   });
 
@@ -33,7 +34,7 @@ class BatchState {
     int? current,
     int? total,
     String? currentImage,
-    List<SegmentationResult>? results,
+    int? successCount,
     String? error,
   }) {
     return BatchState(
@@ -41,7 +42,7 @@ class BatchState {
       current: current ?? this.current,
       total: total ?? this.total,
       currentImage: currentImage ?? this.currentImage,
-      results: results ?? this.results,
+      successCount: successCount ?? this.successCount,
       error: error ?? this.error,
     );
   }
@@ -74,18 +75,20 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
         if (chunk.trim().isEmpty) continue;
         
         try {
-          final Map<String, dynamic> update = jsonDecode(chunk);
+          // Utilisation de l'Isolate pour parser le JSON et créer le modèle en tâche de fond
+          final Map<String, dynamic> update = await DataParser.parseBatchUpdate(chunk);
           
           if (update['status'] == 'success') {
-            final result = SegmentationResult.fromJson(update['result']);
+            final result = update['result_model'] as SegmentationResult;
             
             state = state.copyWith(
               current: update['current'],
               total: update['total'],
               currentImage: update['image_path'],
-              results: [...state.results, result],
+              successCount: state.successCount + 1,
             );
             
+            // Mise à jour de l'historique global
             ref.read(segmentationHistoryProvider.notifier).update((history) => [...history, result]);
           } else if (update['status'] == 'error') {
              final errorData = update['error'];
