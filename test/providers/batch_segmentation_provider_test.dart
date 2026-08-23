@@ -77,7 +77,7 @@ void main() {
       
       // Si le test échoue ici, c'est que le stream n'a pas été bien transformé
       // ou que jsonDecode a échoué.
-      expect(state.results.length, 1, reason: 'Erreur: ${state.error}');
+      expect(state.successCount, 1, reason: 'Erreur: ${state.error}');
       expect(state.current, 1);
     });
   });
