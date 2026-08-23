@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/config/backend_config.dart';
+import 'package:segma/utils/data_parser.dart';
 
 class BackendService {
   final Dio dio;
@@ -94,7 +95,8 @@ class BackendService {
       );
 
       if (response.statusCode == 200) {
-        return SegmentationResult.fromJson(
+        // Optimisation : Conversion de la Map en modèle sur un thread séparé
+        return DataParser.convertToSegmentationResult(
           response.data as Map<String, dynamic>,
         );
       }
