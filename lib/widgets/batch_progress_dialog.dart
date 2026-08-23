@@ -40,7 +40,7 @@ class BatchProgressDialog extends ConsumerWidget {
           ] else ...[
             Icon(Icons.check_circle_outline, color: scheme.tertiary, size: 48),
             const SizedBox(height: 16),
-            Text('Traitement terminé ! ${state.results.length} images segmentées.'),
+            Text('Traitement terminé ! ${state.successCount} images segmentées.'),
           ],
         ],
       ),
