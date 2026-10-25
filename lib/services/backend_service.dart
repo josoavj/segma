@@ -96,7 +96,7 @@ class BackendService {
 
       if (response.statusCode == 200) {
         // Optimisation : Conversion de la Map en modèle sur un thread séparé
-        return DataParser.convertToSegmentationResult(
+        return await DataParser.convertToSegmentationResult(
           response.data as Map<String, dynamic>,
         );
       }
