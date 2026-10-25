@@ -97,30 +97,6 @@ class SegmentationResult {
   }
 }
 
-/// Requête de segmentation par prompt texte
-class SegmentationRequest {
-  final String imagePath;
-  final String prompt;
-  final double confidenceThreshold;
-  final String? saveDir;
-
-  const SegmentationRequest({
-    required this.imagePath,
-    required this.prompt,
-    this.confidenceThreshold = 0.0,
-    this.saveDir,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'image_path': imagePath,
-      'prompt': prompt,
-      'confidence_threshold': confidenceThreshold,
-      if (saveDir != null) 'save_dir': saveDir,
-    };
-  }
-}
-
 /// Point d'interaction pour SAM
 class InteractivePoint {
   final double x; 

@@ -2,7 +2,6 @@
 # SAM 3 nécessite PyTorch 2.7+ pour le support natif des nouveaux kernels d'attention
 torch==2.7.0
 torchvision==0.20.0
-torchaudio==2.7.0
 
 # Installation de Transformers depuis la source pour SAM 3 (Crucial en 2026)
 git+https://github.com/huggingface/transformers.git
@@ -21,6 +20,5 @@ fastapi==0.104.1
 uvicorn==0.24.0
 python-multipart==0.0.6
 pydantic==2.5.0
-pydantic-settings==2.1.0
 python-dotenv==1.0.0
 aiofiles==23.2.1
