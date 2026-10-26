@@ -1,4 +1,9 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi.responses import StreamingResponse
+import json
+import logging
+import os
+
 from app.api.schemas import (
     SegmentationRequest, SegmentationResponse, ImageUploadResponse,
     ModelConfigResponse, ModelInfoResponse, ModelChangeRequest
@@ -6,32 +11,26 @@ from app.api.schemas import (
 from app.services.segmentation_service import SegmentationService
 from app.services.upload_service import UploadService, UploadValidationError
 from app.models.model_manager import model_manager
-import logging
-import os
 
 logger = logging.getLogger(__name__)
 
-# Mise à jour du préfixe pour SAM 3
 router = APIRouter(prefix="/api/v3", tags=["segmentation"])
 
-# Instanciation du service orchestrateur
 segmentation_service = SegmentationService()
 upload_service = UploadService()
 
-from fastapi.responses import StreamingResponse
-import json
 
 @router.post("/segment/batch")
 async def segment_batch(request: SegmentationRequest):
-    """Traitement par lot d'un dossier complet avec streaming des résultats."""
+    """Traitement par lot d'un dossier complet avec streaming des résultats et verrou GPU."""
     async def event_generator():
-        async for update in segmentation_service.segment_batch(
-            folder_path=request.filename,
-            prompt=request.prompt,
-            confidence_threshold=request.confidence_threshold
-        ):
-            # On envoie chaque résultat suivi d'un saut de ligne (NDJSON)
-            yield json.dumps(update) + "\n"
+        async with model_manager.inference_lock:
+            async for update in segmentation_service.segment_batch(
+                folder_path=request.filename,
+                prompt=request.prompt,
+                confidence_threshold=request.confidence_threshold
+            ):
+                yield json.dumps(update) + "\n"
 
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
 
@@ -40,18 +39,18 @@ async def segment_batch(request: SegmentationRequest):
 async def segment_image(request: SegmentationRequest):
     """Segmente une image par prompt texte (SAM 3 - Promptable Concept Segmentation)"""
 
-    # Validation du prompt (SAM 3 nécessite un concept clair)
     if not request.prompt or len(request.prompt.strip()) < 2:
         raise HTTPException(status_code=400, detail="Le prompt est trop court pour être traité.")
     
     try:
-        # Appel du service (maintenant asynchrone pour ne pas bloquer l'API)
-        result = await segmentation_service.segment_by_prompt(
-            filename=request.filename,
-            prompt=request.prompt,
-            confidence_threshold=request.confidence_threshold,
-        )
-        return result
+        # Acquisition du verrou asynchrone GPU pour garantir la sérialisation des inférences lourdes
+        async with model_manager.inference_lock:
+            result = await segmentation_service.segment_by_prompt(
+                filename=request.filename,
+                prompt=request.prompt,
+                confidence_threshold=request.confidence_threshold,
+            )
+            return result
         
     except Exception as e:
         logger.error(f"Erreur lors de la segmentation SAM 3: {e}", exc_info=True)
