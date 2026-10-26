@@ -1,6 +1,6 @@
 # SEGMA - Image Segmentation with SAM 3
 
-SEGMA est une solution de pointe pour la segmentation d'images, combinant la puissance de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
+SEGMA est une solution de pointe pour la segmentation d'images, combinant la puissance et l'interface fluide de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
 
 ## Fonctionnalités Clés
 
@@ -17,14 +17,20 @@ SEGMA est une solution de pointe pour la segmentation d'images, combinant la pui
 ## Installation Rapide
 
 ### 1. Initialisation automatique (Recommandé)
+
 Le projet inclut des scripts intelligents pour configurer votre environnement automatiquement.
+
 ```bash
+
 # À la racine du projet
+
 bash scripts/init_project.sh
 ```
+
 *Ce script installera SAM 3, vérifiera votre installation CUDA et configurera vos alias de commande.*
 
 ### 2. Démarrage des Services
+
 - **Backend** : `bash scripts/run_server.sh` (ou `segma-backend` si les alias sont installés).
 - **Frontend** : `flutter run -d linux` (ou `segma-flutter`).
 
@@ -53,3 +59,7 @@ Consultez le [Guide des Tests](docs/guides/TESTING.md) pour plus de détails.
 ## Licence
 
 Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## Editeur et mainteneur
+
+- **[josoavj](https://github.com/josoavj)**
