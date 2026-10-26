@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Dict, Optional, TYPE_CHECKING
 from app.exceptions import ModelNotLoadedException
@@ -32,8 +33,25 @@ class ModelManager:
         self.sam3_model: Optional["SAM3Wrapper"] = None
         self.device = settings.DEVICE.lower()
         self.is_loaded = False
+        self._inference_lock: Optional[asyncio.Lock] = None
         self._initialized = True
-    
+
+    @property
+    def inference_lock(self) -> asyncio.Lock:
+        """Retourne le verrou d'inférence asynchrone (créé paresseusement dans la boucle d'événements)"""
+        if self._inference_lock is None:
+            self._inference_lock = asyncio.Lock()
+        return self._inference_lock
+
+    def clear_vram_cache(self) -> None:
+        """Nettoie explicitement le cache VRAM GPU après traitement"""
+        try:
+            torch = _get_torch()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception as e:
+            logger.debug(f"Remise à zéro VRAM ignorée: {e}")
+
     def _get_device(self, requested_device: Optional[str] = None) -> str:
         """Détermine le device à utiliser (cuda ou cpu)"""
         # On priorise le réglage du .env mais on valide la capacité réelle
@@ -113,6 +131,9 @@ class ModelManager:
 
     def change_model(self, model_type: Optional[str] = None, device: Optional[str] = None) -> Dict:
         """Change la configuration active (modèle/device) et recharge le wrapper."""
+        if self._inference_lock and self._inference_lock.locked():
+            raise ValueError("Impossible de modifier la configuration : une inférence est actuellement en cours.")
+
         target_model = model_type or settings.SAM3_MODEL_ID
         if target_model != settings.SAM3_MODEL_ID:
             raise ValueError(
