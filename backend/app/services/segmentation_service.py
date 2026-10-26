@@ -2,6 +2,8 @@ import logging
 import numpy as np
 import os
 import re
+import uuid
+import anyio
 from pathlib import Path
 
 from app.exceptions import SegmentationException
@@ -104,19 +106,17 @@ class SegmentationService:
                     "error": str(e)
                 }
 
-    async def segment_by_prompt(
+    def _segment_by_prompt_sync(
         self,
         filename: str,
         prompt: str,
         confidence_threshold: float = 0.25,
-    ):
+    ) -> dict:
         """
-        Pipeline complet : Charge l'image -> Segment avec SAM 3 -> 
-        Étiquette avec YOLO -> Sauvegarde en .bin
+        Pipeline synchrone autonome exécuté dans un Worker Thread.
+        Inférence SAM 3 -> Étiquetage YOLO -> Écriture binaire du masque.
         """
         try:
-            # Sécurisation du chemin : on ne permet que l'accès au dossier d'upload
-            # On nettoie le filename pour éviter les injections de type ../
             safe_filename = os.path.normpath(filename).lstrip(os.sep)
             image_path = Path(settings.UPLOAD_DIR) / safe_filename
 
@@ -125,7 +125,7 @@ class SegmentationService:
 
             concept_prompt = self._normalize_text_prompt(prompt)
             logger.info(
-                "🚀 Démarrage Pipeline SAM 3 pour: %s (Prompt: '%s')",
+                "🚀 Démarrage Pipeline SAM 3 Worker Thread pour: %s (Prompt: '%s')",
                 safe_filename,
                 concept_prompt,
             )
@@ -135,13 +135,13 @@ class SegmentationService:
             image = ImageProcessor.load_image(str(image_path))
             height, width = image.shape[:2]
 
-            # 2. Détermination du répertoire de stockage
+            # 2. Détermination du répertoire de stockage avec tag unique UUID (Empêche les collisions)
             image_stem = image_path.stem
-            # On crée un dossier dédié par image pour ne pas mélanger les .bin
-            seg_dir = Path(settings.OUTPUT_DIR) / f"seg_{image_stem}"
+            unique_tag = uuid.uuid4().hex[:6]
+            seg_dir = Path(settings.OUTPUT_DIR) / f"seg_{image_stem}_{unique_tag}"
             seg_dir.mkdir(parents=True, exist_ok=True)
 
-            # 3. Inférence SAM 3 par concept textuel.
+            # 3. Inférence SAM 3 par concept textuel
             raw_masks = self.sam3_wrapper.segment_by_text(
                 image,
                 concept_prompt,
@@ -160,31 +160,22 @@ class SegmentationService:
 
             # 4. Traitement et enrichissement avec YOLO
             objects_data = []
-            
-            # On extrait les bboxes pour YOLO d'un coup pour optimiser les performances
             bboxes_for_yolo = [obj["bbox"] for obj in raw_masks]
             labels_map = self.detector.detect_labels(image, bboxes_for_yolo)
 
             for idx, obj in enumerate(raw_masks):
-                # Conversion du tenseur en numpy binaire (0 ou 255)
                 mask_np = ImageProcessor.tensor_to_mask(obj["mask"])
-                
-                # Calcul des pixels pour filtrer le bruit
                 pixel_count = np.count_nonzero(mask_np)
-                if pixel_count < 100: # Seuil de bruit
+                if pixel_count < 100:
                     continue
 
-                # Sauvegarde au format .bin (Brut / Même taille que l'originale)
                 mask_filename = f"mask_{idx}.bin"
                 mask_path = seg_dir / mask_filename
-                
-                # Écriture binaire directe
                 mask_np.tofile(str(mask_path))
 
-                # Construction de l'objet de retour
                 objects_data.append({
                     "object_id": idx,
-                    "label": labels_map.get(idx, concept_prompt), # Priorité au label YOLO
+                    "label": labels_map.get(idx, concept_prompt),
                     "confidence": float(obj["score"]),
                     "bbox": obj["bbox"],
                     "mask_path": str(mask_path.absolute()),
@@ -202,3 +193,23 @@ class SegmentationService:
         except Exception as e:
             logger.error(f"❌ Erreur critique SegmentationService: {e}", exc_info=True)
             raise SegmentationException(f"Échec de la segmentation : {str(e)}")
+
+    async def segment_by_prompt(
+        self,
+        filename: str,
+        prompt: str,
+        confidence_threshold: float = 0.25,
+    ) -> dict:
+        """
+        Méthode asynchrone non-bloquante.
+        Déporte l'inférence lourde sur un Worker Thread et libère la VRAM à la fin.
+        """
+        try:
+            return await anyio.to_thread.run_sync(
+                self._segment_by_prompt_sync,
+                filename,
+                prompt,
+                confidence_threshold,
+            )
+        finally:
+            model_manager.clear_vram_cache()
