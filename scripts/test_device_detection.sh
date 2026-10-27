@@ -24,22 +24,24 @@ echo ""
 echo "[CHECK] Test 1: Détection du device Python"
 echo "────────────────────────────────────────────"
 "$PYTHON_BIN" << 'PYEOF'
-import torch
+try:
+    import torch
 
-print(f"PyTorch version: {torch.__version__}")
-print(f"CUDA available: {torch.cuda.is_available()}")
-print(f"CUDA compiled: {torch.version.cuda is not None}")
+    print(f"PyTorch version: {torch.__version__}")
+    print(f"CUDA available: {torch.cuda.is_available()}")
+    print(f"CUDA compiled: {torch.version.cuda is not None}")
 
-if torch.cuda.is_available():
-    print(f"\n[GPU] GPU DÉTECTÉ:")
-    print(f"   Device name: {torch.cuda.get_device_name(0)}")
-    print(f"   VRAM: {torch.cuda.get_device_properties(0).total_memory / (1024**3):.1f}GB")
-    print(f"   Compute capability: {torch.cuda.get_device_capability(0)}")
-    print(f"   CUDA version: {torch.version.cuda}")
-else:
-    print(f"\n[CPU] AUCUN GPU - Utilisation du CPU")
-    print(f"   CPU cores: {torch.get_num_threads()}")
-
+    if torch.cuda.is_available():
+        print(f"\n[GPU] GPU DÉTECTÉ:")
+        print(f"   Device name: {torch.cuda.get_device_name(0)}")
+        print(f"   VRAM: {torch.cuda.get_device_properties(0).total_memory / (1024**3):.1f}GB")
+        print(f"   Compute capability: {torch.cuda.get_device_capability(0)}")
+        print(f"   CUDA version: {torch.version.cuda}")
+    else:
+        print(f"\n[CPU] AUCUN GPU - Utilisation du CPU")
+        print(f"   CPU cores: {torch.get_num_threads()}")
+except ModuleNotFoundError:
+    print("⚠️ PyTorch non installé sur cet environnement Python")
 PYEOF
 
 echo ""
@@ -65,17 +67,20 @@ cd "$BACKEND_DIR" && "$PYTHON_BIN" << 'PYEOF'
 import sys
 sys.path.insert(0, '.')
 
-from app.models.model_manager import model_manager
+try:
+    from app.models.model_manager import model_manager
 
-info = model_manager.get_model_info()
-print(f"ModelManager Info:")
-print(f"   Device: {info['device'].upper()}")
-print(f"   Device name: {info['device_name']}")
-if info.get('vram_gb'):
-    print(f"   VRAM: {info['vram_gb']}GB")
-print(f"   Model type: {info['model_type']}")
-print(f"   Is loaded: {info['is_loaded']}")
-print(f"   CUDA available: {info['cuda_available']}")
+    info = model_manager.get_model_info()
+    print(f"ModelManager Info:")
+    print(f"   Device: {info['device'].upper()}")
+    print(f"   Device name: {info['device_name']}")
+    if info.get('vram_gb'):
+        print(f"   VRAM: {info['vram_gb']}GB")
+    print(f"   Model type: {info['model_type']}")
+    print(f"   Is loaded: {info['is_loaded']}")
+    print(f"   CUDA available: {info['cuda_available']}")
+except Exception as e:
+    print(f"⚠️ Échec de la récupération des infos ModelManager: {e}")
 
 PYEOF
 
