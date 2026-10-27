@@ -34,14 +34,18 @@ if [ -f "$BACKEND_DIR/requirements.txt" ]; then
     "$PYTHON_BIN" -m pip install -r "$BACKEND_DIR/requirements.txt"
 else
     # Liste de secours
-    "$PYTHON_BIN" -m pip install "sam3>=1.0" \
+    "$PYTHON_BIN" -m pip install "git+https://github.com/huggingface/transformers.git" \
         "huggingface-hub>=0.20.0" \
-        "pillow>=9.0" \
+        "ultralytics>=8.3.237" \
+        "pillow>=10.1.0" \
         "opencv-python>=4.8.0" \
         "numpy>=1.24.0" \
-        "pydantic>=2.7.0" \
-        "python-multipart==0.0.6" \
-        "uvicorn==0.27.0"
+        "pydantic>=2.5.0" \
+        "python-multipart>=0.0.6" \
+        "uvicorn>=0.24.0" \
+        "fastapi>=0.104.1" \
+        "python-dotenv>=1.0.0" \
+        "aiofiles>=23.2.1"
 fi
 
 echo ""

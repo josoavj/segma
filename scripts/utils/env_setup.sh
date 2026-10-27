@@ -12,18 +12,21 @@ if [ -f "$PROJECT_ROOT/scripts/local_env.sh" ]; then
     source "$PROJECT_ROOT/scripts/local_env.sh"
 fi
 
-# 3. Détecter le Virtualenv (VENV_PATH peut être défini dans local_env.sh)
+# 3. Détecter le Virtualenv (VENV_PATH peut être défini dans local_env.sh ou l'environnement)
+if [ -n "$VENV_PATH" ] && [ ! -f "$VENV_PATH/bin/python" ]; then
+    unset VENV_PATH
+fi
+
 if [ -z "$VENV_PATH" ]; then
     # Liste de recherche prioritaire pour le venv
     SEARCH_PATHS=(
         "$PROJECT_ROOT/.venv"
         "$PROJECT_ROOT/venv"
         "$PROJECT_ROOT/backend/venv"
-        "/home/shadowcraft/.pyenv" # Fallback local spécifique (sera supprimé plus tard pour portabilité totale)
     )
 
     for path in "${SEARCH_PATHS[@]}"; do
-        if [ -d "$path/bin" ]; then
+        if [ -f "$path/bin/python" ]; then
             VENV_PATH="$path"
             break
         fi
