@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 import 'package:segma/core/config/backend_config.dart' as backend_config;
 import 'package:segma/core/errors/error_handler.dart';
 
@@ -19,12 +19,14 @@ class _ModelConfigurationTileState
   late String _selectedDevice;
   bool _isChanging = false;
 
-  final List<String> _availableModels = [backend_config.AppConfig.sam3Model];
+  final List<String> _availableModels = [
+    backend_config.BackendConfig.sam3Model
+  ];
 
   @override
   void initState() {
     super.initState();
-    _selectedModel = backend_config.AppConfig.sam3Model;
+    _selectedModel = backend_config.BackendConfig.sam3Model;
     _selectedDevice = 'cpu';
   }
 
@@ -95,8 +97,9 @@ class _ModelConfigurationTileState
               padding: const EdgeInsets.symmetric(horizontal: 12),
               items: _availableModels.map((model) {
                 final label =
-                    backend_config.AppConfig.modelDescriptions[model] ?? model;
-                final sizeMb = backend_config.AppConfig.modelSizes[model];
+                    backend_config.BackendConfig.modelDescriptions[model] ??
+                        model;
+                final sizeMb = backend_config.BackendConfig.modelSizes[model];
                 final size = sizeMb != null ? '$sizeMb MB' : null;
 
                 return DropdownMenuItem(
