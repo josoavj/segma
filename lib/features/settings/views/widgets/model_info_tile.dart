@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/widgets/common/settings_ui.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/features/settings/views/widgets/settings_ui.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 import 'package:segma/core/errors/error_handler.dart';
 
 class ModelInfoTile extends ConsumerWidget {
