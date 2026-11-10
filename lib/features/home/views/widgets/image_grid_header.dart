@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/home/models/folder_model.dart';
 
 class ImageGridHeader extends StatelessWidget {
   final FolderModel selectedFolder;
