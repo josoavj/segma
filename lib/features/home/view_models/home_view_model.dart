@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/service_providers.dart';
+import 'package:segma/features/home/models/folder_model.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/app/di/service_providers.dart';
 
 /// Provider pour le chemin du dossier sélectionné (initialisé sur Documents de l'utilisateur)
 class SelectedFolderPath extends AsyncNotifier<String> {
