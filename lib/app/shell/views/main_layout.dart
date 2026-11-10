@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/providers/navigation_provider.dart';
-import 'package:segma/screens/home_page.dart';
-import 'package:segma/screens/segmented_objects_page.dart';
-import 'package:segma/screens/settings_page.dart';
-import 'package:segma/screens/logs_page.dart';
-import 'package:segma/screens/about_page.dart';
+import 'package:segma/app/shell/view_models/navigation_view_model.dart';
+import 'package:segma/features/home/views/home_page.dart';
+import 'package:segma/features/segmented_objects/views/segmented_objects_page.dart';
+import 'package:segma/features/settings/views/settings_page.dart';
+import 'package:segma/features/logs/views/logs_page.dart';
+import 'package:segma/features/about/views/about_page.dart';
 import 'package:segma/app/shell/views/modern_sidebar.dart';
-import 'package:segma/widgets/common/toast_overlay.dart';
+import 'package:segma/core/notifications/toast_overlay.dart';
 import 'package:segma/app/shell/views/importance_dialog.dart';
-import 'package:segma/services/notification_service.dart';
-import 'package:segma/models/notification_model.dart';
+import 'package:segma/core/notifications/notification_service.dart';
+import 'package:segma/core/notifications/notification_model.dart';
 
 class MainLayout extends ConsumerWidget {
   const MainLayout({super.key});
