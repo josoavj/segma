@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/file_provider.dart';
-import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/providers/batch_segmentation_provider.dart';
-import 'package:segma/providers/service_providers.dart';
-import 'package:segma/widgets/folder_tree_widget.dart';
-import 'package:segma/widgets/folder_picker_widget.dart';
-import 'package:segma/widgets/batch_progress_dialog.dart';
+import 'package:segma/features/home/models/folder_model.dart';
+import 'package:segma/features/home/view_models/home_view_model.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/features/segmentation/view_models/batch_segmentation_view_model.dart';
+import 'package:segma/app/di/service_providers.dart';
+import 'package:segma/features/home/views/widgets/folder_tree_widget.dart';
+import 'package:segma/features/home/views/widgets/folder_picker_widget.dart';
+import 'package:segma/features/segmentation/views/widgets/batch_progress_dialog.dart';
 import 'package:segma/core/errors/error_handler.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 
 class HomeSidebar extends ConsumerWidget {
   final FolderModel folderStructure;
