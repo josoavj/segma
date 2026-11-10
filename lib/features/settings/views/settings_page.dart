@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/providers/navigation_provider.dart';
+import 'package:segma/app/shell/view_models/navigation_view_model.dart';
 import 'package:segma/core/config/app_config.dart';
-import 'package:segma/widgets/common/settings_ui.dart';
-import 'package:segma/widgets/settings/health_check_tile.dart';
-import 'package:segma/widgets/settings/model_info_tile.dart';
-import 'package:segma/widgets/settings/storage_info_tile.dart';
-import 'package:segma/widgets/settings/model_configuration_tile.dart';
-import 'package:segma/widgets/dialogs/clear_cache_dialog.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/features/settings/views/widgets/settings_ui.dart';
+import 'package:segma/features/settings/views/widgets/health_check_tile.dart';
+import 'package:segma/features/settings/views/widgets/model_info_tile.dart';
+import 'package:segma/features/settings/views/widgets/storage_info_tile.dart';
+import 'package:segma/features/settings/views/widgets/model_configuration_tile.dart';
+import 'package:segma/features/settings/views/widgets/clear_cache_dialog.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
