@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
 import 'package:segma/core/config/backend_config.dart';
-import 'package:segma/utils/data_parser.dart';
+import 'package:segma/features/segmentation/data/data_parser.dart';
 
 class BackendService {
   final Dio dio;
@@ -14,9 +14,9 @@ class BackendService {
             Dio(
               BaseOptions(
                 baseUrl: baseUrl,
-                connectTimeout: AppConfig.apiTimeout,
-                receiveTimeout: AppConfig.uploadTimeout,
-                sendTimeout: AppConfig.uploadTimeout,
+                connectTimeout: BackendConfig.apiTimeout,
+                receiveTimeout: BackendConfig.uploadTimeout,
+                sendTimeout: BackendConfig.uploadTimeout,
                 headers: {
                   'X-Client-Platform': Platform.operatingSystem,
                   'X-App-Version': '1.0.0',
@@ -34,7 +34,7 @@ class BackendService {
 
   /// Factory pour créer une instance avec la configuration par défaut
   factory BackendService.withConfig() {
-    return BackendService(baseUrl: AppConfig.backendUrl);
+    return BackendService(baseUrl: BackendConfig.backendUrl);
   }
 
   /// Vérifie la santé du serveur backend
