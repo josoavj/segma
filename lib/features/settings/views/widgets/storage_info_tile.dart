@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:segma/widgets/common/settings_ui.dart';
+import 'package:segma/features/settings/views/widgets/settings_ui.dart';
 
 class StorageInfoTile extends StatefulWidget {
   const StorageInfoTile({super.key});
