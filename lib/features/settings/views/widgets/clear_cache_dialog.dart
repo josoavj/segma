@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 
 class ClearCacheDialog extends ConsumerWidget {
   const ClearCacheDialog({super.key});
