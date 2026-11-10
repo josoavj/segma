@@ -10,11 +10,12 @@ class AppErrorHandler {
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
           return "Le serveur met trop de temps à répondre. Vérifiez votre connexion internet.";
-        
+
         case DioExceptionType.connectionError:
           if (error.error is SocketException) {
             final se = error.error as SocketException;
-            if (se.osError?.errorCode == 111 || se.message.contains("Connection refused")) {
+            if (se.osError?.errorCode == 111 ||
+                se.message.contains("Connection refused")) {
               return "Impossible de contacter le serveur. Assurez-vous que le backend SEGMA est bien lancé.";
             }
           }

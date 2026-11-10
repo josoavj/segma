@@ -31,11 +31,12 @@ void main() {
     test('segment should upload and then segment', () async {
       const imagePath = 'local/image.jpg';
       const backendPath = 'server/image.jpg';
-      
+
       when(() => mockBackend.uploadImage(imagePath))
           .thenAnswer((_) async => {'image_path': backendPath});
-          
-      when(() => mockBackend.segmentByPrompt(backendPath, any(), confidenceThreshold: any(named: 'confidenceThreshold')))
+
+      when(() => mockBackend.segmentByPrompt(backendPath, any(),
+              confidenceThreshold: any(named: 'confidenceThreshold')))
           .thenAnswer((_) async => SegmentationResult(
                 imageId: 'id',
                 imagePath: backendPath,
@@ -47,16 +48,17 @@ void main() {
               ));
 
       await container.read(segmentImageProvider.notifier).segment(imagePath);
-      
+
       expect(container.read(currentSegmentationProvider), isNotNull);
-      expect(container.read(uploadedImagePathMapProvider)[imagePath], backendPath);
+      expect(
+          container.read(uploadedImagePathMapProvider)[imagePath], backendPath);
       verify(() => mockBackend.uploadImage(imagePath)).called(1);
     });
 
     test('interactive points should be manageable', () {
       final notifier = container.read(interactivePointsProvider.notifier);
       notifier.state = [const InteractivePoint(x: 0.1, y: 0.1)];
-      
+
       expect(container.read(interactivePointsProvider).length, 1);
     });
   });

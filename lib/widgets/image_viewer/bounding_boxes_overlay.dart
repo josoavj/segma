@@ -42,7 +42,7 @@ class BoundingBoxesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (imageWidth <= 0 || imageHeight <= 0) return;
-    
+
     final imageAspectRatio = imageWidth / imageHeight;
     final canvasAspectRatio = size.width / size.height;
 

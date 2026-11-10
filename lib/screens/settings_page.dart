@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/navigation_provider.dart';
-import 'package:segma/config/app_config.dart';
+import 'package:segma/core/config/app_config.dart';
 import 'package:segma/widgets/common/settings_ui.dart';
 import 'package:segma/widgets/settings/health_check_tile.dart';
 import 'package:segma/widgets/settings/model_info_tile.dart';
@@ -61,7 +61,9 @@ class SettingsPage extends ConsumerWidget {
                   title: 'URL du serveur',
                   subtitle: AppConfig.backendUrl,
                   onTap: () {
-                    ref.read(notificationServiceProvider.notifier).info('URL: ${AppConfig.backendUrl}');
+                    ref
+                        .read(notificationServiceProvider.notifier)
+                        .info('URL: ${AppConfig.backendUrl}');
                   },
                 ),
                 SettingsTile(
@@ -142,7 +144,9 @@ class SettingsPage extends ConsumerWidget {
                     color: scheme.primary,
                   ),
                   onTap: () {
-                    ref.read(notificationServiceProvider.notifier).success('Vous avez la dernière version');
+                    ref
+                        .read(notificationServiceProvider.notifier)
+                        .success('Vous avez la dernière version');
                   },
                 ),
                 const SettingsTile(

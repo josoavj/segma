@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/widgets/common/settings_ui.dart';
 import 'package:segma/services/notification_service.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 
 class ModelInfoTile extends ConsumerWidget {
   const ModelInfoTile({super.key});
@@ -56,7 +56,9 @@ class ModelInfoTile extends ConsumerWidget {
                 color: scheme.primary,
               ),
               onTap: () {
-                ref.read(notificationServiceProvider.notifier).info('Allez à "Configuration du modèle" pour changer');
+                ref
+                    .read(notificationServiceProvider.notifier)
+                    .info('Allez à "Configuration du modèle" pour changer');
               },
             ),
             SettingsTile(
@@ -75,9 +77,7 @@ class ModelInfoTile extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: device == 'cuda'
-                        ? scheme.tertiary
-                        : scheme.primary,
+                    color: device == 'cuda' ? scheme.tertiary : scheme.primary,
                   ),
                 ),
               ),

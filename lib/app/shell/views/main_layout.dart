@@ -6,9 +6,9 @@ import 'package:segma/screens/segmented_objects_page.dart';
 import 'package:segma/screens/settings_page.dart';
 import 'package:segma/screens/logs_page.dart';
 import 'package:segma/screens/about_page.dart';
-import 'package:segma/widgets/modern_sidebar.dart';
+import 'package:segma/app/shell/views/modern_sidebar.dart';
 import 'package:segma/widgets/common/toast_overlay.dart';
-import 'package:segma/widgets/dialogs/importance_dialog.dart';
+import 'package:segma/app/shell/views/importance_dialog.dart';
 import 'package:segma/services/notification_service.dart';
 import 'package:segma/models/notification_model.dart';
 

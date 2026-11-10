@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/providers/segmentation_provider.dart';
 import 'package:segma/services/notification_service.dart';
-import 'package:segma/config/backend_config.dart' as backend_config;
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/config/backend_config.dart' as backend_config;
+import 'package:segma/core/errors/error_handler.dart';
 
 class ModelConfigurationTile extends ConsumerStatefulWidget {
   const ModelConfigurationTile({super.key});
@@ -35,13 +35,17 @@ class _ModelConfigurationTileState
       await ref.read(changeModelProvider((model, device)).future);
 
       if (mounted) {
-        ref.read(notificationServiceProvider.notifier).success('Modèle changé: $model sur $device');
+        ref
+            .read(notificationServiceProvider.notifier)
+            .success('Modèle changé: $model sur $device');
         // Invalider les providers pour forcer la mise à jour
         ref.invalidate(modelInfoProvider);
       }
     } catch (e, stack) {
       if (mounted) {
-        ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+        ref
+            .read(notificationServiceProvider.notifier)
+            .error(e, stackTrace: stack);
       }
     } finally {
       if (mounted) {
@@ -105,12 +109,12 @@ class _ModelConfigurationTileState
                       if (size != null)
                         Text(
                           size,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                         ),
                     ],
                   ),

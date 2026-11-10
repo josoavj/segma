@@ -37,12 +37,15 @@ class ModernCard extends StatelessWidget {
               LinearGradient(
                 colors: isDark
                     ? [
-                        Color.lerp(scheme.surface, scheme.primaryContainer, 0.45)!,
-                        Color.lerp(scheme.surface, scheme.secondaryContainer, 0.40)!,
+                        Color.lerp(
+                            scheme.surface, scheme.primaryContainer, 0.45)!,
+                        Color.lerp(
+                            scheme.surface, scheme.secondaryContainer, 0.40)!,
                       ]
                     : [
                         scheme.surfaceContainerLowest,
-                        Color.lerp(scheme.surfaceContainerLowest, scheme.primaryContainer, 0.08)!,
+                        Color.lerp(scheme.surfaceContainerLowest,
+                            scheme.primaryContainer, 0.08)!,
                       ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -71,16 +74,16 @@ class DetailRow extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
       ],
     );

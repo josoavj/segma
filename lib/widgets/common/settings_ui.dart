@@ -4,7 +4,8 @@ class SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const SettingsSection({super.key, required this.title, required this.children});
+  const SettingsSection(
+      {super.key, required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +20,10 @@ class SettingsSection extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: scheme.primary.withValues(alpha: 0.8),
-              letterSpacing: 1.2,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: scheme.primary.withValues(alpha: 0.8),
+                  letterSpacing: 1.2,
+                ),
           ),
         ),
         Container(
@@ -53,14 +54,17 @@ class SettingsSection extends StatelessWidget {
               data: ListTileThemeData(
                 tileColor: Colors.transparent,
                 shape: const RoundedRectangleBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                titleTextStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: scheme.onSurface,
-                ),
-                subtitleTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                titleTextStyle:
+                    Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurface,
+                        ),
+                subtitleTextStyle:
+                    Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        ),
               ),
               child: Column(
                 children: _buildChildrenWithDividers(scheme, isDark),

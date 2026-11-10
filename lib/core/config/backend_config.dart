@@ -27,7 +27,7 @@ class AppConfig {
   };
 
   static const Map<String, int> modelSizes = {
-    'facebook/sam3': 2400, 
+    'facebook/sam3': 2400,
   };
 
   // Mode de l'application

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:segma/services/log_service.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/logging/log_service.dart';
+import 'package:segma/core/errors/error_handler.dart';
 
 final logsProvider = FutureProvider<List<LogEntry>>((ref) async {
   return logService.getAllLogs();
@@ -24,211 +24,214 @@ class LogsPage extends ConsumerWidget {
 
     return Column(
       children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.lerp(scheme.surfaceContainerHigh, scheme.primary, 0.55)!,
-                  Color.lerp(scheme.surfaceContainerHigh, scheme.secondary, 0.42)!,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: scheme.outline.withValues(alpha: 0.18),
-                  width: 1,
-                ),
-              ),
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Search bar
-                TextField(
-                  onChanged: (value) {
-                    ref.read(logFilterProvider.notifier).state = value;
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher dans les logs...',
-                    hintStyle: TextStyle(
-                      color: scheme.onSurface.withValues(alpha: 0.58),
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: scheme.onSurface.withValues(alpha: 0.75),
-                    ),
-                    filled: true,
-                    fillColor: scheme.surface.withValues(alpha: 0.66),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  style: TextStyle(color: scheme.onSurface),
-                ),
-                const SizedBox(height: 12),
-                // Filter buttons
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      FilterChip(
-                        label: const Text('Tous'),
-                        selected: levelFilter == null,
-                        onSelected: (selected) {
-                          if (selected) {
-                            ref.read(logLevelFilterProvider.notifier).state =
-                                null;
-                          }
-                        },
-                        backgroundColor: scheme.onPrimary.withValues(
-                          alpha: 0.12,
-                        ),
-                        selectedColor: scheme.primaryContainer,
-                        labelStyle: TextStyle(
-                          color: levelFilter == null
-                              ? scheme.onPrimaryContainer
-                              : scheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('INFO'),
-                        selected: levelFilter == 'INFO',
-                        onSelected: (selected) {
-                          ref.read(logLevelFilterProvider.notifier).state =
-                              selected ? 'INFO' : null;
-                        },
-                        backgroundColor: scheme.onPrimary.withValues(
-                          alpha: 0.12,
-                        ),
-                        selectedColor: scheme.secondaryContainer,
-                        labelStyle: TextStyle(
-                          color: levelFilter == 'INFO'
-                              ? scheme.onSecondaryContainer
-                              : scheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('WARNING'),
-                        selected: levelFilter == 'WARNING',
-                        onSelected: (selected) {
-                          ref.read(logLevelFilterProvider.notifier).state =
-                              selected ? 'WARNING' : null;
-                        },
-                        backgroundColor: scheme.onPrimary.withValues(
-                          alpha: 0.12,
-                        ),
-                        selectedColor: scheme.tertiaryContainer,
-                        labelStyle: TextStyle(
-                          color: levelFilter == 'WARNING'
-                              ? scheme.onTertiaryContainer
-                              : scheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilterChip(
-                        label: const Text('ERROR'),
-                        selected: levelFilter == 'ERROR',
-                        onSelected: (selected) {
-                          ref.read(logLevelFilterProvider.notifier).state =
-                              selected ? 'ERROR' : null;
-                        },
-                        backgroundColor: scheme.onPrimary.withValues(
-                          alpha: 0.12,
-                        ),
-                        selectedColor: scheme.errorContainer,
-                        labelStyle: TextStyle(
-                          color: levelFilter == 'ERROR'
-                              ? scheme.onErrorContainer
-                              : scheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.lerp(scheme.surfaceContainerHigh, scheme.primary, 0.55)!,
+                Color.lerp(
+                    scheme.surfaceContainerHigh, scheme.secondary, 0.42)!,
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: scheme.outline.withValues(alpha: 0.18),
+                width: 1,
+              ),
             ),
           ),
-          // Content
-          Expanded(
-            child: logsAsync.when(
-              data: (logs) {
-                // Filter logs
-                final filteredLogs = logs.where((log) {
-                  final matchesSearch = log.message.toLowerCase().contains(
-                    searchFilter.toLowerCase(),
-                  );
-                  final matchesLevel =
-                      levelFilter == null || log.level == levelFilter;
-                  return matchesSearch && matchesLevel;
-                }).toList();
-
-                if (filteredLogs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inbox,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aucun log disponible',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  reverse: true,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredLogs.length,
-                  itemBuilder: (context, index) {
-                    final log = filteredLogs[filteredLogs.length - 1 - index];
-                    return _LogEntryWidget(logEntry: log);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar
+              TextField(
+                onChanged: (value) {
+                  ref.read(logFilterProvider.notifier).state = value;
+                },
+                decoration: InputDecoration(
+                  hintText: 'Rechercher dans les logs...',
+                  hintStyle: TextStyle(
+                    color: scheme.onSurface.withValues(alpha: 0.58),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: scheme.onSurface.withValues(alpha: 0.75),
+                  ),
+                  filled: true,
+                  fillColor: scheme.surface.withValues(alpha: 0.66),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                style: TextStyle(color: scheme.onSurface),
+              ),
+              const SizedBox(height: 12),
+              // Filter buttons
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.error,
+                    FilterChip(
+                      label: const Text('Tous'),
+                      selected: levelFilter == null,
+                      onSelected: (selected) {
+                        if (selected) {
+                          ref.read(logLevelFilterProvider.notifier).state =
+                              null;
+                        }
+                      },
+                      backgroundColor: scheme.onPrimary.withValues(
+                        alpha: 0.12,
+                      ),
+                      selectedColor: scheme.primaryContainer,
+                      labelStyle: TextStyle(
+                        color: levelFilter == null
+                            ? scheme.onPrimaryContainer
+                            : scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      AppErrorHandler.getFriendlyMessage(error),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(color: scheme.error),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('INFO'),
+                      selected: levelFilter == 'INFO',
+                      onSelected: (selected) {
+                        ref.read(logLevelFilterProvider.notifier).state =
+                            selected ? 'INFO' : null;
+                      },
+                      backgroundColor: scheme.onPrimary.withValues(
+                        alpha: 0.12,
+                      ),
+                      selectedColor: scheme.secondaryContainer,
+                      labelStyle: TextStyle(
+                        color: levelFilter == 'INFO'
+                            ? scheme.onSecondaryContainer
+                            : scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('WARNING'),
+                      selected: levelFilter == 'WARNING',
+                      onSelected: (selected) {
+                        ref.read(logLevelFilterProvider.notifier).state =
+                            selected ? 'WARNING' : null;
+                      },
+                      backgroundColor: scheme.onPrimary.withValues(
+                        alpha: 0.12,
+                      ),
+                      selectedColor: scheme.tertiaryContainer,
+                      labelStyle: TextStyle(
+                        color: levelFilter == 'WARNING'
+                            ? scheme.onTertiaryContainer
+                            : scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('ERROR'),
+                      selected: levelFilter == 'ERROR',
+                      onSelected: (selected) {
+                        ref.read(logLevelFilterProvider.notifier).state =
+                            selected ? 'ERROR' : null;
+                      },
+                      backgroundColor: scheme.onPrimary.withValues(
+                        alpha: 0.12,
+                      ),
+                      selectedColor: scheme.errorContainer,
+                      labelStyle: TextStyle(
+                        color: levelFilter == 'ERROR'
+                            ? scheme.onErrorContainer
+                            : scheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
+        // Content
+        Expanded(
+          child: logsAsync.when(
+            data: (logs) {
+              // Filter logs
+              final filteredLogs = logs.where((log) {
+                final matchesSearch = log.message.toLowerCase().contains(
+                      searchFilter.toLowerCase(),
+                    );
+                final matchesLevel =
+                    levelFilter == null || log.level == levelFilter;
+                return matchesSearch && matchesLevel;
+              }).toList();
+
+              if (filteredLogs.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inbox,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucun log disponible',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                reverse: true,
+                padding: const EdgeInsets.all(16),
+                itemCount: filteredLogs.length,
+                itemBuilder: (context, index) {
+                  final log = filteredLogs[filteredLogs.length - 1 - index];
+                  return _LogEntryWidget(logEntry: log);
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppErrorHandler.getFriendlyMessage(error),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: scheme.error),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }
 
@@ -305,17 +308,17 @@ class _LogEntryWidget extends StatelessWidget {
               child: Text(
                 logEntry.level,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _getLevelColor(context),
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: _getLevelColor(context),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
             const SizedBox(width: 12),
             Text(
               logEntry.timestamp,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),

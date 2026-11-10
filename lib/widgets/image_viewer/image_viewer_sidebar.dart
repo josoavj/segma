@@ -101,7 +101,8 @@ class ImageViewerSidebar extends ConsumerWidget {
                         ),
                       ),
                       filled: true,
-                      fillColor: scheme.surfaceContainerHigh.withValues(alpha: 0.5),
+                      fillColor:
+                          scheme.surfaceContainerHigh.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -113,7 +114,8 @@ class ImageViewerSidebar extends ConsumerWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => SegmentationEditorPage(image: image),
+                          builder: (context) =>
+                              SegmentationEditorPage(image: image),
                         ),
                       );
                     },
@@ -151,7 +153,8 @@ class ImageViewerSidebar extends ConsumerWidget {
                           hintText: 'Filtrer les objets...',
                           prefixIcon: Icon(
                             Icons.filter_list,
-                            color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            color:
+                                scheme.onSurfaceVariant.withValues(alpha: 0.7),
                             size: 18,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -159,7 +162,8 @@ class ImageViewerSidebar extends ConsumerWidget {
                             vertical: 10,
                           ),
                           filled: true,
-                          fillColor: scheme.surfaceContainerHigh.withValues(alpha: 0.3),
+                          fillColor: scheme.surfaceContainerHigh
+                              .withValues(alpha: 0.3),
                         ),
                       ),
                     ),
@@ -187,7 +191,10 @@ class ImageViewerSidebar extends ConsumerWidget {
                 ],
               )
             : LinearGradient(
-                colors: [scheme.primary, scheme.primary.withValues(alpha: 0.85)],
+                colors: [
+                  scheme.primary,
+                  scheme.primary.withValues(alpha: 0.85)
+                ],
               ),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
@@ -242,7 +249,8 @@ class ImageViewerSidebar extends ConsumerWidget {
         decoration: BoxDecoration(
           color: scheme.surfaceContainerLowest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+          border:
+              Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
         ),
         constraints: const BoxConstraints(maxHeight: 300),
         child: ListenableBuilder(
@@ -251,8 +259,8 @@ class ImageViewerSidebar extends ConsumerWidget {
             final filteredObjects = currentSeg!.objects
                 .where(
                   (obj) => obj.label.toLowerCase().contains(
-                    searchController.text.toLowerCase(),
-                  ),
+                        searchController.text.toLowerCase(),
+                      ),
                 )
                 .toList();
 

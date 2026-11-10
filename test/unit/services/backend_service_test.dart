@@ -11,7 +11,8 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    backendService = BackendService(baseUrl: 'http://localhost:8000', dio: mockDio);
+    backendService =
+        BackendService(baseUrl: 'http://localhost:8000', dio: mockDio);
   });
 
   group('BackendService Health Check', () {
@@ -59,10 +60,12 @@ void main() {
                 requestOptions: RequestOptions(path: '/api/v3/segment'),
               ));
 
-      final result = await backendService.segmentByPrompt('/path/test.jpg', 'test');
+      final result =
+          await backendService.segmentByPrompt('/path/test.jpg', 'test');
 
       expect(result.imagePath, '/path/test.jpg');
-      verify(() => mockDio.post('/api/v3/segment', data: any(named: 'data'))).called(1);
+      verify(() => mockDio.post('/api/v3/segment', data: any(named: 'data')))
+          .called(1);
     });
   });
 }

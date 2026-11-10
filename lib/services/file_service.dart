@@ -38,7 +38,8 @@ class FileService {
             path: entity.path,
             name: name,
           );
-          final loaded = await _loadFolderRecursive(entity, subfolder, currentDepth + 1, maxDepth);
+          final loaded = await _loadFolderRecursive(
+              entity, subfolder, currentDepth + 1, maxDepth);
           subfolders.add(loaded);
         } else if (entity is File && _isImageFile(entity.path)) {
           images.add(
@@ -66,7 +67,16 @@ class FileService {
   }
 
   bool _shouldIgnoreDirectory(String path) {
-    final ignoredPatterns = ['.wine', '.proton', '.steam', '.cache', '.config', '.local', '.mozilla', 'snap'];
+    final ignoredPatterns = [
+      '.wine',
+      '.proton',
+      '.steam',
+      '.cache',
+      '.config',
+      '.local',
+      '.mozilla',
+      'snap'
+    ];
     for (final segment in path.split('/')) {
       if (ignoredPatterns.contains(segment)) return true;
     }
@@ -96,21 +106,27 @@ class FileService {
     final imageNameWithoutExt = p.basenameWithoutExtension(imageFile.path);
 
     try {
-      final segDir = Directory(p.join(parentDir.path, '.segmentation', imageNameWithoutExt));
+      final segDir = Directory(
+          p.join(parentDir.path, '.segmentation', imageNameWithoutExt));
       if (!await segDir.exists()) await segDir.create(recursive: true);
       return segDir;
     } catch (e) {
       final tempDir = await getTemporaryDirectory();
-      final fallbackDir = Directory(p.join(tempDir.path, 'segma_cache', imageNameWithoutExt));
-      if (!await fallbackDir.exists()) await fallbackDir.create(recursive: true);
+      final fallbackDir =
+          Directory(p.join(tempDir.path, 'segma_cache', imageNameWithoutExt));
+      if (!await fallbackDir.exists()) {
+        await fallbackDir.create(recursive: true);
+      }
       return fallbackDir;
     }
   }
 
-  Future<String> saveMask(String imagePath, Uint8List maskData, String objectName) async {
+  Future<String> saveMask(
+      String imagePath, Uint8List maskData, String objectName) async {
     final segmentationDir = await _createSegmentationFolder(imagePath);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final maskPath = p.join(segmentationDir.path, '${objectName}_$timestamp.mask');
+    final maskPath =
+        p.join(segmentationDir.path, '${objectName}_$timestamp.mask');
     await File(maskPath).writeAsBytes(maskData);
     return maskPath;
   }

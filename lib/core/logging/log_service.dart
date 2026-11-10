@@ -61,7 +61,7 @@ class LogService {
       _initialized = true;
 
       info('=== Application Démarrée ===');
-      
+
       // Nettoyage automatique des vieux logs au démarrage (7 jours par défaut)
       clearOldLogs();
     } catch (e) {

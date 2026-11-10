@@ -6,7 +6,7 @@ void main() {
     test('BoundingBox.fromJson should parse correctly', () {
       final json = {'x1': 10, 'y1': 20, 'x2': 100, 'y2': 200};
       final bbox = BoundingBox.fromJson(json);
-      
+
       expect(bbox.x1, 10);
       expect(bbox.y1, 20);
       expect(bbox.x2, 100);
@@ -24,9 +24,9 @@ void main() {
         'mask_path': '/path/to/mask.bin',
         'pixels_count': 1600
       };
-      
+
       final obj = SegmentedObject.fromJson(json);
-      
+
       expect(obj.objectId, 1);
       expect(obj.label, 'bolt');
       expect(obj.confidence, 0.95);
@@ -34,7 +34,8 @@ void main() {
       expect(obj.pixelsCount, 1600);
     });
 
-    test('SegmentationResult.fromJson should handle resolution and objects', () {
+    test('SegmentationResult.fromJson should handle resolution and objects',
+        () {
       final json = {
         'image_path': '/test/image.jpg',
         'resolution': '1920x1080',
@@ -66,12 +67,12 @@ void main() {
     test('InteractivePoint.toJson should return correct format', () {
       const point = InteractivePoint(x: 0.5, y: 0.5, isPositive: true);
       final json = point.toJson();
-      
+
       expect(json['x'], 0.5);
       expect(json['y'], 0.5);
       expect(json['label'], 1);
     });
-    
+
     test('InteractivePoint negative should have label 0', () {
       const point = InteractivePoint(x: 0.1, y: 0.2, isPositive: false);
       expect(point.toJson()['label'], 0);

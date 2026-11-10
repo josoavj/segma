@@ -16,7 +16,8 @@ class SelectedFolderPath extends AsyncNotifier<String> {
   }
 }
 
-final selectedFolderPathProvider = AsyncNotifierProvider<SelectedFolderPath, String>(SelectedFolderPath.new);
+final selectedFolderPathProvider =
+    AsyncNotifierProvider<SelectedFolderPath, String>(SelectedFolderPath.new);
 
 final folderStructureProvider = FutureProvider<FolderModel>((ref) async {
   final folderPath = await ref.watch(selectedFolderPathProvider.future);
@@ -40,7 +41,8 @@ final customFoldersProvider = StateProvider<List<String>>((ref) => []);
 
 final segmentationModeProvider = StateProvider<bool>((ref) => false);
 
-final standardFoldersProvider = FutureProvider<Map<String, String>>((ref) async {
+final standardFoldersProvider =
+    FutureProvider<Map<String, String>>((ref) async {
   final pathsService = ref.watch(folderPathsServiceProvider);
   return pathsService.getStandardFolders();
 });

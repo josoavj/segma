@@ -34,7 +34,9 @@ class ImportanceDialog extends ConsumerWidget {
         child: Icon(type.icon, color: color, size: 40),
       ),
       title: Text(
-        type == NotificationType.critical ? 'Alerte Système' : 'Information Importante',
+        type == NotificationType.critical
+            ? 'Alerte Système'
+            : 'Information Importante',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontWeight: FontWeight.w900,
@@ -52,7 +54,8 @@ class ImportanceDialog extends ConsumerWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
-          if (type == NotificationType.critical || type == NotificationType.error) ...[
+          if (type == NotificationType.critical ||
+              type == NotificationType.error) ...[
             const SizedBox(height: 20),
             Text(
               "Les détails techniques ont été enregistrés pour l'assistance.",
@@ -83,12 +86,14 @@ class ImportanceDialog extends ConsumerWidget {
                 child: const Text('J\'ai compris'),
               ),
             ),
-            if (type == NotificationType.critical || type == NotificationType.error) ...[
+            if (type == NotificationType.critical ||
+                type == NotificationType.error) ...[
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  ref.read(currentPageProvider.notifier).state = NavigationPage.logs;
+                  ref.read(currentPageProvider.notifier).state =
+                      NavigationPage.logs;
                 },
                 child: const Text('Consulter les logs détaillés'),
               ),

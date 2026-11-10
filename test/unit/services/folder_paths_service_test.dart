@@ -17,7 +17,8 @@ void main() {
     });
 
     test('getFolderLabel should return basename for unknown folders', () {
-      expect(service.getFolderLabel('/home/user/MySecretFolder'), 'MySecretFolder');
+      expect(service.getFolderLabel('/home/user/MySecretFolder'),
+          'MySecretFolder');
     });
   });
 }

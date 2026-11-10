@@ -223,9 +223,8 @@ class ModernSidebar extends ConsumerWidget {
   Widget _buildExpandedFooter(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final isDarkTheme = ref.watch(themeNotifierProvider);
-    final toggleIconColor = isDarkTheme
-        ? const Color(0xFFFFC857)
-        : const Color(0xFF7FA8FF);
+    final toggleIconColor =
+        isDarkTheme ? const Color(0xFFFFC857) : const Color(0xFF7FA8FF);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -289,9 +288,8 @@ class ModernSidebar extends ConsumerWidget {
 
   Widget _buildCollapsedFooter(BuildContext context, WidgetRef ref) {
     final isDarkTheme = ref.watch(themeNotifierProvider);
-    final toggleIconColor = isDarkTheme
-        ? const Color(0xFFFFC857)
-        : const Color(0xFF7FA8FF);
+    final toggleIconColor =
+        isDarkTheme ? const Color(0xFFFFC857) : const Color(0xFF7FA8FF);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
