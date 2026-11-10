@@ -16,7 +16,7 @@ class _MaskParams {
 Future<Uint8List> _generateMaskImageIsolated(_MaskParams params) async {
   try {
     final segmentation = params.segmentation;
-    
+
     // Créer une image avec dimensions correctes
     final mask = img.Image(
       width: segmentation.width,
@@ -40,7 +40,9 @@ Future<Uint8List> _generateMaskImageIsolated(_MaskParams params) async {
 
           final maskBytes = maskFile.readAsBytesSync();
 
-          if (maskBytes.length != segmentation.width * segmentation.height) continue;
+          if (maskBytes.length != segmentation.width * segmentation.height) {
+            continue;
+          }
 
           for (int y = 0; y < segmentation.height; y++) {
             for (int x = 0; x < segmentation.width; x++) {
@@ -77,7 +79,8 @@ class MaskOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List>(
       // Utilisation de compute() pour déporter le calcul dans un autre thread
-      future: compute(_generateMaskImageIsolated, _MaskParams(segmentation, imagePath)),
+      future: compute(
+          _generateMaskImageIsolated, _MaskParams(segmentation, imagePath)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
