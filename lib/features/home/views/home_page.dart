@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/file_provider.dart';
-import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/widgets/image_grid_widget.dart';
-import 'package:segma/widgets/image_viewer_widget.dart';
-import 'package:segma/widgets/home/home_sidebar.dart';
-import 'package:segma/widgets/home/image_grid_header.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/features/home/view_models/home_view_model.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/features/home/views/widgets/image_grid_widget.dart';
+import 'package:segma/features/segmentation/views/widgets/image_viewer_widget.dart';
+import 'package:segma/features/home/views/widgets/home_sidebar.dart';
+import 'package:segma/features/home/views/widgets/image_grid_header.dart';
 import 'package:segma/core/errors/error_handler.dart';
 
 class HomePage extends ConsumerWidget {
