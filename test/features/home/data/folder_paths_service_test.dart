@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:segma/services/folder_paths_service.dart';
+import 'package:segma/features/home/data/folder_paths_service.dart';
 
 void main() {
   late FolderPathsService service;
