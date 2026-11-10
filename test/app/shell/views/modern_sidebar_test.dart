@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:segma/providers/navigation_provider.dart';
+import 'package:segma/app/shell/view_models/navigation_view_model.dart';
 import 'package:segma/app/shell/views/modern_sidebar.dart';
 
 void main() {
