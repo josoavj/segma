@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/home/models/folder_model.dart';
+import 'package:segma/features/home/models/image_model.dart';
 
 class FileService {
   /// Charge la structure des dossiers de manière efficiente
