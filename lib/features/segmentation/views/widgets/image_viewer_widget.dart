@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/providers/file_provider.dart';
-import 'package:segma/widgets/image_viewer/image_viewer_sidebar.dart';
-import 'package:segma/widgets/image_viewer/image_viewer_appbar.dart';
-import 'package:segma/widgets/image_viewer/mask_overlay.dart';
-import 'package:segma/widgets/image_viewer/bounding_boxes_overlay.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/features/home/view_models/home_view_model.dart';
+import 'package:segma/features/segmentation/views/widgets/image_viewer_sidebar.dart';
+import 'package:segma/features/segmentation/views/widgets/image_viewer_appbar.dart';
+import 'package:segma/features/segmentation/views/widgets/mask_overlay.dart';
+import 'package:segma/features/segmentation/views/widgets/bounding_boxes_overlay.dart';
 
 class ImageViewerScreen extends StatelessWidget {
   final ImageModel image;
