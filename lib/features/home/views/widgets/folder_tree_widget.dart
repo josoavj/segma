@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/home/models/folder_model.dart';
 
 class FolderTreeWidget extends ConsumerWidget {
   final FolderModel folder;
