@@ -51,16 +51,16 @@ class ImageGridHeader extends StatelessWidget {
                 Text(
                   'Images du dossier',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   selectedFolder.name,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontSize: 11,
-                  ),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 11,
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
