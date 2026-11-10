@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/service_providers.dart';
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
+import 'package:segma/app/di/service_providers.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 import 'package:segma/core/errors/error_handler.dart';
 import 'package:dio/dio.dart';
 
