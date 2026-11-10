@@ -32,7 +32,9 @@ class HealthCheckTile extends ConsumerWidget {
         trailing: Icon(Icons.error, color: scheme.error),
         onTap: () async {
           ref.invalidate(healthCheckProvider);
-          ref.read(notificationServiceProvider.notifier).error(err, stackTrace: stack);
+          ref
+              .read(notificationServiceProvider.notifier)
+              .error(err, stackTrace: stack);
         },
       ),
       data: (health) {
@@ -44,9 +46,8 @@ class HealthCheckTile extends ConsumerWidget {
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: isHealthy
-                  ? scheme.tertiaryContainer
-                  : scheme.errorContainer,
+              color:
+                  isHealthy ? scheme.tertiaryContainer : scheme.errorContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -76,11 +77,12 @@ class HealthCheckTile extends ConsumerWidget {
           ),
           onTap: () {
             ref.invalidate(healthCheckProvider);
-            final type = isHealthy ? NotificationType.success : NotificationType.error;
+            final type =
+                isHealthy ? NotificationType.success : NotificationType.error;
             ref.read(notificationServiceProvider.notifier).show(
-              'Status: $status',
-              type: type,
-            );
+                  'Status: $status',
+                  type: type,
+                );
           },
         );
       },
