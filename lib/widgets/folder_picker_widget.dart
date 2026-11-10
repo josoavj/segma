@@ -49,7 +49,9 @@ class _FolderPickerWidgetState extends ConsumerState<FolderPickerWidget> {
       }
     } catch (e, stack) {
       if (mounted) {
-        ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+        ref
+            .read(notificationServiceProvider.notifier)
+            .error(e, stackTrace: stack);
       }
     } finally {
       setState(() {
@@ -107,25 +109,26 @@ class _FolderPickerWidgetState extends ConsumerState<FolderPickerWidget> {
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _entities.isEmpty
-              ? const Center(child: Text('Aucun dossier'))
-              : ListView.builder(
-                  itemCount: _entities.length,
-                  itemBuilder: (context, index) {
-                    final entity = _entities[index];
-                    final folderName = entity.path.split('/').last;
+                  ? const Center(child: Text('Aucun dossier'))
+                  : ListView.builder(
+                      itemCount: _entities.length,
+                      itemBuilder: (context, index) {
+                        final entity = _entities[index];
+                        final folderName = entity.path.split('/').last;
 
-                    return ListTile(
-                      leading: Icon(Icons.folder, color: scheme.primary),
-                      title: Text(folderName),
-                      onTap: () => _loadDirectory((entity as Directory).path),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 14,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    );
-                  },
-                ),
+                        return ListTile(
+                          leading: Icon(Icons.folder, color: scheme.primary),
+                          title: Text(folderName),
+                          onTap: () =>
+                              _loadDirectory((entity as Directory).path),
+                          trailing: Icon(
+                            Icons.arrow_forward_ios,
+                            size: 14,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        );
+                      },
+                    ),
         ),
       ],
     );
