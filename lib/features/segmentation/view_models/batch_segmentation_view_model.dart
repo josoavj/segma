@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:dio/dio.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/service_providers.dart';
-import 'package:segma/providers/segmentation_provider.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
+import 'package:segma/app/di/service_providers.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
 import 'package:segma/core/errors/error_handler.dart';
-import 'package:segma/utils/data_parser.dart';
+import 'package:segma/features/segmentation/data/data_parser.dart';
 
-import '../core/logging/log_service.dart';
+import 'package:segma/core/logging/log_service.dart';
 
 class BatchState {
   final bool isProcessing;
