@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/providers/file_provider.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/features/home/view_models/home_view_model.dart';
 import 'package:segma/core/errors/error_handler.dart';
 
 class ImageGridWidget extends ConsumerWidget {
