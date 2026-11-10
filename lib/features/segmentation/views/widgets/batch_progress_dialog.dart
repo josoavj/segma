@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/providers/batch_segmentation_provider.dart';
+import 'package:segma/features/segmentation/view_models/batch_segmentation_view_model.dart';
 
 class BatchProgressDialog extends ConsumerWidget {
   const BatchProgressDialog({super.key});
