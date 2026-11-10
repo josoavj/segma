@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:segma/models/models.dart';
-import 'package:segma/config/backend_config.dart';
+import 'package:segma/core/config/backend_config.dart';
 import 'package:segma/utils/data_parser.dart';
 
 class BackendService {
@@ -25,10 +25,10 @@ class BackendService {
             ) {
     if (!kReleaseMode && dio == null) {
       this.dio.interceptors.add(LogInterceptor(
-        responseBody: true,
-        requestBody: true,
-        error: true,
-      ));
+            responseBody: true,
+            requestBody: true,
+            error: true,
+          ));
     }
   }
 
@@ -70,7 +70,7 @@ class BackendService {
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     }
-    
+
     throw DioException(
       requestOptions: response.requestOptions,
       response: response,
