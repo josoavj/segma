@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/models/models.dart';
-import 'package:segma/screens/segmentation_editor_page.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
+import 'package:segma/features/segmentation/views/segmentation_editor_page.dart';
 
 class ImageViewerSidebar extends ConsumerWidget {
   final ImageModel image;
