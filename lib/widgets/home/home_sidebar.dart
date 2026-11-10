@@ -8,7 +8,7 @@ import 'package:segma/providers/service_providers.dart';
 import 'package:segma/widgets/folder_tree_widget.dart';
 import 'package:segma/widgets/folder_picker_widget.dart';
 import 'package:segma/widgets/batch_progress_dialog.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 import 'package:segma/services/notification_service.dart';
 
 class HomeSidebar extends ConsumerWidget {
@@ -48,15 +48,16 @@ class HomeSidebar extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.folder_special, color: scheme.onPrimary, size: 24),
+                    Icon(Icons.folder_special,
+                        color: scheme.onPrimary, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Dossiers',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: scheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                              color: scheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ),
                   ],
@@ -71,19 +72,22 @@ class HomeSidebar extends ConsumerWidget {
                     return ElevatedButton.icon(
                       onPressed: selectedFolder == null
                           ? null
-                          : () => _showBatchProcessDialog(context, ref, selectedFolder),
+                          : () => _showBatchProcessDialog(
+                              context, ref, selectedFolder),
                       icon: const Icon(Icons.auto_awesome, size: 16),
                       label: const Padding(
                         padding: EdgeInsets.only(left: 6),
                         child: Text(
                           'Traiter le dossier',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: scheme.secondaryContainer,
                         foregroundColor: scheme.onSecondaryContainer,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                         shape: const StadiumBorder(),
                         elevation: 0,
                       ),
@@ -96,7 +100,8 @@ class HomeSidebar extends ConsumerWidget {
             ),
           ),
 
-          Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.5)),
+          Divider(
+              height: 1, color: scheme.outlineVariant.withValues(alpha: 0.5)),
 
           // Arborescence des dossiers
           Expanded(
@@ -151,7 +156,8 @@ class HomeSidebar extends ConsumerWidget {
             // Dossiers personnalisés
             if (customFolders.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Divider(color: scheme.onPrimary.withValues(alpha: 0.2), height: 1),
+              Divider(
+                  color: scheme.onPrimary.withValues(alpha: 0.2), height: 1),
               const SizedBox(height: 12),
             ],
             ...customFolders.asMap().entries.map((entry) {
@@ -185,7 +191,8 @@ class HomeSidebar extends ConsumerWidget {
       loading: () => Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CircularProgressIndicator(color: scheme.onPrimary, strokeWidth: 2),
+          child: CircularProgressIndicator(
+              color: scheme.onPrimary, strokeWidth: 2),
         ),
       ),
       error: (err, stack) => Padding(
@@ -287,7 +294,9 @@ class HomeSidebar extends ConsumerWidget {
                   Navigator.pop(context);
                 }
               } catch (e, stack) {
-                ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+                ref
+                    .read(notificationServiceProvider.notifier)
+                    .error(e, stackTrace: stack);
               }
             },
           ),
@@ -314,13 +323,14 @@ class HomeSidebar extends ConsumerWidget {
       child: InkWell(
         onTap: () async {
           try {
-            final folder = await ref
-                .read(fileServiceProvider)
-                .loadFolderStructure(path);
+            final folder =
+                await ref.read(fileServiceProvider).loadFolderStructure(path);
             ref.read(selectedFolderProvider.notifier).state = folder;
             ref.read(selectedImageProvider.notifier).state = null;
           } catch (e, stack) {
-            ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+            ref
+                .read(notificationServiceProvider.notifier)
+                .error(e, stackTrace: stack);
           }
         },
         child: Container(
@@ -344,8 +354,8 @@ class HomeSidebar extends ConsumerWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -382,13 +392,14 @@ class HomeSidebar extends ConsumerWidget {
       child: InkWell(
         onTap: () async {
           try {
-            final folder = await ref
-                .read(fileServiceProvider)
-                .loadFolderStructure(path);
+            final folder =
+                await ref.read(fileServiceProvider).loadFolderStructure(path);
             ref.read(selectedFolderProvider.notifier).state = folder;
             ref.read(selectedImageProvider.notifier).state = null;
           } catch (e, stack) {
-            ref.read(notificationServiceProvider.notifier).error(e, stackTrace: stack);
+            ref
+                .read(notificationServiceProvider.notifier)
+                .error(e, stackTrace: stack);
           }
         },
         child: Container(
@@ -405,9 +416,9 @@ class HomeSidebar extends ConsumerWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: scheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.w500,
+                        color: scheme.onSurface,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
