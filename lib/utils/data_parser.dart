@@ -5,12 +5,14 @@ import 'package:segma/models/models.dart';
 /// Utilitaire pour le parsing de données lourdes sur des threads séparés (Isolates)
 class DataParser {
   /// Parse un message de mise à jour de batch complet en Isolate
-  static Future<Map<String, dynamic>> parseBatchUpdate(String jsonString) async {
+  static Future<Map<String, dynamic>> parseBatchUpdate(
+      String jsonString) async {
     return compute(_decodeBatchUpdate, jsonString);
   }
 
   /// Convertit une Map volumineuse en SegmentationResult en Isolate
-  static Future<SegmentationResult> convertToSegmentationResult(Map<String, dynamic> map) async {
+  static Future<SegmentationResult> convertToSegmentationResult(
+      Map<String, dynamic> map) async {
     return compute(_convertMapToResult, map);
   }
 
