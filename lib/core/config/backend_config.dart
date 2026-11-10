@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// Configuration de l'application SEGMA pour la Production
-class AppConfig {
+class BackendConfig {
   // L'URL est récupérée depuis les variables d'environnement au build ou utilise le défaut
   static const String backendUrl = String.fromEnvironment(
     'BACKEND_URL',

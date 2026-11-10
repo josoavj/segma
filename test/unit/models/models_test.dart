@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
 
 void main() {
   group('Segmentation Models Tests', () {

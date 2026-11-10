@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/models/notification_model.dart';
-import 'package:segma/providers/navigation_provider.dart';
+import 'package:segma/core/notifications/notification_model.dart';
+import 'package:segma/app/shell/view_models/navigation_view_model.dart';
 
 class ImportanceDialog extends ConsumerWidget {
   final String message;
