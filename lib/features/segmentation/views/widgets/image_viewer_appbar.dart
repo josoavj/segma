@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/home/models/image_model.dart';
 
 class ImageViewerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ImageModel image;
