@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
-import 'package:segma/models/notification_model.dart';
+import 'package:segma/core/notifications/notification_model.dart';
 import 'package:segma/core/logging/log_service.dart';
 import 'package:segma/core/errors/error_handler.dart';
 
