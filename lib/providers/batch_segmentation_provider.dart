@@ -5,10 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
 import 'package:segma/providers/segmentation_provider.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 import 'package:segma/utils/data_parser.dart';
 
-import '../services/log_service.dart';
+import '../core/logging/log_service.dart';
 
 class BatchState {
   final bool isProcessing;
@@ -52,12 +52,13 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
   final Ref ref;
   BatchSegmentationNotifier(this.ref) : super(BatchState());
 
-  Future<void> processFolder(String folderPath, String prompt, double threshold) async {
+  Future<void> processFolder(
+      String folderPath, String prompt, double threshold) async {
     state = BatchState(isProcessing: true, total: 0);
 
     try {
       final backendService = ref.read(backendServiceProvider);
-      
+
       final response = await backendService.dio.post(
         '/api/v3/segment/batch',
         data: {
@@ -70,32 +71,38 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
 
       final responseBody = response.data as ResponseBody;
       final stream = responseBody.stream.cast<List<int>>();
-      
-      await for (final chunk in stream.transform(utf8.decoder).transform(const LineSplitter())) {
+
+      await for (final chunk
+          in stream.transform(utf8.decoder).transform(const LineSplitter())) {
         if (chunk.trim().isEmpty) continue;
-        
+
         try {
           // Utilisation de l'Isolate pour parser le JSON et créer le modèle en tâche de fond
-          final Map<String, dynamic> update = await DataParser.parseBatchUpdate(chunk);
-          
+          final Map<String, dynamic> update =
+              await DataParser.parseBatchUpdate(chunk);
+
           if (update['status'] == 'success') {
             final result = update['result_model'] as SegmentationResult;
-            
+
             state = state.copyWith(
               current: update['current'],
               total: update['total'],
               currentImage: update['image_path'],
               successCount: state.successCount + 1,
             );
-            
+
             // Mise à jour de l'historique global
-            ref.read(segmentationHistoryProvider.notifier).update((history) => [...history, result]);
+            ref
+                .read(segmentationHistoryProvider.notifier)
+                .update((history) => [...history, result]);
           } else if (update['status'] == 'error') {
-             final errorData = update['error'];
-             state = state.copyWith(
+            final errorData = update['error'];
+            state = state.copyWith(
               current: update['current'],
               total: update['total'],
-              error: errorData is String ? errorData : AppErrorHandler.getFriendlyMessage(errorData),
+              error: errorData is String
+                  ? errorData
+                  : AppErrorHandler.getFriendlyMessage(errorData),
             );
           }
         } catch (e) {
@@ -117,6 +124,7 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
   }
 }
 
-final batchSegmentationProvider = StateNotifierProvider<BatchSegmentationNotifier, BatchState>((ref) {
+final batchSegmentationProvider =
+    StateNotifierProvider<BatchSegmentationNotifier, BatchState>((ref) {
   return BatchSegmentationNotifier(ref);
 });

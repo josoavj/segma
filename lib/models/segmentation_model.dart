@@ -80,8 +80,12 @@ class SegmentationResult {
   factory SegmentationResult.fromJson(Map<String, dynamic> json) {
     final resolution = json['resolution'] as String? ?? '0x0';
     final resolutionParts = resolution.split('x');
-    final width = int.tryParse(resolutionParts.isNotEmpty ? resolutionParts[0] : '0') ?? 0;
-    final height = int.tryParse(resolutionParts.length > 1 ? resolutionParts[1] : '0') ?? 0;
+    final width =
+        int.tryParse(resolutionParts.isNotEmpty ? resolutionParts[0] : '0') ??
+            0;
+    final height =
+        int.tryParse(resolutionParts.length > 1 ? resolutionParts[1] : '0') ??
+            0;
 
     return SegmentationResult(
       imageId: json['image_path'].hashCode.toString(),
@@ -99,9 +103,9 @@ class SegmentationResult {
 
 /// Point d'interaction pour SAM
 class InteractivePoint {
-  final double x; 
-  final double y; 
-  final bool isPositive; 
+  final double x;
+  final double y;
+  final bool isPositive;
 
   const InteractivePoint({
     required this.x,
@@ -110,8 +114,8 @@ class InteractivePoint {
   });
 
   Map<String, dynamic> toJson() => {
-    'x': x,
-    'y': y,
-    'label': isPositive ? 1 : 0,
-  };
+        'x': x,
+        'y': y,
+        'label': isPositive ? 1 : 0,
+      };
 }

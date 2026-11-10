@@ -18,10 +18,10 @@ class AboutPage extends ConsumerWidget {
       }
     } catch (e, stack) {
       ref.read(notificationServiceProvider.notifier).error(
-        "Impossible d'ouvrir le lien. Vérifiez votre navigateur.",
-        technicalError: e,
-        stackTrace: stack,
-      );
+            "Impossible d'ouvrir le lien. Vérifiez votre navigateur.",
+            technicalError: e,
+            stackTrace: stack,
+          );
     }
   }
 
@@ -43,7 +43,8 @@ class AboutPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: scheme.primary.withValues(alpha: isDark ? 0.15 : 0.1),
+                    color:
+                        scheme.primary.withValues(alpha: isDark ? 0.15 : 0.1),
                     blurRadius: 25,
                     offset: const Offset(0, 12),
                   ),
@@ -77,10 +78,10 @@ class AboutPage extends ConsumerWidget {
             Text(
               'SEGMA',
               style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: scheme.onSurface,
-                letterSpacing: -0.5,
-              ),
+                    fontWeight: FontWeight.w900,
+                    color: scheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -89,9 +90,9 @@ class AboutPage extends ConsumerWidget {
             Text(
               'Image Segmentation with SAM 3',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -109,9 +110,9 @@ class AboutPage extends ConsumerWidget {
               child: Text(
                 'Version 1.0.0',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: scheme.primary,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: scheme.primary,
+                    ),
               ),
             ),
             const SizedBox(height: 48),
@@ -121,7 +122,8 @@ class AboutPage extends ConsumerWidget {
               title: 'À propos',
               icon: Icons.info_outline,
               iconColor: scheme.primary,
-              iconBackgroundColor: scheme.primaryContainer.withValues(alpha: 0.4),
+              iconBackgroundColor:
+                  scheme.primaryContainer.withValues(alpha: 0.4),
               child: Text(
                 'SEGMA est une solution professionnelle de segmentation d\'images '
                 'utilisant le modèle SAM 3 de Meta. Elle combine l\'intelligence '
@@ -134,9 +136,9 @@ class AboutPage extends ConsumerWidget {
                 '• Exporter les données\n'
                 '• Consulter les logs d\'activité',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  height: 1.6,
-                  color: scheme.onSurface.withValues(alpha: 0.8),
-                ),
+                      height: 1.6,
+                      color: scheme.onSurface.withValues(alpha: 0.8),
+                    ),
               ),
             ),
             const SizedBox(height: 24),
@@ -146,7 +148,8 @@ class AboutPage extends ConsumerWidget {
               title: 'Technologies',
               icon: Icons.auto_awesome_mosaic,
               iconColor: scheme.secondary,
-              iconBackgroundColor: scheme.secondaryContainer.withValues(alpha: 0.4),
+              iconBackgroundColor:
+                  scheme.secondaryContainer.withValues(alpha: 0.4),
               child: Column(
                 children: [
                   _buildTechCard(
@@ -168,7 +171,8 @@ class AboutPage extends ConsumerWidget {
                   _buildTechCard(
                     context,
                     name: 'Meta SAM 3',
-                    description: 'Segment Anything Model de dernière génération',
+                    description:
+                        'Segment Anything Model de dernière génération',
                     icon: Icons.psychology,
                     color: Colors.deepPurple,
                   ),
@@ -182,7 +186,8 @@ class AboutPage extends ConsumerWidget {
               title: 'Équipe',
               icon: Icons.groups_outlined,
               iconColor: scheme.tertiary,
-              iconBackgroundColor: scheme.tertiaryContainer.withValues(alpha: 0.4),
+              iconBackgroundColor:
+                  scheme.tertiaryContainer.withValues(alpha: 0.4),
               child: _buildDeveloperCard(
                 context,
                 name: 'Josoa VONJINIAINA',
@@ -204,16 +209,16 @@ class AboutPage extends ConsumerWidget {
                   Text(
                     '© 2026 SEGMA Project',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Propulsé par l\'IA de Meta et Flutter',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    ),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
                   ),
                 ],
               ),
@@ -237,7 +242,7 @@ class AboutPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark 
+        color: isDark
             ? scheme.surfaceContainerHigh.withValues(alpha: 0.4)
             : Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
@@ -263,15 +268,15 @@ class AboutPage extends ConsumerWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -295,7 +300,7 @@ class AboutPage extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark 
+        color: isDark
             ? scheme.surfaceContainerHigh.withValues(alpha: 0.4)
             : Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
@@ -332,14 +337,14 @@ class AboutPage extends ConsumerWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   role,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
                 if (portfolioUrl != null)
                   Padding(
@@ -351,11 +356,13 @@ class AboutPage extends ConsumerWidget {
                         onTap: () => _launchURL(key as WidgetRef, portfolioUrl),
                         borderRadius: BorderRadius.circular(6),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.language, size: 14, color: scheme.primary),
+                              Icon(Icons.language,
+                                  size: 14, color: scheme.primary),
                               const SizedBox(width: 6),
                               Text(
                                 'Voir mon Portfolio',
@@ -437,9 +444,9 @@ class _SectionCard extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: scheme.onSurface,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onSurface,
+                      ),
                 ),
               ],
             ),

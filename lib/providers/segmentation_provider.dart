@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/service_providers.dart';
 import 'package:segma/services/notification_service.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 import 'package:dio/dio.dart';
 
 // État de chargement de la segmentation
@@ -23,7 +23,8 @@ final segmentationPromptProvider = StateProvider<String>((ref) {
 });
 
 // Points interactifs pour SAM
-final interactivePointsProvider = StateProvider<List<InteractivePoint>>((ref) => []);
+final interactivePointsProvider =
+    StateProvider<List<InteractivePoint>>((ref) => []);
 
 // Seuil de confiance (SAM 3 recommande 0.25)
 final confidenceThresholdProvider = StateProvider<double>((ref) {
@@ -109,10 +110,11 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
         final friendlyMsg = AppErrorHandler.getFriendlyMessage(e);
         ref.read(segmentationErrorProvider.notifier).state = friendlyMsg;
         ref.read(notificationServiceProvider.notifier).error(
-          e, 
-          stackTrace: stack,
-          critical: e is! DioException, // Les erreurs réseau sont rarement "critiques" au sens dialogue bloquant
-        );
+              e,
+              stackTrace: stack,
+              critical: e
+                  is! DioException, // Les erreurs réseau sont rarement "critiques" au sens dialogue bloquant
+            );
         rethrow;
       } finally {
         // Toujours mettre à jour l'état de chargement à la fin
@@ -124,16 +126,16 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
 
 final segmentImageProvider =
     AsyncNotifierProvider<SegmentationNotifier, SegmentationResult?>(
-      SegmentationNotifier.new,
-    );
+  SegmentationNotifier.new,
+);
 
 // Changement de modèle
 final changeModelProvider =
     FutureProvider.family<Map<String, dynamic>, (String, String?)>((
-      ref,
-      params,
-    ) async {
-      final (modelType, device) = params;
-      final service = ref.read(backendServiceProvider);
-      return service.changeModel(modelType, device: device);
-    });
+  ref,
+  params,
+) async {
+  final (modelType, device) = params;
+  final service = ref.read(backendServiceProvider);
+  return service.changeModel(modelType, device: device);
+});

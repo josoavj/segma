@@ -7,7 +7,7 @@ import 'package:segma/widgets/image_grid_widget.dart';
 import 'package:segma/widgets/image_viewer_widget.dart';
 import 'package:segma/widgets/home/home_sidebar.dart';
 import 'package:segma/widgets/home/image_grid_header.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -50,7 +50,8 @@ class HomePage extends ConsumerWidget {
                       child: ImageGridWidget(
                         folderPath: selectedFolder.path,
                         onImageSelected: (image) {
-                          ref.read(selectedImageProvider.notifier).state = image;
+                          ref.read(selectedImageProvider.notifier).state =
+                              image;
                         },
                         selectedImage: selectedImage,
                       ),
@@ -112,16 +113,16 @@ class _EmptyHomeState extends StatelessWidget {
               Text(
                 'Aucun dossier sélectionné',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Sélectionnez un dossier dans\nla barre latérale pour afficher les images',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),
