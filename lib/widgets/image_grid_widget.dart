@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/models/models.dart';
 import 'package:segma/providers/file_provider.dart';
-import 'package:segma/utils/error_handler.dart';
+import 'package:segma/core/errors/error_handler.dart';
 
 class ImageGridWidget extends ConsumerWidget {
   final String folderPath;
@@ -41,8 +41,8 @@ class ImageGridWidget extends ConsumerWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.bodyLarge?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
