@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 
-import 'package:segma/services/notification_service.dart';
+import 'package:segma/core/notifications/notification_service.dart';
 
 class AboutPage extends ConsumerWidget {
   const AboutPage({super.key});
