@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
 
 class BoundingBoxesOverlay extends StatelessWidget {
   final SegmentationResult segmentation;
