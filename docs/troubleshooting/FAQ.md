@@ -191,7 +191,7 @@ curl -X POST http://localhost:8000/api/v1/model/change \
 
 ### Q: Comment configurer l'URL du backend?
 
-**R**: Dans `lib/config/backend_config.dart`:
+**R**: Dans `lib/core/config/backend_config.dart`:
 ```dart
 const String backendUrl = "http://localhost:8000";
 ```
