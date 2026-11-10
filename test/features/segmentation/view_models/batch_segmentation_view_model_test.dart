@@ -5,9 +5,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:segma/providers/batch_segmentation_provider.dart';
-import 'package:segma/services/backend_service.dart';
-import 'package:segma/providers/service_providers.dart';
+import 'package:segma/features/segmentation/view_models/batch_segmentation_view_model.dart';
+import 'package:segma/features/segmentation/data/backend_service.dart';
+import 'package:segma/app/di/service_providers.dart';
 
 class MockBackendService extends Mock implements BackendService {}
 
