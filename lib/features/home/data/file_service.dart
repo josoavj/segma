@@ -76,12 +76,18 @@ class FileService {
       '.config',
       '.local',
       '.mozilla',
-      'snap'
+      'snap',
     ];
-    for (final segment in path.split('/')) {
-      if (ignoredPatterns.contains(segment)) return true;
+    final normalizedPath = path.replaceAll('\\', '/').toLowerCase();
+    final segments = normalizedPath.split('/');
+
+    for (final segment in segments) {
+      if (ignoredPatterns.contains(segment)) {
+        return true;
+      }
     }
-    return path.contains('.wine/dosdevices/z:');
+
+    return normalizedPath.contains('.wine/dosdevices/z:');
   }
 
   Future<List<ImageModel>> loadImagesFromFolder(String folderPath) async {
