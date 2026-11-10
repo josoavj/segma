@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:segma/services/file_service.dart';
+import 'package:segma/features/home/data/file_service.dart';
 
 void main() {
   late FileService fileService;
