@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:segma/models/models.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
 
 /// Utilitaire pour le parsing de données lourdes sur des threads séparés (Isolates)
 class DataParser {
