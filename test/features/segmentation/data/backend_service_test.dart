@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:segma/services/backend_service.dart';
+import 'package:segma/features/segmentation/data/backend_service.dart';
 
 class MockDio extends Mock implements Dio {}
 
