@@ -1,0 +1,40 @@
+name: CI Flutter
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Installer les dépendances
+        run: flutter pub get
+
+      - name: Vérifier le formatage
+        if: runner.os == 'Linux'
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyse statique
+        run: flutter analyze
+
+      - name: Lancer les tests
+        run: flutter test
+        
