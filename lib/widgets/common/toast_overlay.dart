@@ -10,8 +10,9 @@ class ToastOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notification = ref.watch(notificationServiceProvider);
-    
-    if (notification == null || notification.type == NotificationType.critical) {
+
+    if (notification == null ||
+        notification.type == NotificationType.critical) {
       return const SizedBox.shrink();
     }
 
@@ -49,7 +50,7 @@ class ToastOverlay extends ConsumerWidget {
                 constraints: const BoxConstraints(maxWidth: 500),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: isDark 
+                  color: isDark
                       ? const Color(0xFF1E293B).withValues(alpha: 0.8)
                       : Colors.white.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(32),
@@ -91,7 +92,9 @@ class ToastOverlay extends ConsumerWidget {
                             child: Text(
                               notification.message,
                               style: TextStyle(
-                                color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
