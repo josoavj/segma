@@ -73,7 +73,8 @@ class _StorageInfoTileState extends State<StorageInfoTile> {
             }
 
             if (!snapshot.hasData) {
-              return const SettingsTile(title: 'Espace utilisé', subtitle: 'Erreur');
+              return const SettingsTile(
+                  title: 'Espace utilisé', subtitle: 'Erreur');
             }
 
             final data = snapshot.data!;
