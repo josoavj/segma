@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:segma/services/notification_service.dart';
-import 'package:segma/models/notification_model.dart';
+import 'package:segma/core/notifications/notification_service.dart';
+import 'package:segma/core/notifications/notification_model.dart';
 
 class ToastOverlay extends ConsumerWidget {
   const ToastOverlay({super.key});
