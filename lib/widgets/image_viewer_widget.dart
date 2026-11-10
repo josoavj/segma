@@ -42,14 +42,15 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     super.initState();
     _searchController = TextEditingController();
     _promptController = TextEditingController(text: 'all objects in the image');
-    
+
     // Utilisation de microtask pour éviter l'erreur de modification pendant le build
     Future.microtask(() {
       if (mounted) {
-        ref.read(segmentationPromptProvider.notifier).state = _promptController.text;
+        ref.read(segmentationPromptProvider.notifier).state =
+            _promptController.text;
       }
     });
-    
+
     _loadImageSize();
   }
 
@@ -103,8 +104,8 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
               .read(segmentImageProvider.notifier)
               .segment(widget.image.path)
               .catchError((e) {
-                debugPrint('Erreur segmentation auto: $e');
-              });
+            debugPrint('Erreur segmentation auto: $e');
+          });
         }
       });
     }
@@ -131,8 +132,8 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                   .read(segmentImageProvider.notifier)
                   .segment(widget.image.path)
                   .catchError((e) {
-                    debugPrint('Erreur segmentation: $e');
-                  });
+                debugPrint('Erreur segmentation: $e');
+              });
             },
           ),
           Expanded(
