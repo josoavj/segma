@@ -1,4 +1,4 @@
-import 'image_model.dart';
+import 'package:segma/features/home/models/image_model.dart';
 
 class FolderModel {
   final String id;
