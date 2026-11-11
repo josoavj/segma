@@ -15,7 +15,7 @@ class Settings:
     DEBUG = os.getenv("DEBUG", "False").lower() == "true"
     
     # --- Server ---
-    HOST = os.getenv("HOST", "0.0.0.0")
+    HOST = os.getenv("HOST", "127.0.0.1")
     PORT = int(os.getenv("PORT", 8000))
     
     # --- Model SAM 3 ---
@@ -34,10 +34,11 @@ class Settings:
     OUTPUT_DIR = os.getenv("OUTPUT_DIR", str(BASE_DIR / "data" / "masks"))
     
     # --- CORS ---
-    # Autoriser localhost pour Flutter Web et l'IP du serveur pour Flutter Mobile
+    # Le backend est destiné à un usage local. Les origines web peuvent être
+    # ajustées explicitement via CORS_ORIGINS si nécessaire.
     CORS_ORIGINS = os.getenv(
         "CORS_ORIGINS",
-        "http://localhost:3000,http://localhost:8080,*",
+        "http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000,http://127.0.0.1:8080",
     ).split(",")
 
 settings = Settings()
