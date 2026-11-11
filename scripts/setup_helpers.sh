@@ -22,7 +22,7 @@ export SEGMA_PYTHON="$PYTHON_BIN"
 function segma-backend() {
     cd "\$SEGMA_PROJECT_ROOT/backend"
     echo "[BACKEND] Démarrage backend SAM3..."
-    "\$SEGMA_PYTHON" -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    "\$SEGMA_PYTHON" main.py
 }
 
 # Tester l'installation SAM3
