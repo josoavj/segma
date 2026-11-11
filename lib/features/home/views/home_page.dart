@@ -23,9 +23,7 @@ class HomePage extends ConsumerWidget {
       if ((previous == null && next != null) ||
           (previous != null && next == null) ||
           (previous != null && next != null && previous.path != next.path)) {
-        ref.read(currentSegmentationProvider.notifier).state = null;
-        ref.read(segmentationErrorProvider.notifier).state = null;
-        ref.read(segmentationLoadingProvider.notifier).state = false;
+        ref.read(segmentImageProvider.notifier).reset();
       }
     });
 
