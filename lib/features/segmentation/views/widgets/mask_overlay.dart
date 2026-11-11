@@ -65,7 +65,7 @@ Future<Uint8List> _generateMaskImageIsolated(_MaskParams params) async {
   }
 }
 
-class MaskOverlay extends StatelessWidget {
+class MaskOverlay extends StatefulWidget {
   final SegmentationResult segmentation;
   final String imagePath;
 
@@ -76,11 +76,36 @@ class MaskOverlay extends StatelessWidget {
   });
 
   @override
+  State<MaskOverlay> createState() => _MaskOverlayState();
+}
+
+class _MaskOverlayState extends State<MaskOverlay> {
+  late Future<Uint8List> _maskFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _maskFuture = _generateMask();
+  }
+
+  @override
+  void didUpdateWidget(covariant MaskOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.segmentation != widget.segmentation ||
+        oldWidget.imagePath != widget.imagePath) {
+      _maskFuture = _generateMask();
+    }
+  }
+
+  Future<Uint8List> _generateMask() => compute(
+        _generateMaskImageIsolated,
+        _MaskParams(widget.segmentation, widget.imagePath),
+      );
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List>(
-      // Utilisation de compute() pour déporter le calcul dans un autre thread
-      future: compute(
-          _generateMaskImageIsolated, _MaskParams(segmentation, imagePath)),
+      future: _maskFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
