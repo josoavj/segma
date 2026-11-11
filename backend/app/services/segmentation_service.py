@@ -1,9 +1,9 @@
 import logging
-import numpy as np
-import os
 import re
 import uuid
+
 import anyio
+import numpy as np
 from pathlib import Path
 
 from app.exceptions import SegmentationException
@@ -53,81 +53,33 @@ class SegmentationService:
 
         return cleaned_prompt
 
-    async def segment_batch(
-        self,
-        folder_path: str,
-        prompt: str,
-        confidence_threshold: float = 0.25,
-    ):
-        """
-        Traite un dossier d'images en streaming.
-        Génère un itérateur JSON pour le suivi en temps réel.
-        """
-        # Sécurisation du dossier
-        safe_folder_name = Path(folder_path).name
-        input_dir = Path(settings.UPLOAD_DIR) / safe_folder_name
-
-        if not input_dir.exists() or not input_dir.is_dir():
-             yield {
-                "status": "error",
-                "current": 0,
-                "total": 0,
-                "error": f"Dossier {safe_folder_name} non trouvé."
-            }
-             return
-
-        image_paths = [
-            f for f in os.listdir(input_dir)
-            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
-        ]
-
-        total = len(image_paths)
-        for idx, filename in enumerate(image_paths):
-            try:
-                result = await self.segment_by_prompt(
-                    filename=f"{safe_folder_name}/{filename}" if "/" in folder_path else filename,
-                    prompt=prompt,
-                    confidence_threshold=confidence_threshold
-                )
-                yield {
-                    "status": "success",
-                    "current": idx + 1,
-                    "total": total,
-                    "image_path": filename,
-                    "result": result
-                }
-            except Exception as e:
-                logger.error(f"Erreur batch sur {filename}: {e}")
-                yield {
-                    "status": "error",
-                    "current": idx + 1,
-                    "total": total,
-                    "image_path": filename,
-                    "error": str(e)
-                }
-
     def _segment_by_prompt_sync(
         self,
         filename: str,
-        prompt: str,
+        prompt: str | None,
         confidence_threshold: float = 0.25,
+        points: list[dict] | None = None,
     ) -> dict:
         """
         Pipeline synchrone autonome exécuté dans un Worker Thread.
         Inférence SAM 3 -> Étiquetage YOLO -> Écriture binaire du masque.
         """
         try:
-            safe_filename = os.path.normpath(filename).lstrip(os.sep)
-            image_path = Path(settings.UPLOAD_DIR) / safe_filename
+            upload_root = Path(settings.UPLOAD_DIR).resolve()
+            image_path = (upload_root / filename).resolve()
+            try:
+                safe_filename = image_path.relative_to(upload_root).as_posix()
+            except ValueError as e:
+                raise SegmentationException("Chemin d'image invalide.") from e
 
-            if not image_path.exists():
+            if not image_path.is_file():
                 raise SegmentationException(f"L'image {safe_filename} n'existe pas sur le serveur.")
 
-            concept_prompt = self._normalize_text_prompt(prompt)
+            concept_prompt = self._normalize_text_prompt(prompt) if prompt else None
             logger.info(
                 "🚀 Démarrage Pipeline SAM 3 Worker Thread pour: %s (Prompt: '%s')",
                 safe_filename,
-                concept_prompt,
+                concept_prompt or "zones visuelles",
             )
             from app.models.sam3.image_processor import ImageProcessor
             
@@ -142,14 +94,31 @@ class SegmentationService:
             seg_dir.mkdir(parents=True, exist_ok=True)
 
             # 3. Inférence SAM 3 par concept textuel
+            input_boxes = []
+            input_boxes_labels = []
+            for point in points or []:
+                center_x = float(point["x"]) * width
+                center_y = float(point["y"]) * height
+                half_width = max(2.0, width * 0.015)
+                half_height = max(2.0, height * 0.015)
+                input_boxes.append([
+                    max(0.0, center_x - half_width),
+                    max(0.0, center_y - half_height),
+                    min(float(width), center_x + half_width),
+                    min(float(height), center_y + half_height),
+                ])
+                input_boxes_labels.append(int(point["label"]))
+
             raw_masks = self.sam3_wrapper.segment_by_text(
                 image,
                 concept_prompt,
                 threshold=confidence_threshold,
+                input_boxes=input_boxes or None,
+                input_boxes_labels=input_boxes_labels or None,
             )
             
             if not raw_masks:
-                logger.warning(f"Aucun objet trouvé pour le concept '{concept_prompt}'")
+                logger.warning("Aucun objet trouvé pour le prompt '%s'", concept_prompt or "zones visuelles")
                 return {
                     "image_path": safe_filename,
                     "resolution": f"{width}x{height}",
@@ -175,7 +144,7 @@ class SegmentationService:
 
                 objects_data.append({
                     "object_id": idx,
-                    "label": labels_map.get(idx, concept_prompt),
+                    "label": labels_map.get(idx, concept_prompt or "objet sélectionné"),
                     "confidence": float(obj["score"]),
                     "bbox": obj["bbox"],
                     "mask_path": str(mask_path.absolute()),
@@ -197,8 +166,9 @@ class SegmentationService:
     async def segment_by_prompt(
         self,
         filename: str,
-        prompt: str,
+        prompt: str | None,
         confidence_threshold: float = 0.25,
+        points: list[dict] | None = None,
     ) -> dict:
         """
         Méthode asynchrone non-bloquante.
@@ -210,6 +180,7 @@ class SegmentationService:
                 filename,
                 prompt,
                 confidence_threshold,
+                points,
             )
         finally:
             model_manager.clear_vram_cache()
