@@ -1,5 +1,4 @@
 import aiofiles
-import os
 import uuid
 from pathlib import Path
 
@@ -20,41 +19,41 @@ class UploadValidationError(Exception):
 class UploadService:
     """Gère la validation et la persistance des images entrantes."""
 
-    allowed_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
+    allowed_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
     async def save_image(self, file: UploadFile) -> ImageUploadResponse:
         filename = file.filename or ""
         extension = Path(filename).suffix.lower()
 
         if extension not in self.allowed_extensions:
-            raise UploadValidationError("Seuls JPG, PNG et BMP sont supportés.")
-
-        # On ne charge pas tout en mémoire d'un coup (content = await file.read())
-        # On stream le contenu pour économiser de la RAM sur les gros fichiers
+            raise UploadValidationError("Seuls JPG, PNG, BMP et WebP sont supportés.")
 
         ensure_runtime_dirs()
         stored_filename = f"{uuid.uuid4().hex}{extension}"
         file_path = Path(settings.UPLOAD_DIR) / stored_filename
 
-        # Utilisation de aiofiles pour ne pas bloquer le thread principal
-        async with aiofiles.open(file_path, "wb") as output:
-            while chunk := await file.read(1024 * 1024):  # 1MB chunks
-                await output.write(chunk)
-
-        file_size = os.path.getsize(file_path)
-        if file_size > settings.MAX_FILE_SIZE:
-            os.remove(file_path)
-            raise UploadValidationError("L'image est trop lourde.", status_code=413)
-
-        if file_size == 0:
-            os.remove(file_path)
-            raise UploadValidationError("Le fichier uploadé est vide.")
-
         try:
+            file_size = 0
+            async with aiofiles.open(file_path, "wb") as output:
+                while chunk := await file.read(1024 * 1024):
+                    if file_size + len(chunk) > settings.MAX_FILE_SIZE:
+                        raise UploadValidationError(
+                            "L'image est trop lourde.", status_code=413
+                        )
+                    await output.write(chunk)
+                    file_size += len(chunk)
+
+            if file_size == 0:
+                raise UploadValidationError("Le fichier uploadé est vide.")
+
             from PIL import Image
 
             with Image.open(file_path) as image:
                 width, height = image.size
+                image.verify()
+        except UploadValidationError:
+            file_path.unlink(missing_ok=True)
+            raise
         except Exception as e:
             file_path.unlink(missing_ok=True)
             raise UploadValidationError(
