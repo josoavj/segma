@@ -18,6 +18,7 @@ class _ModelConfigurationTileState
   late String _selectedModel;
   late String _selectedDevice;
   bool _isChanging = false;
+  bool _initializedFromBackend = false;
 
   final List<String> _availableModels = [
     backend_config.BackendConfig.sam3Model
@@ -34,14 +35,27 @@ class _ModelConfigurationTileState
     setState(() => _isChanging = true);
 
     try {
-      await ref.read(changeModelProvider((model, device)).future);
+      final result =
+          await ref.read(changeModelProvider((model, device)).future);
 
       if (mounted) {
-        ref
-            .read(notificationServiceProvider.notifier)
-            .success('Modèle changé: $model sur $device');
-        // Invalider les providers pour forcer la mise à jour
+        final actualDevice = result['device'] as String? ?? device;
+        final isLoaded = result['is_loaded'] as bool? ?? false;
+        setState(() {
+          _selectedModel = model;
+          _selectedDevice = actualDevice;
+        });
+        if (isLoaded) {
+          ref.read(notificationServiceProvider.notifier).success(
+                'Modèle prêt sur $actualDevice',
+              );
+        } else {
+          ref.read(notificationServiceProvider.notifier).error(
+                'Le modèle n’a pas pu être chargé sur $actualDevice.',
+              );
+        }
         ref.invalidate(modelInfoProvider);
+        ref.invalidate(healthCheckProvider);
       }
     } catch (e, stack) {
       if (mounted) {
@@ -61,7 +75,20 @@ class _ModelConfigurationTileState
     final modelInfoAsync = ref.watch(modelInfoProvider);
     final modelInfo = modelInfoAsync.asData?.value;
     final cudaAvailable = modelInfo?['cuda_available'] as bool? ?? false;
-    final availableDevices = cudaAvailable ? ['cpu', 'cuda'] : ['cpu'];
+    final mpsAvailable = modelInfo?['mps_available'] as bool? ?? false;
+    final availableDevices = [
+      'cpu',
+      if (cudaAvailable) 'cuda',
+      if (mpsAvailable) 'mps',
+    ];
+
+    if (modelInfo != null && !_initializedFromBackend) {
+      _selectedModel = modelInfo['model_type'] as String? ?? _selectedModel;
+      final backendDevice = modelInfo['device'] as String?;
+      _selectedDevice =
+          availableDevices.contains(backendDevice) ? backendDevice! : 'cpu';
+      _initializedFromBackend = true;
+    }
 
     if (!availableDevices.contains(_selectedDevice)) {
       _selectedDevice = 'cpu';
@@ -155,11 +182,15 @@ class _ModelConfigurationTileState
                   child: Row(
                     children: [
                       Icon(
-                        device == 'cuda' ? Icons.speed : Icons.memory,
+                        device == 'cpu' ? Icons.memory : Icons.speed,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
-                      Text(device == 'cuda' ? 'GPU (CUDA)' : 'CPU'),
+                      Text(switch (device) {
+                        'cuda' => 'GPU (CUDA)',
+                        'mps' => 'GPU (Apple Silicon)',
+                        _ => 'CPU',
+                      }),
                     ],
                   ),
                 );
