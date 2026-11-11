@@ -21,10 +21,11 @@ async def health():
         # Récupération des infos temps réel depuis le manager singleton
         model_info = model_manager.get_model_info()
         
+        is_loaded = model_info['is_loaded']
         return HealthResponse(
-            status="healthy",
+            status="healthy" if is_loaded else "degraded",
             device=model_info['device'],
-            model_loaded=model_info['is_loaded'],
+            model_loaded=is_loaded,
             model_type="SAM 3", # On force le type cohérent avec ton projet
             api_version=API_VERSION
         )
