@@ -1,373 +1,67 @@
-# FAQ - SAM3 SEGMA
+# FAQ SEGMA
 
-## Questions Générales
+## Utilisation locale
 
-### Q: C'est quoi SAM3?
+### Où s'exécute SEGMA ?
 
-**R**: Segment Anything Model 3. Un modèle d'IA qui peut segmenter (découper) n'importe quel objet dans une image basé sur des descriptions texte, des points, ou des boîtes.
+L'interface Flutter et l'API FastAPI tournent sur le même ordinateur. Le backend écoute par défaut sur `127.0.0.1:8000`; aucun compte utilisateur SEGMA n'est nécessaire.
 
-### Q: Pourquoi SAM3 et pas SAM1?
+### Comment démarrer l'application ?
 
-**R**: 
+Installez les dépendances comme indiqué dans le [guide d'installation](../setup/INSTALLATION.md), lancez `bash scripts/run_server.sh`, puis démarrez Flutter dans un autre terminal avec `flutter run -d linux` (ou la cible de bureau disponible).
 
-- SAM1: Peut faire points/boxes seulement
-- SAM3: Points/boxes **+ segmentation par texte**
-- SAM3 est plus puissant et c'est la version officielle actuelle
+### Pourquoi l'interface ne se connecte-t-elle pas ?
 
-### Q: Ça coûte combien?
+Vérifiez que le backend est lancé et ouvrez `http://127.0.0.1:8000/api/v3/health`. L'URL Flutter est centralisée dans `lib/core/config/backend_config.dart` et peut être remplacée au build avec `--dart-define=BACKEND_URL=...`.
 
-**R**: Gratuit! SAM3 est open-source par Meta. Il y a un petit coût CPU/GPU mais c'est gratuit du côté service.
+## Modèle et segmentation
 
-### Q: Ça fonctionne hors-ligne?
+### Pourquoi faut-il Hugging Face ?
 
-**R**: Non. Besoin de:
+Le modèle `facebook/sam3` est téléchargé depuis Hugging Face. Il peut être nécessaire d'accepter ses conditions et de s'authentifier localement avec `huggingface-cli login`. Ce n'est pas un compte SEGMA.
 
-- Internet pour télécharger le modèle (première fois)
-- Token HuggingFace pour l'authentification
+### Comment segmenter une image ?
 
-Une fois le modèle téléchargé (~2-3 GB), il peut fonctionner local.
+Choisissez un dossier et une image, saisissez un prompt puis lancez la segmentation. Les masques et les boîtes englobantes s'affichent dans le visualiseur.
 
----
+### À quoi sert l'éditeur interactif ?
 
-## Installation & Configuration
+Les clics bleus ajoutent des zones positives et les clics rouges des zones négatives. L'interface envoie les coordonnées normalisées; le backend les convertit en petites boîtes avant de les transmettre au modèle SAM 3.
 
-### Q: J'ai quelle version de Python?
+### Le modèle peut-il utiliser le CPU ?
 
-**R**: Vérifiez:
-```bash
-/home/shadowcraft/.pyenv/bin/python --version
-```
+Oui. CUDA est disponible avec un GPU NVIDIA compatible; MPS peut être proposé sur Apple Silicon. Le choix effectif du device et son état sont affichés dans Paramètres.
 
-### Q: SAM3 est installé?
+### Comment fonctionne le traitement par lot ?
 
-**R**: Vérifiez:
-```bash
-/home/shadowcraft/.pyenv/bin/python -c "import sam3; print(sam3.__version__)"
-```
+Flutter parcourt les images directement dans le dossier choisi, envoie chaque image au backend puis la segmente. La progression est affichée pendant ce traitement séquentiel.
 
-### Q: Comment créer un token HuggingFace?
+## API
 
-**R**:
+Les routes actuelles utilisent le préfixe `/api/v3` :
 
-1. Allez sur https://huggingface.co/settings/tokens
-2. Cliquez "New token"
-3. Donnez un nom (ex: "segma")
-4. Type: "Read"
-5. Copier le token
+- `GET /api/v3/health`
+- `POST /api/v3/upload`
+- `POST /api/v3/segment`
+- `GET /api/v3/model/info`
+- `POST /api/v3/model/change`
 
-### Q: Où mettre le token HuggingFace?
+Pour les corps JSON et exemples `curl`, consultez [API_USAGE.md](../../backend/API_USAGE.md). Il n'y a pas de route batch : l'application orchestre le lot côté Flutter.
 
-**R**: Authentifier avec:
-```bash
-/home/shadowcraft/.pyenv/bin/huggingface-cli login
-# Collez le token
-```
+## Problèmes fréquents
 
-Ou variable d'env:
-```bash
-export HF_TOKEN="hf_your_token_here"
-```
+### « Impossible de contacter le serveur »
 
-### Q: Je dois accepter les conditions où?
+Lancez le backend et vérifiez son adresse ainsi que le port `8000`. L'API de santé permet de distinguer un backend arrêté d'un modèle qui n'a pas fini de charger.
 
-**R**: https://huggingface.co/facebook/sam3
+### Aucun masque n'est renvoyé
 
-Bouton: "I have read the license and agree with the terms"
+Essayez un prompt plus court ou plus précis, et vérifiez que l'image contient bien l'objet demandé. Dans l'éditeur, posez d'abord un clic positif sur l'objet puis des clics négatifs si nécessaire.
 
----
+### CUDA manque de mémoire
 
-## Utilisation & Fonctionnement
+Choisissez CPU dans Paramètres, fermez les autres applications utilisant le GPU ou essayez une image plus petite.
 
-### Q: Pourquoi SAM3 télécharge 2-3 GB?
+### L'image ne s'ouvre pas ou le backend refuse l'upload
 
-**R**: C'est le **poids du modèle** neural. SAM3 est un grand modèle d'IA.
-
-### Q: Ça met combien de temps?
-
-**R**: 
-
-- Téléchargement: 5-10 minutes (dépend internet)
-- Première utilisation: 30-60 secondes (load modèle)
-- Utilisation suivante: 100ms-1s (CPU) ou 50-100ms (GPU)
-
-### Q: J'ai besoin d'un GPU?
-
-**R**: Non obligatoire mais:
-
-- Sans GPU: 2-5 secondes par image (CPU)
-- Avec GPU: 100-300ms par image
-- **Recommandé**: GPU pour une meilleure expérience
-
-### Q: CUDA c'est quoi?
-
-**R**: CUDA = interface NVIDIA pour utiliser les GPUs NVIDIA. Pas besoin si vous avez pas de GPU.
-
----
-
-## Prompts Texte
-
-### Q: Quels prompts fonctionnent?
-
-**R**: Termes génériques en **anglais**:
-
-- "cars"
-- "people"
-- "trees"
-- "Toyota Camry" (Non recommandé)
-- "la voiture" (français) (Non recommandé)
-
-### Q: Le français marche?
-
-**R**: Non. SAM3 est entraîné en anglais seulement.
-
-### Q: Aucun objet détecté, pourquoi?
-
-**R**: Vérifiez:
-
-1. Prompt en anglais?
-2. Objet vraiment dans l'image?
-3. Essayez un prompt plus générique ("objects")
-4. Réduisez confidence_threshold
-
-### Q: Trop d'objets détectés?
-
-**R**:
-
-1. Prompt plus spécifique ("cars" au lieu de "objects")
-2. Augmentez confidence_threshold
-3. Testez différentes formulations
-
-### Q: "Car" vs "cars" - différence?
-
-**R**: Généralement aucune. Utilisez la forme naturelle.
-
----
-
-## API & Backend
-
-### Q: Backend démarre où?
-
-**R**: Par défaut: http://localhost:8000
-
-### Q: Comment tester l'API?
-
-**R**:
-```bash
-# Health check
-curl http://localhost:8000/api/v1/health
-
-# Voir la documentation
-http://localhost:8000/docs
-```
-
-### Q: Port 8000 déjà utilisé?
-
-**R**:
-```bash
-# Utiliser autre port
-/home/shadowcraft/.pyenv/bin/uvicorn app.main:app --port 8001
-```
-
-### Q: Comment je change le device (CPU/CUDA)?
-
-**R**: Via l'API:
-```bash
-curl -X POST http://localhost:8000/api/v1/model/change \
-  -H "Content-Type: application/json" \
-  -d '{"model_type": "vit_b", "device": "cuda"}'
-```
-
----
-
-## Flutter & Frontend
-
-### Q: Flutter ne trouve pas le backend?
-
-**R**: 
-
-1. Backend en cours d'exécution?
-2. Port correct dans code Flutter?
-3. Firewall bloque le port 8000?
-
-### Q: Comment configurer l'URL du backend?
-
-**R**: Dans `lib/core/config/backend_config.dart`:
-```dart
-const String backendUrl = "http://localhost:8000";
-```
-
-### Q: Les bounding boxes ne s'affichent pas?
-
-**R**: Vérifiez que SAM3 détecte des objets (via curl).
-
----
-
-## Dépannage
-
-### Q: "SAM3 non disponible"?
-
-**R**: SAM3 pas installé:
-```bash
-/home/shadowcraft/.pyenv/bin/pip install sam3>=1.0
-```
-
-### Q: "Unauthorized"?
-
-**R**: Problème HuggingFace:
-```bash
-/home/shadowcraft/.pyenv/bin/huggingface-cli login
-# Accepter conditions: https://huggingface.co/facebook/sam3
-```
-
-### Q: "CUDA out of memory"?
-
-**R**: Votre GPU n'a pas assez de VRAM:
-
-1. Utiliser CPU (plus lent)
-2. Réduire taille image
-3. Utiliser ViT-B au lieu de ViT-H
-
-### Q: ModuleNotFoundError?
-
-**R**: Mauvais chemin ou venv:
-```bash
-# Vérifier Python
-/home/shadowcraft/.pyenv/bin/python --version
-
-# Vérifier imports
-/home/shadowcraft/.pyenv/bin/python -c "import sam3"
-```
-
-### Q: Backend crashe sans raison?
-
-**R**: Regardez les logs:
-```bash
-LOGLEVEL=DEBUG /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload --log-level debug
-```
-
----
-
-## Performance
-
-### Q: Pourquoi c'est lent?
-
-**R**: Causes possibles:
-
-- CPU seulement (au lieu de GPU)
-- Grosse image
-- Gros modèle (ViT-H)
-- Première utilisation (load du modèle)
-
-### Q: Combien de temps une segmentation?
-
-**R**:
-
-- GPU ViT-B: 100-150ms
-- GPU ViT-H: 200-500ms
-- CPU ViT-B: 1-2s
-- CPU ViT-H: 5-10s
-
-### Q: Comment accélérer?
-
-**R**:
-
-1. Utiliser GPU
-2. Réduire taille image
-3. Utiliser ViT-B au lieu de ViT-H
-
----
-
-## Erreurs Courantes
-
-### Q: "No module named 'app'"?
-
-**R**: Mauvais répertoire:
-```bash
-# BON:
-cd /home/shadowcraft/Projets/segma/backend
-/home/shadowcraft/.pyenv/bin/uvicorn app.main:app --reload
-
-# MAUVAIS:
-cd /home/shadowcraft/Projets/segma
-/home/shadowcraft/.pyenv/bin/uvicorn backend.app.main:app
-```
-
-### Q: "PermissionError: Cannot open file"?
-
-**R**: Permissions d'accès:
-```bash
-chmod -R 755 /home/shadowcraft/Projets/segma
-```
-
-### Q: Les masques ne se sauvegardent pas?
-
-**R**:
-
-1. Espace disque insuffisant?
-2. Permissions d'écriture?
-3. Répertoire .segmentation existe?
-
-```bash
-# Vérifier
-df -h
-ls -la /tmp/test/.segmentation_*/
-```
-
----
-
-## Modèles
-
-### Q: Différence ViT-B, L, H?
-
-**R**:
-
-| Model | Size | Speed | Quality | GPU |
-|-------|------|-------|---------|-----|
-| B | 95 MB | Rapide | 75% | 2GB |
-| L | 308 MB | Normal | 78% | 3GB |
-| H | 2.5GB | Lent | 80% | 4GB |
-
-### Q: Quel modèle choisir?
-
-**R**: 
-
-- Commencez par ViT-B
-- Si trop lent→ GPU
-- Si pas assez précis→ ViT-H
-
-### Q: Comment changer de modèle?
-
-**R**:
-```python
-# Via API
-POST /api/v1/model/change
-{"model_type": "vit_h", "device": "cuda"}
-```
-
----
-
-## Résolution des Problèmes
-
-### Q: J'ai une erreur, comment je la rapporte?
-
-**R**: 
-
-1. Notez l'erreur **exacte**
-2. Consultez [TROUBLESHOOTING_SAM3.md](../troubleshooting/TROUBLESHOOTING_SAM3.md)
-3. Essayez les solutions suggérées
-4. Regardez les logs avec `LOGLEVEL=DEBUG`
-
-### Q: Comment je regarde les logs?
-
-**R**:
-```bash
-# Lancer avec logs verbose
-LOGLEVEL=DEBUG /home/shadowcraft/.pyenv/bin/uvicorn app.main:app --log-level debug 2>&1 | tee /tmp/segma.log
-
-# Voir logs après
-tail -100 /tmp/segma.log
-```
-
----
-
-**Besoin d'aide? Consultez les guides complets dans docs/**
+Vérifiez que le fichier est accessible, non vide, au format JPG, PNG, BMP ou WebP, et qu'il respecte `MAX_FILE_SIZE` dans la configuration backend.

@@ -43,7 +43,7 @@ Si vous voulez que SAM 3 détecte tout ce qu'il voit sans distinction.
 ## Conseils pour de Meilleurs Résultats
 
 1.  **Ajustez le Seuil de Confiance** : Si vous avez trop de "faux positifs" (des objets segmentés par erreur), augmentez le seuil de confiance dans les paramètres de l'application (ex: passez de 0.25 à 0.50).
-2.  **Affinement Interactif** : Si un prompt texte ne suffit pas, utilisez l'**Éditeur Interactif** de SEGMA. Cliquez sur l'objet pour l'inclure ou sur les zones erronées pour les exclure.
+2.  **Affinement Interactif** : Si un prompt texte ne suffit pas, utilisez l'**Éditeur Interactif** de SEGMA. Cliquez sur l'objet pour ajouter une zone positive ou sur une zone erronée pour l'exclure. Le backend transmet ces clics sous forme de petites boîtes positives/négatives à SAM 3.
 3.  **Singulier vs Pluriel** : Généralement, SAM 3 comprend les deux de la même manière ("cat" vs "cats"), mais le pluriel peut parfois aider à mieux capturer les groupes serrés.
 
 ---

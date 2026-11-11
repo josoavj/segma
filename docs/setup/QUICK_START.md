@@ -44,10 +44,10 @@ flutter run -d linux # ou windows
 2. Saisissez un prompt (ex: "car") et validez.
 3. Utilisez l'éditeur pour affiner avec des clics.
 
-### Traitement par Lot (Batch)
+### Traitement par lot
 1. Sélectionnez un dossier dans la barre latérale.
 2. Cliquez sur le bouton **"Traiter le dossier"**.
-3. Suivez la progression en temps réel via la boîte de dialogue.
+3. Flutter envoie puis traite les images du dossier une par une; la boîte de dialogue affiche la progression.
 
 ---
 
@@ -71,7 +71,7 @@ curl http://localhost:8000/api/v3/health
 ## Conseils de Productivité
 
 1. **Premier lancement** : Le premier traitement d'image sera plus long car SAM 3 télécharge les poids du modèle (~2.4 Go). Soyez patient.
-2. **GPU NVIDIA** : Pour une expérience fluide dans l'éditeur interactif, un GPU avec support CUDA est fortement recommandé.
+2. **GPU** : CUDA (NVIDIA) ou MPS (Apple Silicon) peut accélérer l'inférence; le CPU reste disponible.
 3. **Prompts** : SAM 3 est plus performant avec des prompts en anglais (ex: "all objects", "car", "human face").
 
 **Besoin d'aide ?** Consultez la [FAQ](../troubleshooting/FAQ.md).

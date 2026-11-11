@@ -1,7 +1,7 @@
 # --- Framework Core & IA ---
 # SAM 3 nécessite PyTorch 2.7+ pour le support natif des nouveaux kernels d'attention
 torch==2.7.0
-torchvision==0.20.0
+torchvision==0.22.0
 
 # Installation de Transformers depuis la source pour SAM 3 (Crucial en 2026)
 git+https://github.com/huggingface/transformers.git

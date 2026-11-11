@@ -9,8 +9,6 @@ echo "[BACKEND] Lancement du serveur backend SAM3 & YOLO..."
 echo "Racine du projet: $PROJECT_ROOT"
 echo "Utilisation de Python: $PYTHON_BIN"
 
+# Lancer le point d'entrée pour que HOST, PORT et DEBUG du backend soient appliqués.
 cd "$BACKEND_DIR"
-
-# Lancer le serveur avec l'interpréteur détecté
-export PYTHONPATH="$BACKEND_DIR:$PYTHONPATH"
-"$PYTHON_BIN" -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+exec "$PYTHON_BIN" main.py

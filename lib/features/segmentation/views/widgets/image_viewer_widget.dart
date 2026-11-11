@@ -52,6 +52,23 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     });
 
     _loadImageSize();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _segmentCurrentImage();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ImageViewerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.image.path != widget.image.path) {
+      _showMask = false;
+      _imageSizeLoaded = false;
+      ref.read(segmentImageProvider.notifier).reset();
+      _loadImageSize();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _segmentCurrentImage();
+      });
+    }
   }
 
   @override
@@ -62,12 +79,13 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   }
 
   Future<void> _loadImageSize() async {
+    final imagePath = widget.image.path;
     try {
-      final file = File(widget.image.path);
+      final file = File(imagePath);
       if (await file.exists()) {
         final imageBytes = await file.readAsBytes();
         final image = img.decodeImage(imageBytes);
-        if (image != null) {
+        if (image != null && mounted && widget.image.path == imagePath) {
           setState(() {
             _imageSize = Size(image.width.toDouble(), image.height.toDouble());
             _imageSizeLoaded = true;
@@ -77,6 +95,15 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     } catch (e) {
       debugPrint('Erreur lors du chargement de la taille de l\'image: $e');
     }
+  }
+
+  void _segmentCurrentImage() {
+    ref
+        .read(segmentImageProvider.notifier)
+        .segment(widget.image.path)
+        .catchError((e) {
+      debugPrint('Erreur segmentation automatique: $e');
+    });
   }
 
   void _handleBackNavigation(BuildContext context) {
@@ -90,25 +117,9 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(segmentationLoadingProvider);
-    ref.watch(segmentationErrorProvider);
     final segmentState = ref.watch(segmentImageProvider);
 
     final currentSeg = segmentState.whenData((data) => data).value;
-    final hasError = segmentState.hasError;
-
-    // Déclencher la segmentation seulement si pas déjà en erreur
-    if (currentSeg == null && !isLoading && !hasError) {
-      Future.microtask(() {
-        if (mounted) {
-          ref
-              .read(segmentImageProvider.notifier)
-              .segment(widget.image.path)
-              .catchError((e) {
-            debugPrint('Erreur segmentation auto: $e');
-          });
-        }
-      });
-    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F),

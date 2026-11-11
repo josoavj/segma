@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
-from fastapi.responses import StreamingResponse
-import json
 import logging
 import os
 
@@ -20,27 +18,14 @@ segmentation_service = SegmentationService()
 upload_service = UploadService()
 
 
-@router.post("/segment/batch")
-async def segment_batch(request: SegmentationRequest):
-    """Traitement par lot d'un dossier complet avec streaming des résultats et verrou GPU."""
-    async def event_generator():
-        async with model_manager.inference_lock:
-            async for update in segmentation_service.segment_batch(
-                folder_path=request.filename,
-                prompt=request.prompt,
-                confidence_threshold=request.confidence_threshold
-            ):
-                yield json.dumps(update) + "\n"
-
-    return StreamingResponse(event_generator(), media_type="application/x-ndjson")
-
-
 @router.post("/segment", response_model=SegmentationResponse)
 async def segment_image(request: SegmentationRequest):
     """Segmente une image par prompt texte (SAM 3 - Promptable Concept Segmentation)"""
 
-    if not request.prompt or len(request.prompt.strip()) < 2:
+    if request.prompt is not None and len(request.prompt.strip()) < 2 and not request.points:
         raise HTTPException(status_code=400, detail="Le prompt est trop court pour être traité.")
+    if not request.prompt and not request.points:
+        raise HTTPException(status_code=400, detail="Un prompt texte ou au moins une zone de sélection est requis.")
     
     try:
         # Acquisition du verrou asynchrone GPU pour garantir la sérialisation des inférences lourdes
@@ -49,6 +34,7 @@ async def segment_image(request: SegmentationRequest):
                 filename=request.filename,
                 prompt=request.prompt,
                 confidence_threshold=request.confidence_threshold,
+                points=[point.model_dump() for point in request.points],
             )
             return result
         

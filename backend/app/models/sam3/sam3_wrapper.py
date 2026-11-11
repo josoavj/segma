@@ -46,7 +46,14 @@ class SAM3Wrapper:
             "y2": int(y2)
         }
 
-    def segment_by_text(self, image: np.ndarray, prompt: str, threshold: float = 0.25):
+    def segment_by_text(
+        self,
+        image: np.ndarray,
+        prompt: str | None,
+        threshold: float = 0.25,
+        input_boxes: list[list[float]] | None = None,
+        input_boxes_labels: list[int] | None = None,
+    ):
         """
         Segment tous les objets correspondant au concept textuel (SAM 3 PCS).
         
@@ -77,11 +84,13 @@ class SAM3Wrapper:
                 image_pil = image
             
             # Traiter l'image avec le processor (conversion en tenseur + normalisation)
-            inputs = self.processor(
-                images=image_pil, 
-                text=prompt, 
-                return_tensors="pt"
-            ).to(self.device)
+            processor_args = {"images": image_pil, "return_tensors": "pt"}
+            if prompt:
+                processor_args["text"] = prompt
+            if input_boxes:
+                processor_args["input_boxes"] = [input_boxes]
+                processor_args["input_boxes_labels"] = [input_boxes_labels]
+            inputs = self.processor(**processor_args).to(self.device)
             
             # Inférence du modèle
             with torch.no_grad():
@@ -136,7 +145,7 @@ class SAM3Wrapper:
                         "bbox": bbox,
                     })
             
-            logger.info(f"✓ SAM 3 détecté {len(results)} objets pour prompt: '{prompt}'")
+            logger.info("✓ SAM 3 détecté %s objets (prompt: %s)", len(results), prompt or "zones visuelles")
             return results
             
         except Exception as e:

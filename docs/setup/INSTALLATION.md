@@ -4,17 +4,13 @@ Ce guide détaille l'installation de SEGMA. Nous recommandons l'utilisation des 
 
 ## ⚙️ Méthode Recommandée (Scripts)
 
-Le projet utilise un système de détection d'environnement intelligent.
+Le backend et l'application Flutter tournent sur le poste de travail. Le backend écoute sur `127.0.0.1` par défaut.
 
 ### 1. Initialisation
 ```bash
 bash scripts/init_project.sh
 ```
-Ce script va :
-- Détecter ou créer un environnement virtuel (`.venv`).
-- Installer toutes les dépendances Python nécessaires.
-- Vérifier la compatibilité CUDA.
-- Configurer les raccourcis de commande.
+Ce script détecte l'environnement Python puis installe les dépendances IA. Il ne crée pas de virtualenv automatiquement : créez-le d'abord si nécessaire. Il propose également des vérifications et la configuration des helpers.
 
 ### 2. Configuration Personnalisée (Optionnel)
 Si vous utilisez un environnement spécifique (ex: `pyenv`), créez un fichier `scripts/local_env.sh` (ce fichier est ignoré par Git) :
@@ -29,13 +25,23 @@ export VENV_PATH="/votre/chemin/vers/.pyenv"
 Si vous préférez tout gérer vous-même :
 
 ### 1. Environnement Backend (Python)
-...
 
-### Authentification HuggingFace
-Le modèle SAM 3 nécessite une licence acceptée sur HuggingFace.
+Depuis la racine du dépôt :
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements.txt
+```
+
+L'initialisation guidée peut ensuite être lancée avec `bash scripts/init_project.sh`.
+
+### Accès au modèle Hugging Face
+Le téléchargement du modèle peut nécessiter l'acceptation des conditions Hugging Face et une authentification locale.
 1. Créez un compte sur [huggingface.co](https://huggingface.co).
 2. Acceptez les conditions du modèle [facebook/sam3](https://huggingface.co/facebook/sam3).
-3. Connectez-vous via le CLI :
+3. Si l'accès est demandé, connectez-vous via le CLI :
 ```bash
 huggingface-cli login
 ```
@@ -60,9 +66,8 @@ flutter pub get
 
 ### Démarrer le Backend
 ```bash
-cd backend
-source venv/bin/activate
-uvicorn main:app --host 0.0.0.0 --port 8000
+source .venv/bin/activate
+bash scripts/run_server.sh
 ```
 Le serveur sera disponible sur `http://localhost:8000`.
 
@@ -84,4 +89,4 @@ Si le backend affiche `device: cpu` alors que vous avez un GPU :
 Si Flutter ne parvient pas à lire certains dossiers, vérifiez que votre utilisateur a les permissions nécessaires ou lancez en mode utilisateur (pas root).
 
 ### Latence au premier lancement
-C'est normal. Le premier chargement de SAM 3 peut prendre jusqu'à 5 minutes pour charger les poids du modèle en mémoire vidéo.
+Le backend télécharge les poids si nécessaire puis charge SAM 3 en mémoire. La durée dépend de la connexion Internet, du stockage et du matériel.

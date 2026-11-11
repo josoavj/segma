@@ -1,170 +1,51 @@
-# SEGMA API V3 - Guide d'Utilisation Complet
+# API SEGMA v3
 
-Ce guide détaille comment interagir avec le moteur de segmentation **SAM 3 (Promptable Concept Segmentation)** et **YOLOv8**.
+Le backend est prévu pour une utilisation locale. Par défaut, il écoute sur `127.0.0.1:8000`.
 
-## Points d'entrée (Endpoints)
+## Routes
 
-| Méthode | Endpoint | Description |
+| Méthode | Route | Description |
 | --- | --- | --- |
-| `GET` | `/api/v3/health` | État du système (GPU, SAM 3, Version) |
-| `POST` | `/api/v3/upload` | Téléchargement de l'image source |
-| `POST` | `/api/v3/segment` | Inférence IA (Image → Masques .bin) |
+| `GET` | `/api/v3/health` | État du serveur et du modèle |
+| `POST` | `/api/v3/upload` | Envoi d'une image multipart avec le champ `file` |
+| `POST` | `/api/v3/segment` | Segmentation textuelle ou guidée par zones visuelles |
+| `GET` | `/api/v3/model/info` | Informations du modèle et du device |
+| `POST` | `/api/v3/model/change` | Changement de device ou rechargement du modèle |
 
----
-
-## 1. Vérification de l'état (Health Check)
-
-Avant de lancer des calculs lourds, vérifiez si le GPU est disponible et si le modèle SAM 3 est chargé.
-
-**Requête :**
+## Vérifier le backend
 
 ```bash
-curl -X GET http://localhost:8000/api/v3/health
-
+curl http://127.0.0.1:8000/api/v3/health
 ```
 
-**Réponse (JSON) :**
-
-```json
-{
-  "status": "healthy",
-  "device": "cuda",
-  "model_loaded": true,
-  "model_type": "SAM 3",
-  "api_version": "1.0.0"
-}
-
-```
-
----
-
-## 2. Upload de l'image
-
-L'IA a besoin d'un chemin local pour traiter l'image. Cette étape sauvegarde le fichier sur le serveur.
-
-**Requête :**
+## Envoyer une image
 
 ```bash
-curl -X POST -F "file=@ma_machine.jpg" http://localhost:8000/api/v3/upload
-
+curl -F "file=@image.jpg" http://127.0.0.1:8000/api/v3/upload
 ```
 
-**Réponse (JSON) :**
+La réponse donne un nom généré par le backend, par exemple `a1b2c3.jpg`. Utilisez cette valeur de `image_path` comme `filename` pour segmenter.
 
-```json
-{
-  "filename": "ma_machine.jpg",
-  "image_path": "/absolut/path/to/segma/data/uploads/ma_machine.jpg",
-  "width": 1920,
-  "height": 1080,
-  "size_mb": 1.45
-}
-
-```
-
----
-
-## 3. Segmentation par Prompt (PCS)
-
-C'est ici que SAM 3 identifie les objets par leur nom et génère les masques binaires.
-
-**Requête :**
+## Segmentation par texte
 
 ```bash
-curl -X POST http://localhost:8000/api/v3/segment \
+curl -X POST http://127.0.0.1:8000/api/v3/segment \
   -H "Content-Type: application/json" \
-  -d '{
-    "image_path": "/path/to/ma_machine.jpg",
-    "prompt": "boulons de fixation et écrous",
-    "confidence_threshold": 0.3
-  }'
-
+  -d '{"filename":"a1b2c3.jpg","prompt":"red car","confidence_threshold":0.25}'
 ```
 
-**Réponse (JSON) :**
+## Segmentation guidée par clics
 
-```json
-{
-  "status": "success",
-  "objects_count": 2,
-  "objects": [
-    {
-      "object_id": 0,
-      "label": "bolt",
-      "confidence": 0.92,
-      "bbox": {"x1": 450, "y1": 300, "x2": 510, "y2": 360},
-      "mask_path": "/data/masks/seg_ma_machine/mask_0.bin",
-      "pixels_count": 3200
-    }
-  ]
-}
+Les coordonnées sont normalisées entre `0` et `1`; `label: 1` inclut une zone, `label: 0` l'exclut. Le backend transforme chaque clic en petite boîte et la transmet à SAM 3.
 
+```bash
+curl -X POST http://127.0.0.1:8000/api/v3/segment \
+  -H "Content-Type: application/json" \
+  -d '{"filename":"a1b2c3.jpg","points":[{"x":0.52,"y":0.41,"label":1},{"x":0.64,"y":0.49,"label":0}]}'
 ```
 
----
+La réponse de segmentation contient `image_path`, `resolution`, `objects_count`, `objects` et `segmentation_dir`. Chaque objet comprend `object_id`, `label`, `confidence`, `bbox`, `mask_path` et `pixels_count`. Un masque `.bin` est un tableau brut `uint8` d'un octet par pixel, de largeur et hauteur égales à l'image.
 
-## 4. Comprendre le format des masques (.bin)
+## Traitement par lot
 
-Le format `.bin` est un flux binaire brut (**raw data**) sans en-tête ni compression.
-
-* **Type de données** : `uint8` (1 octet par pixel).
-* **Valeurs** : `255` (Zone sélectionnée), `0` (Fond).
-* **Taille du fichier** : Exactement  de l'image originale.
-
-### Exemple de conversion .bin vers PNG (Python) :
-
-```python
-import numpy as np
-from PIL import Image
-
-# Charger le fichier binaire
-w, h = 1920, 1080
-mask_data = np.fromfile("mask_0.bin", dtype=np.uint8)
-mask_array = mask_data.reshape((h, w))
-
-# Sauvegarder en image classique
-Image.fromarray(mask_array).save("visual_mask.png")
-
-```
-
----
-
-## 5. Structure de stockage
-
-Le backend organise les fichiers pour éviter les conflits :
-
-```text
-data/
-├── uploads/              # Images originales (ma_machine.jpg)
-└── masks/
-    └── seg_ma_machine/   # Dossier spécifique à l'image
-        ├── mask_0.bin    # Masque du premier objet
-        ├── mask_1.bin    # Masque du second objet
-        └── metadata.json # (Optionnel) Copie des infos YOLO
-
-```
-
----
-
-## 6. Dépannage & Erreurs
-
-| Code HTTP | Cause possible | Solution |
-| --- | --- | --- |
-| **413** | Image trop lourde | Augmenter `MAX_FILE_SIZE` dans le `.env` |
-| **404** | Image path invalide | Vérifier que le chemin envoyé est bien celui retourné par `/upload` |
-| **500** | CUDA Out of Memory | Réduire la résolution de l'image ou utiliser `DEVICE=cpu` |
-| **500** | SAM 3 Timeout | Augmenter le timeout de votre client (Inférence > 2s) |
-
----
-
-## 7. Note pour l'intégration Flutter
-
-Pour afficher les masques sur mobile :
-
-1. Utilisez `File(path).readAsBytesSync()` pour obtenir un `Uint8List`.
-2. Ne convertissez pas tout en PNG sur le serveur (trop lent).
-3. Utilisez un `CustomPainter` dans Flutter pour dessiner le masque binaire directement sur l'image originale.
-
----
-
-**Version API** : 1.0.0 (Janvier 2026)
+Le traitement par lot de l'application est géré par Flutter : chaque image du dossier local est uploadée puis envoyée à `/api/v3/segment`. Il n'existe pas de route batch côté backend.

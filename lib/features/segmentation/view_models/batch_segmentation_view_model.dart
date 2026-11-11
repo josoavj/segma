@@ -1,14 +1,9 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:dio/dio.dart';
-import 'package:segma/features/segmentation/models/segmentation_model.dart';
 import 'package:segma/app/di/service_providers.dart';
-import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
 import 'package:segma/core/errors/error_handler.dart';
-import 'package:segma/features/segmentation/data/data_parser.dart';
-
 import 'package:segma/core/logging/log_service.dart';
+import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
 
 class BatchState {
   final bool isProcessing;
@@ -58,55 +53,46 @@ class BatchSegmentationNotifier extends StateNotifier<BatchState> {
 
     try {
       final backendService = ref.read(backendServiceProvider);
+      final fileService = ref.read(fileServiceProvider);
+      final images = await fileService.loadImagesFromFolder(folderPath);
+      state = state.copyWith(total: images.length);
 
-      final response = await backendService.dio.post(
-        '/api/v3/segment/batch',
-        data: {
-          'filename': folderPath,
-          'prompt': prompt,
-          'confidence_threshold': threshold,
-        },
-        options: Options(responseType: ResponseType.stream),
-      );
+      if (images.isEmpty) {
+        state = state.copyWith(error: 'Aucune image trouvée dans ce dossier.');
+        return;
+      }
 
-      final responseBody = response.data as ResponseBody;
-      final stream = responseBody.stream.cast<List<int>>();
-
-      await for (final chunk
-          in stream.transform(utf8.decoder).transform(const LineSplitter())) {
-        if (chunk.trim().isEmpty) continue;
-
+      for (var index = 0; index < images.length; index++) {
+        final image = images[index];
         try {
-          // Utilisation de l'Isolate pour parser le JSON et créer le modèle en tâche de fond
-          final Map<String, dynamic> update =
-              await DataParser.parseBatchUpdate(chunk);
+          state = state.copyWith(currentImage: image.name);
+          final uploadResult = await backendService.uploadImage(image.path);
+          final backendPath = uploadResult['image_path'] as String;
+          final result = await backendService.segmentByPrompt(
+            backendPath,
+            prompt,
+            confidenceThreshold: threshold,
+          );
 
-          if (update['status'] == 'success') {
-            final result = update['result_model'] as SegmentationResult;
+          final uploadMap = ref.read(uploadedImagePathMapProvider);
+          ref.read(uploadedImagePathMapProvider.notifier).state = {
+            ...uploadMap,
+            image.path: backendPath,
+          };
+          ref.read(segmentationHistoryProvider.notifier).state = [
+            ...ref.read(segmentationHistoryProvider),
+            result,
+          ];
 
-            state = state.copyWith(
-              current: update['current'],
-              total: update['total'],
-              currentImage: update['image_path'],
-              successCount: state.successCount + 1,
-            );
-
-            // Mise à jour de l'historique global
-            ref
-                .read(segmentationHistoryProvider.notifier)
-                .update((history) => [...history, result]);
-          } else if (update['status'] == 'error') {
-            final errorData = update['error'];
-            state = state.copyWith(
-              current: update['current'],
-              total: update['total'],
-              error: errorData is String
-                  ? errorData
-                  : AppErrorHandler.getFriendlyMessage(errorData),
-            );
-          }
+          state = state.copyWith(
+            current: index + 1,
+            successCount: state.successCount + 1,
+          );
         } catch (e) {
-          continue;
+          state = state.copyWith(
+            current: index + 1,
+            error: '${image.name}: ${AppErrorHandler.getFriendlyMessage(e)}',
+          );
         }
       }
     } catch (e, stack) {

@@ -1,0 +1,28 @@
+name: Déploiement de SEGMA sur GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths: ['presentation/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: presentation
+      - uses: actions/deploy-pages@v4

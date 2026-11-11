@@ -108,9 +108,13 @@ class ModelManager:
         try:
             torch = _get_torch()
             cuda_available = torch.cuda.is_available()
+            mps_available = (
+                hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+            )
         except ModuleNotFoundError:
             torch = None
             cuda_available = False
+            mps_available = False
 
         device_name = "CPU"
         if self.device == "cuda" and cuda_available:
@@ -126,6 +130,7 @@ class ModelManager:
             "vram_gb": self._get_gpu_memory_info() if self.device == "cuda" else 0.0,
             "available_models": [settings.SAM3_MODEL_ID],
             "cuda_available": cuda_available,
+            "mps_available": mps_available,
             "api_version": "1.0.0"
         }
 

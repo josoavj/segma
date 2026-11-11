@@ -62,7 +62,7 @@ class FileService {
   }
 
   bool _isImageFile(String path) {
-    final extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    final extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp'];
     final lowerPath = path.toLowerCase();
     return extensions.any((ext) => lowerPath.endsWith(ext));
   }

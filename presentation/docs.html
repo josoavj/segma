@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Documentation - Segma</title>
+  <meta name="description" content="Installation locale, utilisation, API et architecture de Segma.">
+  <meta name="theme-color" content="#0e1621">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header>
+    <div class="wrap">
+      <nav><a class="brand" href="index.html"><img src="assets/favicon.png" alt="">Segma</a><button id="burger"
+          aria-label="Ouvrir le menu" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg></button>
+        <div class="links"><a href="index.html#fonctionnalites">Fonctionnalités</a><a
+            href="index.html#architecture">Architecture</a><a class="on" href="docs.html">Documentation</a><a
+            href="releases.html">Versions</a><a class="btn" href="https://github.com/josoavj/segma">GitHub</a></div>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero page-hero">
+      <div class="wrap"><h1>Documentation</h1>
+        <p class="lead">Installer Segma, lancer l’application et comprendre les échanges entre l’interface et le backend
+          local.</p>
+      </div>
+    </section>
+    <div class="wrap docs">
+      <aside class="docs-aside">
+        <button id="tocbtn" class="toc-toggle" type="button" aria-expanded="false" aria-controls="docs-nav">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          <span>Sommaire de la documentation</span>
+          <svg class="icon toc-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        </button>
+        <nav class="side" id="docs-nav" aria-label="Sommaire de la documentation">
+          <div class="side-group"><span class="side-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="m3 12 9 4 9-4M3 17l9 4 9-4"/></svg>Pour commencer</span>
+            <a class="side-link" href="#demarrage"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>Démarrage local</a>
+            <a class="side-link" href="#utilisation"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16M8 15l3-3 3 2 5-6"/></svg>Utilisation</a>
+            <a class="side-link" href="#prompts"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-4 2 1.5-4A7.5 7.5 0 1 1 20 11.5Z"/></svg>Prompts et clics</a>
+            <a class="side-link" href="#configuration"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/></svg>Configuration</a>
+          </div>
+          <div class="side-group"><span class="side-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8m-8 3h8m-8 3h5"/></svg>Référence</span>
+            <a class="side-link" href="#api"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14"/></svg>API v3</a>
+            <a class="side-link" href="#resultats"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>Résultats et masques</a>
+            <a class="side-link" href="#architecture"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></svg>Architecture</a>
+          </div>
+          <div class="side-group"><span class="side-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.7 1.2c-.8 1.1-2.3 1.3-2.3 3m0 3h.01"/></svg>Aide et projet</span>
+            <a class="side-link" href="#faq"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.7 1.2c-.8 1.1-2.3 1.3-2.3 3m0 3h.01"/></svg>FAQ et dépannage</a>
+            <a class="side-link" href="#developpeur"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Développeur</a>
+          </div>
+          <a class="side-help" href="https://github.com/josoavj/segma/issues" target="_blank" rel="noopener noreferrer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v4m0 4h.01"/><circle cx="12" cy="12" r="9"/></svg>Signaler un problème</a>
+        </nav>
+      </aside>
+      <article class="doc">
+        <h2 id="demarrage">Démarrage local</h2>
+        <p>Pour utiliser les builds prêts à l’emploi, ouvrez la page <a
+            href="https://github.com/josoavj/segma/releases">GitHub Releases</a> et choisissez le paquet Linux ou
+          Windows correspondant à votre système. Consultez les notes de la release pour le nom du fichier et les
+          consignes d’installation de cette version.</p>
+        <p>Pour lancer le projet depuis les sources, suivez les étapes ci-dessous. Segma est composé d’une application
+          Flutter et d’un backend Python/FastAPI. Les deux s’exécutent sur le poste de travail ; le backend écoute par
+          défaut sur <code>127.0.0.1:8000</code>. Aucun hébergement distant ni compte Segma n’est requis.</p>
+        <h3>Prérequis</h3>
+        <ul>
+          <li>Python 3.10 ou supérieur et pip.</li>
+          <li>Flutter SDK 3.6 ou supérieur.</li>
+          <li>Git et les outils de compilation requis par Flutter pour votre système.</li>
+          <li>Une connexion internet lors du premier téléchargement des poids du modèle.</li>
+        </ul>
+        <h3>Installer les dépendances Python</h3>
+        <p>Depuis la racine du dépôt, créez et activez un environnement virtuel :</p>
+        <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements.txt</code></pre>
+        <p>Le script d’initialisation peut ensuite effectuer ses vérifications guidées :</p>
+        <pre><code>bash scripts/init_project.sh</code></pre>
+        <h3>Accès à SAM 3</h3>
+        <p>L’accès aux poids <code>facebook/sam3</code> peut nécessiter d’accepter les conditions du modèle sur <a
+            href="https://huggingface.co/facebook/sam3">sa page Hugging Face</a>, puis de s’authentifier localement avec
+          Hugging Face CLI :</p>
+        <pre><code>hf auth login</code></pre>
+        <p>Cela concerne l’accès au modèle et ne crée pas de compte Segma.</p>
+        <h3>Lancer le backend et l’application</h3>
+        <p>Dans un terminal, activez l’environnement virtuel puis démarrez le serveur :</p>
+        <pre><code>source .venv/bin/activate
+bash scripts/run_server.sh</code></pre>
+        <p>Dans un autre terminal, à la racine du dépôt :</p>
+        <pre><code>flutter pub get
+flutter run -d linux</code></pre>
+        <p>Pour Windows, choisissez la cible Windows disponible dans votre installation Flutter. Vérifiez le backend
+          avec :</p>
+        <pre><code>curl http://127.0.0.1:8000/api/v3/health</code></pre>
+
+        <h2 id="utilisation">Utilisation</h2>
+        <ol>
+          <li>Ouvrez un dossier local dans l’explorateur de Segma et sélectionnez une image.</li>
+          <li>Dans l’éditeur, entrez un prompt décrivant l’objet (SAM 3 donne généralement de meilleurs résultats avec
+            des prompts anglais simples).</li>
+          <li>Affinez la sélection en ajoutant des clics positifs pour inclure des zones ou négatifs pour les exclure.
+          </li>
+          <li>Pour un dossier, lancez le traitement par lot : l’application envoie et traite les images une par une,
+            avec progression dans l’interface.</li>
+        </ol>
+        <p>Les extensions acceptées par défaut sont JPG, JPEG, PNG, BMP et WebP. La taille maximale d’un fichier est de
+          100 Mio. Le backend vérifie que le fichier n’est pas vide et peut être décodé comme image. Le résultat
+          comprend les masques détectés et leurs informations de segmentation.</p>
+
+        <h2 id="prompts">Conseils pour les prompts et les clics</h2>
+        <p>Un prompt doit nommer clairement le concept recherché. Les termes anglais courts sont généralement un bon
+          point de départ pour SAM 3, par exemple <code>red car</code>, <code>person</code>, <code>yellow flower</code>
+          ou <code>wooden table</code>. Si le résultat est trop large, essayez un terme plus précis ou ajoutez un
+          attribut visuel distinctif.</p>
+        <ul>
+          <li>Commencez par un nom d’objet plutôt qu’une longue phrase.</li>
+          <li>Pour plusieurs catégories, essayez une formulation simple telle que <code>cars and trees</code>.</li>
+          <li>Utilisez un clic positif sur l’objet à conserver et des clics négatifs sur les zones à écarter.</li>
+          <li>Les points sont rapportés à la taille de l’image, avec des coordonnées comprises entre 0 et 1. Le backend
+            les convertit en petites boîtes avant de les transmettre au modèle.</li>
+          <li>Réglez le seuil de confiance si l’interface propose ce contrôle : l’API accepte une valeur entre 0 et 1,
+            avec 0,25 par défaut.</li>
+        </ul>
+        <p>La segmentation dépend de l’image, du prompt, du seuil et du modèle. Les clics guident la sélection, mais ne
+          garantissent pas une frontière parfaite.</p>
+
+        <h2 id="configuration">Configuration</h2>
+        <p>Les paramètres du backend se trouvent dans le fichier <code>.env</code> à la racine du dépôt. Copiez
+          <code>.env.example</code> pour partir des valeurs par défaut :</p>
+        <pre><code>cp .env.example .env</code></pre>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Valeur par défaut</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>HOST</code></td>
+                <td><code>127.0.0.1</code></td>
+                <td>Adresse d’écoute locale du backend</td>
+              </tr>
+              <tr>
+                <td><code>PORT</code></td>
+                <td><code>8000</code></td>
+                <td>Port HTTP local</td>
+              </tr>
+              <tr>
+                <td><code>DEVICE</code></td>
+                <td><code>cuda</code></td>
+                <td>Périphérique demandé : CPU, CUDA ou MPS selon la prise en charge</td>
+              </tr>
+              <tr>
+                <td><code>SAM3_MODEL_ID</code></td>
+                <td><code>facebook/sam3</code></td>
+                <td>Identifiant du modèle</td>
+              </tr>
+              <tr>
+                <td><code>MAX_FILE_SIZE</code></td>
+                <td><code>104857600</code></td>
+                <td>Taille maximale d’upload en octets (100 Mio)</td>
+              </tr>
+              <tr>
+                <td><code>UPLOAD_DIR</code></td>
+                <td><code>data/uploads</code></td>
+                <td>Dossier local des images envoyées au backend</td>
+              </tr>
+              <tr>
+                <td><code>OUTPUT_DIR</code></td>
+                <td><code>data/masks</code></td>
+                <td>Dossier local des masques générés</td>
+              </tr>
+              <tr>
+                <td><code>HF_TOKEN</code></td>
+                <td>aucune</td>
+                <td>Jeton Hugging Face facultatif si l’accès au modèle l’exige</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Avec le script fourni, les chemins relatifs sont interprétés depuis le dossier du backend. Ne modifiez le
+          bind réseau que si vous comprenez les conséquences : le mode par défaut limite l’accès au poste local.</p>
+
+        <h2 id="api">API v3</h2>
+        <p>Le backend expose ces routes sur <code>http://127.0.0.1:8000</code> :</p>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Méthode</th>
+                <th>Route</th>
+                <th>Usage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/v3/health</code></td>
+                <td>État du serveur et du modèle</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/v3/upload</code></td>
+                <td>Envoi d’image multipart avec champ <code>file</code></td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/v3/segment</code></td>
+                <td>Segmentation par texte ou points</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/v3/model/info</code></td>
+                <td>Informations du modèle et du périphérique</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/v3/model/change</code></td>
+                <td>Changement de périphérique ou rechargement</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Envoyer une image</h3>
+        <pre><code>curl -F "file=@image.jpg" http://127.0.0.1:8000/api/v3/upload</code></pre>
+        <p>La réponse contient un nom généré par le serveur. Utilisez cette valeur comme <code>filename</code> lors de
+          la segmentation.</p>
+        <h3>Prompt texte</h3>
+        <pre><code>curl -X POST http://127.0.0.1:8000/api/v3/segment \\
+  -H "Content-Type: application/json" \\
+  -d '{"filename":"a1b2c3.jpg","prompt":"red car","confidence_threshold":0.25}'</code></pre>
+        <h3>Points d’inclusion et d’exclusion</h3>
+        <p>Les coordonnées <code>x</code> et <code>y</code> sont normalisées de 0 à 1. Le label 1 inclut une zone et 0
+          l’exclut. Le backend convertit chaque point en petite boîte pour SAM 3.</p>
+        <pre><code>curl -X POST http://127.0.0.1:8000/api/v3/segment \\
+  -H "Content-Type: application/json" \\
+  -d '{"filename":"a1b2c3.jpg","points":[{"x":0.52,"y":0.41,"label":1},{"x":0.64,"y":0.49,"label":0}]}'</code></pre>
+        <p>La réponse fournit notamment la résolution, le nombre d’objets et les informations de chaque objet : libellé,
+          confiance, boîte englobante, chemin du masque et nombre de pixels.</p>
+        <div class="note">Le traitement par lot est orchestré par l’application Flutter. L’API backend ne fournit pas de
+          route dédiée au traitement par lot.</div>
+
+        <h2 id="resultats">Résultats et fichiers de masque</h2>
+        <p>Chaque réponse API inclut l’image source, sa résolution, le nombre d’objets, les métadonnées des segments et
+          le dossier de sortie. Pour chaque objet, les métadonnées comprennent un identifiant, un libellé, un score de
+          confiance, une boîte englobante en pixels, le chemin du masque et le nombre de pixels couverts.</p>
+        <p>Les masques enregistrés en <code>.bin</code> sont des tableaux bruts de valeurs <code>uint8</code> : un octet
+          par pixel, dans l’ordre des pixels de l’image, largeur et hauteur d’origine. Ce n’est pas un fichier PNG
+          autonome. L’interface Segma lit ces données et dessine une superposition colorée dans l’éditeur.</p>
+
+        <h2 id="architecture">Architecture</h2>
+        <ul>
+          <li><strong>Application :</strong> Flutter desktop avec gestion d’état Riverpod et client HTTP Dio.</li>
+          <li><strong>Backend :</strong> API FastAPI locale, traitement d’image avec PyTorch et SAM 3.</li>
+          <li><strong>Flux :</strong> Flutter envoie l’image au backend local, puis lui transmet le prompt ou les
+            points. Les résultats reviennent à l’éditeur.</li>
+          <li><strong>Traitement par lot :</strong> l’application répète ce flux pour chaque fichier sélectionné.</li>
+          <li><strong>Données :</strong> les uploads et masques sont écrits sous les dossiers de données du backend,
+            modifiables avec <code>UPLOAD_DIR</code> et <code>OUTPUT_DIR</code>.</li>
+        </ul>
+        <p>Le dépôt contient également des guides détaillés : <a
+            href="https://github.com/josoavj/segma/blob/master/README.md">README</a>, <a
+            href="https://github.com/josoavj/segma/blob/master/backend/API_USAGE.md">référence API</a>, <a
+            href="https://github.com/josoavj/segma/blob/master/docs/guides/PROMPTS_GUIDE.md">guide des prompts</a> et <a
+            href="https://github.com/josoavj/segma/blob/master/docs/guides/ARCHITECTURE.md">architecture</a>.</p>
+
+        <h2 id="faq">FAQ et dépannage</h2>
+        <h3>Le premier démarrage est long</h3>
+        <p>Le backend doit récupérer les poids si nécessaire puis charger le modèle en mémoire. La durée dépend de la
+          connexion, du stockage et de la machine.</p>
+        <h3>Le modèle ne se télécharge pas</h3>
+        <p>Vérifiez l’accès Hugging Face, l’acceptation des conditions de <code>facebook/sam3</code> et votre
+          authentification CLI si le dépôt du modèle l’exige.</p>
+        <h3>CUDA ou MPS n’est pas proposé</h3>
+        <p>Vérifiez que votre installation de PyTorch correspond à votre système et que le périphérique est disponible.
+          Le CPU reste l’option de repli.</p>
+        <h3>Le backend répond, mais le modèle n’est pas prêt</h3>
+        <p>Consultez la réponse de <code>/api/v3/health</code> et les journaux du terminal du backend pour distinguer
+          l’état du serveur de celui du modèle.</p>
+        <h3>La requête de segmentation est refusée</h3>
+        <p>Il faut fournir au moins un prompt d’au moins deux caractères ou un point. Vérifiez que <code>filename</code>
+          reprend bien le nom renvoyé par la route d’upload, et que chaque coordonnée est comprise entre 0 et 1.</p>
+        <h3>Le fichier est refusé</h3>
+        <p>Vérifiez l’extension JPG, JPEG, PNG, BMP ou WebP, l’intégrité du fichier et sa taille maximale de 100 Mio.
+          Une erreur HTTP 413 indique une taille supérieure à la limite configurée.</p>
+        <h3>L’application n’arrive pas à joindre l’API</h3>
+        <p>Vérifiez que le serveur est lancé sur <code>127.0.0.1:8000</code> et consultez les paramètres d’URL du
+          backend dans l’application. L’URL de santé permet de vérifier que l’API répond.</p>
+        <p>Pour les problèmes connus et les contributions, consultez le <a
+            href="https://github.com/josoavj/segma/issues">suivi des issues</a>.</p>
+
+        <h2 id="developpeur">Développeur et contributions</h2>
+        <p>Segma est développé et maintenu par <strong>Josoa VONJINIAINA</strong>. Le code source et le suivi public du
+          projet sont disponibles sur <a href="https://github.com/josoavj/segma">GitHub</a>. Pour les bugs ou
+          suggestions, ouvrez une issue en indiquant votre système, les étapes pour reproduire le problème et les
+          messages d’erreur pertinents. Pour contribuer au code, consultez <a
+            href="https://github.com/josoavj/segma/blob/master/CONTRIBUTING.md">les consignes de contribution</a>.</p>
+        <p>Contact public : <a href="mailto:josoavonjiniaina13@gmail.com">josoavonjiniaina13@gmail.com</a>. Licence du
+          projet : <a href="https://github.com/josoavj/segma/blob/master/LICENSE">MIT</a>. SAM 3 demeure soumis à ses
+          propres conditions d’utilisation.</p>
+      </article>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <div><b class="footer-brand">Segma</b><br>Segmentation d’images avec SAM 3 · Licence MIT<br>© 2026 Josoa
+        VONJINIAINA</div>
+      <div><a href="index.html">Accueil</a><a href="releases.html">Versions</a><a
+          href="https://github.com/josoavj/segma">GitHub</a></div>
+    </div>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

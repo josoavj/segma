@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Segma - Segmentation d’images en local avec SAM 3</title>
+    <meta name="description"
+        content="Segma est une application desktop locale de segmentation d’images avec SAM 3, par texte ou par clics positifs et négatifs.">
+    <meta name="theme-color" content="#0e1621">
+    <link rel="icon" href="assets/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="wrap">
+            <nav>
+                <a class="brand" href="index.html"><img src="assets/favicon.png" alt="">Segma</a>
+                <button id="burger" aria-label="Ouvrir le menu" aria-expanded="false">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="links">
+                    <a href="#fonctionnalites">Fonctionnalités</a>
+                    <a href="#architecture">Architecture</a>
+                    <a href="#telechargement">Télécharger</a>
+                    <a href="docs.html">Documentation</a>
+                    <a href="releases.html">Versions</a>
+                    <a class="btn" href="https://github.com/josoavj/segma">GitHub 
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M7 17 17 7M8 7h9v9" />
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <div class="wrap g">
+                <div>
+                    <h1>Isolez les objets qui comptent. <span class="grad">En quelques gestes.</span></h1>
+                    <p class="lead">Pour les créateurs, les annotateurs et les curieux de vision par ordinateur : trouvez un sujet avec un prompt, puis affinez son masque en cliquant sur l’image. Segma réunit l’exploration, la segmentation SAM 3 et l’aperçu des résultats dans une application de bureau locale.</p>
+                    <div class="cta">
+                        <a class="btn" href="#telechargement">Télécharger pour Linux ou Windows</a>
+                        <a class="btn ghost" href="#fonctionnalites">Découvrir les fonctionnalités</a></div>
+                    <p class="micro">Vos images sont traitées sur votre ordinateur. Aucun compte Segma n’est nécessaire.</p>
+                </div>
+                <div class="app-preview" role="img" aria-label="Aperçu illustratif de l’écran d’accueil Segma avec navigation de fichiers et grille d’images">
+                    <div class="preview-top">
+                        <span class="preview-brand"><img src="assets/favicon.png" alt="">Segma</span>
+                        <span class="preview-title">Espace de travail</span>
+                        <span class="preview-dot"></span>
+                    </div>
+                    <div class="preview-body">
+                        <aside class="preview-side"><span class="preview-label">BIBLIOTHÈQUE</span><span
+                                class="preview-nav active"><svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z" />
+                                </svg>Accueil</span><span class="preview-nav"><svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M3 6h7l2 2h9v11H3z" />
+                                </svg>Images</span><span class="preview-nav"><svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M4 5h16v14H4zM4 15l5-5 4 4 2-2 5 5" />
+                                </svg>Récents</span><span
+                                class="preview-label preview-label-spaced">DOSSIERS</span><span
+                                class="preview-folder">Documents</span><span class="preview-folder">Images</span><span
+                                class="preview-folder">Téléchargements</span></aside>
+                        <div class="preview-main">
+                            <div class="preview-heading">
+                                <div><small>VOTRE ESPACE</small><strong>Mes images</strong></div><span
+                                    class="preview-count">6 fichiers</span>
+                            </div>
+                            <div class="preview-grid">
+                                <div class="thumb thumb-mountain"><i></i></div>
+                                <div class="thumb thumb-flower"><i></i><b></b></div>
+                                <div class="thumb thumb-city"><i></i></div>
+                                <div class="thumb thumb-coast"><i></i></div>
+                                <div class="thumb thumb-plant"><i></i><b></b></div>
+                                <div class="thumb thumb-hill"><i></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-caption"><svg class="icon" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 11v5m0-8h.01" />
+                        </svg>Aperçu illustratif de l’écran d’accueil</div>
+                </div>
+            </div>
+        </section>
+        <section id="fonctionnalites">
+            <div class="wrap">
+                <h2>Un flux de travail simple et précis</h2>
+                <p class="sub">De la sélection des fichiers à l’affinement du masque, Segma réunit les étapes utiles
+                    dans une application de bureau.</p>
+                <div class="grid">
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="M3 6h7l2 2h9v11H3z" />
+                                <path d="M3 10h18" />
+                            </svg></div>
+                        <h3>Parcourir vos fichiers</h3>
+                        <p>Choisissez un dossier local et parcourez les images compatibles depuis la grille de
+                            l’application.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="M4 5h16v14H4zM4 15l5-5 4 4 2-2 5 5" />
+                                <circle cx="9" cy="8" r="1" />
+                            </svg></div>
+                        <h3>Décrire un objet</h3>
+                        <p>Entrez une consigne textuelle, par exemple « red car », pour demander à SAM 3 de trouver les
+                            objets correspondants.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="m5 3 14 11-7 1-3 6z" />
+                                <circle cx="17" cy="6" r="2" />
+                            </svg></div>
+                        <h3>Affiner par clics</h3>
+                        <p>Ajoutez des points positifs pour inclure une zone et négatifs pour en exclure une,
+                            directement sur l’image.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="8" height="7" rx="1" />
+                                <rect x="13" y="4" width="8" height="7" rx="1" />
+                                <rect x="3" y="13" width="8" height="7" rx="1" />
+                                <rect x="13" y="13" width="8" height="7" rx="1" />
+                            </svg></div>
+                        <h3>Traiter un dossier</h3>
+                        <p>Lancez un traitement local par lot. L’application envoie et traite les images l’une après
+                            l’autre avec une progression visible.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="M4 4h16v16H4zM8 8h8M8 12h5M8 16h8" />
+                            </svg></div>
+                        <h3>Visualiser les masques</h3>
+                        <p>Examinez le résultat dans l’éditeur avec les contours et les zones segmentées superposés à
+                            l’image.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1" />
+                                <circle cx="12" cy="12" r="4" />
+                            </svg></div>
+                        <h3>Choisir le calcul</h3>
+                        <p>Utilisez le processeur disponible : CPU, CUDA ou MPS selon votre installation et votre
+                            matériel.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+        <section class="alt">
+            <div class="wrap">
+                <h2>Comment ça marche</h2>
+                <p class="sub">L’interface et le moteur tournent sur la même machine.</p>
+                <div class="grid steps">
+                    <article class="card">
+                        <h3>Sélectionnez</h3>
+                        <p>Ouvrez une image depuis la bibliothèque ou un dossier local.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Demandez</h3>
+                        <p>Décrivez l’objet en texte ou commencez par des clics sur l’image.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Affinez</h3>
+                        <p>Ajoutez des clics d’inclusion ou d’exclusion et observez les masques générés.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Consultez</h3>
+                        <p>Inspectez les objets segmentés dans l’éditeur et leurs résultats enregistrés localement.</p>
+                    </article>
+                </div>
+                <p class="note">SAM 3 peut nécessiter l’acceptation de ses conditions et une authentification Hugging
+                    Face pour télécharger le modèle. Il s’agit de l’accès au modèle, pas d’un compte Segma.</p>
+            </div>
+        </section>
+        <section>
+            <div class="wrap">
+                <h2>Ce qu’il faut savoir avant de commencer</h2>
+                <p class="sub">Les informations pratiques pour choisir une version et préparer votre ordinateur.</p>
+                <div class="grid">
+                    <article class="card">
+                        <h3>Systèmes de bureau</h3>
+                        <p>Des versions de l’application sont proposées pour Linux et Windows depuis la page GitHub
+                            Releases. Le guide explique aussi comment lancer le projet depuis les sources.</p>
+                        <p><a href="releases.html">Voir les versions disponibles</a></p>
+                    </article>
+                    <article class="card">
+                        <h3>Modèle et matériel</h3>
+                        <p>Segma utilise SAM 3 via PyTorch. Le backend fonctionne sur CPU et peut utiliser CUDA ou MPS
+                            quand le matériel et l’installation PyTorch le permettent. Le premier chargement peut
+                            télécharger les poids du modèle.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Formats et taille</h3>
+                        <p>Les formats pris en charge par défaut sont JPG, JPEG, PNG, BMP et WebP. La taille maximale
+                            configurée par défaut est de 100 Mio par image.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Fichiers et confidentialité</h3>
+                        <p>Les images choisies sont transmises au backend local de Segma pour le traitement.
+                            L’application ne requiert pas de compte Segma ni de service distant pour segmenter.</p>
+                    </article>
+                </div>
+                <p class="note">La licence de Segma est MIT. SAM 3 et ses poids suivent les conditions de licence et
+                    d’accès publiées par Meta et Hugging Face.</p>
+            </div>
+        </section>
+        <section id="architecture">
+            <div class="wrap">
+                <h2>Une application locale, en deux composants</h2>
+                <p class="sub">L’interface Flutter communique avec une API FastAPI disponible sur votre ordinateur.</p>
+                <div class="grid">
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="15" rx="2" />
+                                <path d="M8 22h8m-4-3v3M7 9l3 3-3 3m5 0h4" />
+                            </svg></div>
+                        <h3>Application Flutter</h3>
+                        <p>Interface de bureau pour parcourir les images, lancer des segmentations et gérer un
+                            traitement par dossier.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7z" />
+                                <path d="M8 12h8m-4-4v8" />
+                            </svg></div>
+                        <h3>Backend FastAPI</h3>
+                        <p>Charge SAM 3 via PyTorch et expose les routes locales d’envoi d’image, de segmentation et
+                            d’état du modèle.</p>
+                    </article>
+                    <article class="card">
+                        <div class="ic"><svg class="icon" viewBox="0 0 24 24">
+                                <path d="M5 4h14v16H5zM8 8h8m-8 4h8m-8 4h5" />
+                            </svg></div>
+                        <h3>Données sur l’ordinateur</h3>
+                        <p>Les images sont envoyées au backend local pour le traitement. Le service écoute par défaut
+                            sur 127.0.0.1:8000.</p>
+                    </article>
+                </div>
+                <p style="margin-top:1.5rem"><a class="btn ghost" href="docs.html#architecture">Consulter l’architecture
+                        détaillée</a></p>
+            </div>
+        </section>
+        <section id="telechargement" class="alt">
+            <div class="wrap">
+                <h2>Télécharger Segma</h2>
+                <p class="sub">Choisissez le paquet qui correspond à votre système. Les fichiers et les consignes
+                    d’installation sont publiés sur GitHub Releases.</p>
+                <div class="grid download-grid">
+                    <article class="card download-card">
+                        <div class="download-card-head"><span class="download-os-icon"><svg class="icon"
+                                    viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="4" width="18" height="15" rx="2" />
+                                    <path d="M8 22h8m-4-3v3M7 8h.01M11 8h.01M15 8h.01M7 12h.01M11 12h.01M15 12h.01" />
+                                </svg></span><span class="download-platform-label">VERSION BUREAU</span></div>
+                        <h3>Windows</h3>
+                        <p>Téléchargez le build Windows depuis la page des releases, puis consultez les notes de la
+                            version pour les étapes d’installation.</p><a class="btn download-button"
+                            href="https://github.com/josoavj/segma/releases" target="_blank"
+                            rel="noopener noreferrer">Télécharger pour Windows <svg class="icon" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path d="M12 3v12m-5-5 5 5 5-5M4 19h16" />
+                            </svg></a>
+                    </article>
+                    <article class="card download-card">
+                        <div class="download-card-head"><span class="download-os-icon"><svg class="icon"
+                                    viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7z" />
+                                    <path d="M8 12h8m-4-4v8" />
+                                </svg></span><span class="download-platform-label">VERSION BUREAU</span></div>
+                        <h3>Linux</h3>
+                        <p>Téléchargez le build Linux depuis la page des releases, puis suivez les consignes fournies
+                            avec cette version.</p><a class="btn download-button"
+                            href="https://github.com/josoavj/segma/releases" target="_blank"
+                            rel="noopener noreferrer">Télécharger pour Linux <svg class="icon" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path d="M12 3v12m-5-5 5 5 5-5M4 19h16" />
+                            </svg></a>
+                    </article>
+                </div>
+                <p class="download-note">Releases officielles de la plateforme.</p>
+            </div>
+        </section>
+        <section class="alt">
+            <div class="wrap">
+                <h2>Questions fréquentes</h2>
+                <p class="sub">Quelques repères pour commencer.</p>
+                <details>
+                    <summary>Faut-il un GPU ?</summary>
+                    <p>Non. Le backend peut utiliser le CPU. CUDA et MPS sont disponibles lorsque PyTorch et le matériel
+                        sont configurés pour les prendre en charge. Le temps de calcul dépend de l’image, du modèle et
+                        de la machine.</p>
+                </details>
+                <details>
+                    <summary>Faut-il créer un compte Segma ?</summary>
+                    <p>Non, Segma n’a pas de création de compte utilisateur. Hugging Face peut demander une
+                        authentification pour accéder aux poids de SAM 3.</p>
+                </details>
+                <details>
+                    <summary>Les traitements sont-ils locaux ?</summary>
+                    <p>Oui. L’interface communique avec le backend exécuté sur la même machine et les fichiers
+                        sélectionnés sont traités localement.</p>
+                </details>
+                <details>
+                    <summary>Quels formats d’image sont pris en charge ?</summary>
+                    <p>JPG, JPEG, PNG, BMP et WebP. La limite de taille configurée par défaut est de 100 Mio.</p>
+                </details>
+                <details>
+                    <summary>Le traitement par lot utilise-t-il un service distant ?</summary>
+                    <p>Non. Flutter parcourt le dossier et traite les images une par une avec le backend local.</p>
+                </details>
+            </div>
+        </section>
+        <section class="alt">
+            <div class="wrap">
+                <div class="developer-panel">
+                    <div class="developer-profile"><img class="developer-avatar"
+                            src="https://avatars.githubusercontent.com/u/76913187?v=4"
+                            alt="Photo de profil GitHub de Josoa Vonjiniaina" loading="lazy">
+                        <div>
+                            <h2>Josoa Vonjiniaina</h2>
+                            <p>Développeur de Segma, intéressé par les applications mobiles, le développement logiciel
+                                et la cybersécurité.</p><span class="developer-handle">@josoavj · Antananarivo,
+                                Madagascar</span>
+                        </div>
+                    </div>
+                    <div class="developer-links"><a class="developer-link portfolio-link"
+                            href="https://josoavj-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer"><span
+                                class="developer-link-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 5h18v14H3zM8 21h8m-4-2v2M8 9h8m-8 4h5" />
+                                </svg></span><span class="developer-link-copy"><small>Découvrir mon
+                                    travail</small><strong>Portfolio</strong><em>Projets, parcours et
+                                    réalisations</em></span><svg class="icon developer-arrow" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path d="M7 17 17 7M8 7h9v9" />
+                            </svg></a><a class="developer-link github-link" href="https://github.com/josoavj"
+                            target="_blank" rel="noopener noreferrer"><span class="developer-link-icon"><svg
+                                    class="icon github-mark" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path
+                                        d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.68-3.76-1.32-3.76-1.32-.5-1.3-1.24-1.65-1.24-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 .1.73 2.1 3.9 1.6.1-.73.4-1.23.7-1.51-2.47-.28-5.07-1.24-5.07-5.52 0-1.22.44-2.22 1.16-3-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.56 0c2.1-1.45 3.05-1.15 3.05-1.15.61 1.55.23 2.7.11 2.98.72.78 1.16 1.78 1.16 3 0 4.3-2.6 5.24-5.08 5.51.4.35.75 1.02.75 2.06v3.04c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
+                                </svg></span><span class="developer-link-copy"><small>Code source et
+                                    contributions</small><strong>GitHub</strong><em>josoavj · Dépôts et
+                                    projets</em></span><svg class="icon developer-arrow" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path d="M7 17 17 7M8 7h9v9" />
+                            </svg></a><a class="developer-link contact-link"
+                            href="mailto:josoavonjiniaina13@gmail.com"><span class="developer-link-icon"><svg
+                                    class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                    <path d="m4 7 8 6 8-6" />
+                                </svg></span><span class="developer-link-copy"><small>Une question ou une idée
+                                    ?</small><strong>Me contacter</strong><em>Écrire par e-mail</em></span><svg
+                                class="icon developer-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M7 17 17 7M8 7h9v9" />
+                            </svg></a></div>
+                </div>
+            </div>
+        </section>
+        <section>
+            <div class="wrap center">
+                <h2>Besoin d’aide pour commencer ?</h2>
+                <p class="sub">Le guide détaille l’installation et le lancement local ; la FAQ répond aux questions
+                    fréquentes sur le modèle et les traitements.</p>
+                <div class="cta centered"><a class="btn" href="docs.html#demarrage">Lire le guide de démarrage</a><a
+                        class="btn ghost" href="docs.html#faq">Consulter la FAQ</a></div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="wrap">
+            <div><b class="footer-brand">Segma</b><br>Segmentation d’images avec SAM 3 · Licence MIT<br>© 2026 Josoa
+                VONJINIAINA</div>
+            <div><a href="docs.html">Documentation</a><a href="releases.html">Versions</a><a
+                    href="https://github.com/josoavj/segma">GitHub</a><a
+                    href="https://github.com/josoavj/segma/issues">Issues</a></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

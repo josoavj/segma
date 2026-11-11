@@ -1,122 +1,37 @@
-# SEGMA - Backend API Documentation (V3 - SAM 3 Edition)
+# Backend SEGMA
 
-## Vue d'ensemble
+Le backend FastAPI est exécuté localement par l'application de bureau Flutter. Il reçoit les images choisies par l'utilisateur, exécute SAM 3 et écrit les masques dans `backend/data/` par défaut.
 
-SEGMA est une solution de segmentation d'images de pointe utilisant **SAM 3 (Segment Anything Model 3)** de Meta. Contrairement aux versions précédentes, ce backend supporte le **Promptable Concept Segmentation (PCS)**, permettant de segmenter des objets complexes via de simples descriptions textuelles.
+## Installation locale
 
-### Technologies Clés (2026)
-
-* **Framework**: FastAPI 0.104.1
-* **IA Moteur**: SAM 3 (via Transformers) + YOLOv8 (Ultralytics)
-* **Calcul**: PyTorch 2.7.0+ (Optimisé pour FlashAttention)
-* **Format de Sortie**: Fichiers binaires bruts (`.bin`) pour une précision chirurgicale.
-
-## Installation et Configuration
-
-### Prérequis
-
-* **Python 3.12+**
-* **CUDA 12.x** (Fortement recommandé pour SAM 3)
-* **Accès Hugging Face** (Le modèle `facebook/sam3` est un modèle sous licence Meta).
-
-### Installation rapide
-
-1. **Installer les dépendances spécialisées**:
+Depuis la racine du dépôt, utilisez l'environnement Python destiné au projet puis installez les dépendances :
 
 ```bash
-pip install -r requirements.txt
-# Note: SAM 3 nécessite souvent l'installation de transformers depuis git
-
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
 ```
 
-2. **Authentification Hugging Face**:
+Le modèle `facebook/sam3` peut demander l'acceptation de ses conditions Hugging Face et une authentification locale avec `huggingface-cli login`.
+
+## Démarrage
+
+Depuis la racine du dépôt :
 
 ```bash
-huggingface-cli login
-
+bash scripts/run_server.sh
 ```
 
-3. **Variables d'environnement (.env)**:
+Ou depuis `backend/` avec l'environnement activé :
 
-```dotenv
-SAM3_MODEL_ID=facebook/sam3
-YOLO_MODEL=yolov8n.pt
-DEVICE=cuda
-MASK_FORMAT=bin
-
+```bash
+python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
-## Nouveaux Endpoints API (v3)
+La configuration se fait avec les variables de `backend/config.py`; un fichier `.env` à la racine peut les remplacer. Les principales sont `HOST`, `PORT`, `DEVICE`, `SAM3_MODEL_ID`, `MAX_FILE_SIZE`, `UPLOAD_DIR` et `OUTPUT_DIR`.
 
-### 1. Segmentation par Concept (PCS)
+## API
 
-**POST** `/api/v3/segment`
+L'API v3 expose le health check, l'upload, la segmentation texte ou guidée par clics, les informations modèle et le changement de device. Les exemples de requêtes et la structure de réponse sont dans [API_USAGE.md](API_USAGE.md).
 
-C'est le cœur du nouveau système. Au lieu de cliquer, vous décrivez ce que vous voulez extraire.
-
-**Requête (Multipart/Form-Data)**:
-
-* `file`: L'image à traiter.
-* `prompt`: "tous les boulons", "les zones endommagées", etc.
-* `confidence`: Seuil de détection (défaut: 0.25).
-
-**Réponse**:
-
-```json
-{
-  "status": "success",
-  "objects_count": 12,
-  "objects": [
-    {
-      "object_id": 0,
-      "label": "bolt",
-      "confidence": 0.89,
-      "mask_path": "/data/masks/seg_img01/mask_0.bin",
-      "bbox": {"x1": 120, "y1": 450, "x2": 200, "y2": 530}
-    }
-  ]
-}
-
-```
-
----
-
-### 2. Format des Masques (.bin)
-
-Pour répondre aux contraintes de précision et de performance, les masques sont sauvegardés en **binaire brut (raw binary)**.
-
-* **Structure**: Un fichier `.bin` est un tableau de bytes (`uint8`).
-* **Valeurs**: `255` pour l'objet, `0` pour le fond.
-* **Dimensions**: La taille du fichier est exactement égale à  de l'image originale.
-* **Usage Flutter**:
-```dart
-// Exemple de lecture en Flutter
-Uint8List maskBytes = await File(maskPath).readAsBytes();
-// Le pixel à (x, y) est à l'index : y * width + x
-
-```
-
-
-
-## Architecture du Projet (Harmonisée)
-
-```text
-backend/
-├── main.py                  # Initialisation FastAPI & Lifespan
-├── config.py                # Configuration SAM 3 / YOLO
-├── app/
-│   ├── api/
-│   │   ├── schemas.py       # Contrats Pydantic v3
-│   │   ├── health.py        # Diagnostic GPU/Modèle
-│   │   └── segmentation.py  # Routes Upload & Segment
-│   ├── models/
-│   │   ├── sam3_wrapper.py  # Interface avec facebook/sam3
-│   │   └── image_processor.py # Gestion des .bin et PIL
-│   └── services/
-│       ├── segmentation_service.py # Orchestrateur IA
-│       └── object_detector.py      # Labeling YOLOv8
-└── data/
-    ├── uploads/             # Images originales
-    └── masks/               # Dossiers de masques .bin
-
-```
+Le traitement par lot est orchestré par Flutter, qui envoie les images une à une. Il n'y a pas de route batch dans le backend.

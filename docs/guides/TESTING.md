@@ -8,11 +8,11 @@ Le dossier `test/` à la racine du projet est organisé de manière hiérarchiqu
 
 ```text
 test/
-├── unit/                 # Tests unitaires sans dépendances Flutter lourdes
-│   ├── models/           # Sérialisation JSON, logique des modèles
-│   └── services/         # Services avec Mocks (Backend, FileSystem)
-├── providers/            # Tests de la logique métier (Riverpod)
-└── widgets/              # Tests de composants UI (Widget testing)
+├── unit/models/                         # Modèles et sérialisation
+├── features/home/data/                  # Services dossiers et fichiers
+├── features/segmentation/data/           # Client backend
+├── features/segmentation/view_models/    # View models
+└── app/shell/views/                      # Tests widgets de la sidebar
 ```
 
 ---
@@ -75,7 +75,7 @@ Pour les fonctions asynchrones complexes (comme le traitement par lot), utilisez
 ## Standards de Qualité
 
 > [IMPORTANT]
-> - Chaque nouveau service ou provider **doit** avoir un fichier de test associé.
+> - Ajouter un test ciblé pour chaque nouveau service ou comportement d'état important.
 > - Les tests ne doivent jamais dépendre d'un serveur backend réel ou de fichiers utilisateur réels. Utilisez des dossiers temporaires (`Directory.systemTemp`).
 > - La suite de tests doit passer intégralement avant toute Pull Request.
 

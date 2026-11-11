@@ -81,29 +81,31 @@ class BackendService {
   /// Segmente une image avec un prompt texte SAM 3.
   Future<SegmentationResult> segmentByPrompt(
     String filename,
-    String prompt, {
+    String? prompt, {
     double confidenceThreshold = 0.25,
+    List<InteractivePoint> points = const [],
   }) async {
-    try {
-      final response = await dio.post(
-        '/api/v3/segment',
-        data: {
-          'filename': filename,
-          'prompt': prompt,
-          'confidence_threshold': confidenceThreshold,
-        },
-      );
+    final response = await dio.post(
+      '/api/v3/segment',
+      data: {
+        'filename': filename,
+        if (prompt != null && prompt.trim().isNotEmpty) 'prompt': prompt,
+        if (points.isNotEmpty)
+          'points': points.map((point) => point.toJson()).toList(),
+        'confidence_threshold': confidenceThreshold,
+      },
+    );
 
-      if (response.statusCode == 200) {
-        // Optimisation : Conversion de la Map en modèle sur un thread séparé
-        return await DataParser.convertToSegmentationResult(
-          response.data as Map<String, dynamic>,
-        );
-      }
-      throw Exception('Erreur segmentation: ${response.statusCode}');
-    } on DioException catch (e) {
-      throw Exception('Erreur réseau: ${e.message}');
+    if (response.statusCode == 200) {
+      return DataParser.convertToSegmentationResult(
+        response.data as Map<String, dynamic>,
+      );
     }
+    throw DioException(
+      requestOptions: response.requestOptions,
+      response: response,
+      type: DioExceptionType.badResponse,
+    );
   }
 
   /// Obtient les informations du modèle SAM actuellement chargé

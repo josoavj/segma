@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/features/home/models/image_model.dart';
 import 'package:segma/features/segmentation/models/segmentation_model.dart';
 import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
+import 'package:segma/features/segmentation/views/widgets/mask_overlay.dart';
 
 class SegmentationEditorPage extends ConsumerStatefulWidget {
   final ImageModel image;
@@ -23,10 +24,9 @@ class _SegmentationEditorPageState
   @override
   void initState() {
     super.initState();
-    // Réinitialiser les points au démarrage de l'éditeur
+    // Garder le résultat du visualiseur comme état de départ de l'éditeur.
     Future.microtask(() {
       ref.read(interactivePointsProvider.notifier).state = [];
-      ref.read(currentSegmentationProvider.notifier).state = null;
     });
   }
 
@@ -52,17 +52,19 @@ class _SegmentationEditorPageState
         point
       ];
 
-      _triggerSegmentation();
+      _triggerSegmentation([...currentPoints, point]);
     }
   }
 
-  Future<void> _triggerSegmentation() async {
-    await ref.read(segmentImageProvider.notifier).segment(widget.image.path);
+  Future<void> _triggerSegmentation(List<InteractivePoint> points) async {
+    await ref
+        .read(segmentImageProvider.notifier)
+        .segment(widget.image.path, points: points);
   }
 
   void _clearPoints() {
     ref.read(interactivePointsProvider.notifier).state = [];
-    ref.read(currentSegmentationProvider.notifier).state = null;
+    ref.read(segmentImageProvider.notifier).reset();
   }
 
   void _undoPoint() {
@@ -70,10 +72,11 @@ class _SegmentationEditorPageState
     if (points.isNotEmpty) {
       ref.read(interactivePointsProvider.notifier).state =
           points.sublist(0, points.length - 1);
-      if (ref.read(interactivePointsProvider).isEmpty) {
-        ref.read(currentSegmentationProvider.notifier).state = null;
+      final remainingPoints = ref.read(interactivePointsProvider);
+      if (remainingPoints.isEmpty) {
+        ref.read(segmentImageProvider.notifier).reset();
       } else {
-        _triggerSegmentation();
+        _triggerSegmentation(remainingPoints);
       }
     }
   }
@@ -110,6 +113,22 @@ class _SegmentationEditorPageState
                                 File(widget.image.path),
                                 key: _imageKey,
                                 fit: BoxFit.contain,
+                              ),
+
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final result =
+                                      ref.watch(currentSegmentationProvider);
+                                  if (result == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return IgnorePointer(
+                                    child: MaskOverlay(
+                                      segmentation: result,
+                                      imagePath: widget.image.path,
+                                    ),
+                                  );
+                                },
                               ),
 
                               // Overlay des points d'interaction (re-calculés selon la taille réelle)
@@ -197,6 +216,7 @@ class _SegmentationEditorPageState
   Widget _buildSidebar() {
     final isLoading = ref.watch(segmentationLoadingProvider);
     final result = ref.watch(currentSegmentationProvider);
+    final error = ref.watch(segmentationErrorProvider);
 
     return Container(
       width: 320,
@@ -224,7 +244,14 @@ class _SegmentationEditorPageState
           const Divider(),
           Expanded(
             child: result == null
-                ? _buildInstructions()
+                ? error != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(error, textAlign: TextAlign.center),
+                        ),
+                      )
+                    : _buildInstructions()
                 : _buildObjectList(result),
           ),
           if (isLoading) const LinearProgressIndicator(),

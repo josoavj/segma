@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/app/shell/view_models/navigation_view_model.dart';
-import 'package:segma/core/config/app_config.dart';
+import 'package:segma/core/config/backend_config.dart';
 import 'package:segma/features/settings/views/widgets/settings_ui.dart';
 import 'package:segma/features/settings/views/widgets/health_check_tile.dart';
 import 'package:segma/features/settings/views/widgets/model_info_tile.dart';
@@ -59,22 +59,12 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 SettingsTile(
                   title: 'URL du serveur',
-                  subtitle: AppConfig.backendUrl,
+                  subtitle: BackendConfig.backendUrl,
                   onTap: () {
                     ref
                         .read(notificationServiceProvider.notifier)
-                        .info('URL: ${AppConfig.backendUrl}');
+                        .info('URL: ${BackendConfig.backendUrl}');
                   },
-                ),
-                SettingsTile(
-                  title: 'État de la connexion',
-                  subtitle: 'En ligne',
-                  trailing: _StatusIndicator(
-                    color: scheme.tertiary,
-                    bgColor: scheme.tertiaryContainer,
-                    onColor: scheme.onTertiaryContainer,
-                    label: 'Actif',
-                  ),
                 ),
                 const HealthCheckTile(),
               ],
@@ -163,50 +153,6 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 32),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StatusIndicator extends StatelessWidget {
-  final Color color;
-  final Color bgColor;
-  final Color onColor;
-  final String label;
-
-  const _StatusIndicator({
-    required this.color,
-    required this.bgColor,
-    required this.onColor,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: onColor,
-            ),
-          ),
-        ],
       ),
     );
   }
