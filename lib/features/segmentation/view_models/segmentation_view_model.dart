@@ -63,19 +63,26 @@ final uploadedImagePathMapProvider = StateProvider<Map<String, String>>(
 
 // Segmentation par prompt - AsyncNotifier pour éviter les modifications pendant construction
 class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
+  int _requestGeneration = 0;
+
   @override
   Future<SegmentationResult?> build() async => null;
 
-  Future<void> segment(String imagePath) async {
+  Future<void> segment(
+    String imagePath, {
+    List<InteractivePoint>? points,
+  }) async {
+    final requestGeneration = ++_requestGeneration;
     // Mettre à jour l'état de chargement
     ref.read(segmentationLoadingProvider.notifier).state = true;
     ref.read(segmentationErrorProvider.notifier).state = null;
 
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final nextState = await AsyncValue.guard(() async {
       try {
         final service = ref.read(backendServiceProvider);
-        final prompt = ref.read(segmentationPromptProvider);
+        final prompt =
+            points == null ? ref.read(segmentationPromptProvider) : null;
         final threshold = ref.read(confidenceThresholdProvider);
         final uploadMap = ref.read(uploadedImagePathMapProvider);
         var backendImagePath = uploadMap[imagePath];
@@ -94,7 +101,10 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
           backendImagePath,
           prompt,
           confidenceThreshold: threshold,
+          points: points ?? const [],
         );
+
+        if (requestGeneration != _requestGeneration) return null;
 
         // Mettre à jour les providers après succès
         ref.read(currentSegmentationProvider.notifier).state = result;
@@ -107,6 +117,7 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
 
         return result;
       } catch (e, stack) {
+        if (requestGeneration != _requestGeneration) rethrow;
         final friendlyMsg = AppErrorHandler.getFriendlyMessage(e);
         ref.read(segmentationErrorProvider.notifier).state = friendlyMsg;
         ref.read(notificationServiceProvider.notifier).error(
@@ -118,9 +129,22 @@ class SegmentationNotifier extends AsyncNotifier<SegmentationResult?> {
         rethrow;
       } finally {
         // Toujours mettre à jour l'état de chargement à la fin
-        ref.read(segmentationLoadingProvider.notifier).state = false;
+        if (requestGeneration == _requestGeneration) {
+          ref.read(segmentationLoadingProvider.notifier).state = false;
+        }
       }
     });
+    if (requestGeneration == _requestGeneration) {
+      state = nextState;
+    }
+  }
+
+  void reset() {
+    _requestGeneration++;
+    state = const AsyncData(null);
+    ref.read(currentSegmentationProvider.notifier).state = null;
+    ref.read(segmentationErrorProvider.notifier).state = null;
+    ref.read(segmentationLoadingProvider.notifier).state = false;
   }
 }
 
