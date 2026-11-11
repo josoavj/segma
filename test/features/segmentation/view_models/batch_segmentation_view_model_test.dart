@@ -1,84 +1,76 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:segma/features/segmentation/view_models/batch_segmentation_view_model.dart';
-import 'package:segma/features/segmentation/data/backend_service.dart';
 import 'package:segma/app/di/service_providers.dart';
+import 'package:segma/features/home/data/file_service.dart';
+import 'package:segma/features/home/models/image_model.dart';
+import 'package:segma/features/segmentation/data/backend_service.dart';
+import 'package:segma/features/segmentation/models/segmentation_model.dart';
+import 'package:segma/features/segmentation/view_models/batch_segmentation_view_model.dart';
 
 class MockBackendService extends Mock implements BackendService {}
 
-class MockDio extends Mock implements Dio {}
-
-class FakeOptions extends Fake implements Options {}
+class MockFileService extends Mock implements FileService {}
 
 void main() {
   late ProviderContainer container;
   late MockBackendService mockBackend;
-  late MockDio mockDio;
-
-  setUpAll(() {
-    registerFallbackValue(FakeOptions());
-    registerFallbackValue(RequestOptions(path: ''));
-  });
+  late MockFileService mockFiles;
 
   setUp(() {
     mockBackend = MockBackendService();
-    mockDio = MockDio();
-
-    when(() => mockBackend.dio).thenReturn(mockDio);
-    when(() => mockBackend.baseUrl).thenReturn('http://test');
-
+    mockFiles = MockFileService();
     container = ProviderContainer(
       overrides: [
         backendServiceProvider.overrideWithValue(mockBackend),
+        fileServiceProvider.overrideWithValue(mockFiles),
       ],
     );
   });
 
-  group('BatchSegmentationProvider Tests', () {
-    test('processFolder should handle streaming results', () async {
-      final update = {
-        'status': 'success',
-        'current': 1,
-        'total': 1,
-        'image_path': 'img.jpg',
-        'result': {
-          'image_path': 'img.jpg',
-          'resolution': '100x100',
-          'segmentation_dir': 'dir',
-          'objects': []
-        }
-      };
+  tearDown(() => container.dispose());
 
-      final ndjson = '${jsonEncode(update)}\n';
-      // Utiliser un Stream.value pour éviter les timeouts
-      final stream = Stream.value(Uint8List.fromList(utf8.encode(ndjson)));
+  test('processFolder uploads and segments each local image', () async {
+    const imagePath = '/test/img.jpg';
+    const backendPath = 'server-img.jpg';
+    when(() => mockFiles.loadImagesFromFolder('/test')).thenAnswer(
+      (_) async => [ImageModel.fromPath(imagePath, 'img.jpg')],
+    );
+    when(() => mockBackend.uploadImage(imagePath)).thenAnswer(
+      (_) async => {'image_path': backendPath},
+    );
+    when(() => mockBackend.segmentByPrompt(
+          backendPath,
+          'car',
+          confidenceThreshold: 0.5,
+          points: const [],
+        )).thenAnswer(
+      (_) async => SegmentationResult(
+        imageId: 'id',
+        imagePath: backendPath,
+        width: 100,
+        height: 100,
+        objects: [],
+        segmentationDir: 'dir',
+        createdAt: DateTime.now(),
+      ),
+    );
 
-      final mockResponse = Response(
-        data: ResponseBody(stream, 200),
-        statusCode: 200,
-        requestOptions: RequestOptions(path: '/api/v3/segment/batch'),
-      );
+    await container
+        .read(batchSegmentationProvider.notifier)
+        .processFolder('/test', 'car', 0.5);
 
-      when(() => mockDio.post(any(),
-              data: any(named: 'data'), options: any(named: 'options')))
-          .thenAnswer((_) async => mockResponse);
-
-      final notifier = container.read(batchSegmentationProvider.notifier);
-
-      // On attend la fin du traitement
-      await notifier.processFolder('/test', 'prompt', 0.5);
-
-      final state = container.read(batchSegmentationProvider);
-
-      // Si le test échoue ici, c'est que le stream n'a pas été bien transformé
-      // ou que jsonDecode a échoué.
-      expect(state.successCount, 1, reason: 'Erreur: ${state.error}');
-      expect(state.current, 1);
-    });
+    final state = container.read(batchSegmentationProvider);
+    expect(state.successCount, 1);
+    expect(state.current, 1);
+    expect(state.total, 1);
+    expect(state.isProcessing, isFalse);
+    verify(() => mockBackend.uploadImage(imagePath)).called(1);
+    verify(() => mockBackend.segmentByPrompt(
+          backendPath,
+          'car',
+          confidenceThreshold: 0.5,
+          points: const [],
+        )).called(1);
   });
 }
