@@ -5,7 +5,7 @@ class BackendConfig {
   // L'URL est récupérée depuis les variables d'environnement au build ou utilise le défaut
   static const String backendUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'http://127.0.0.1:8000',
   );
 
   // Timeouts adaptés à la production
@@ -19,7 +19,7 @@ class BackendConfig {
   static const String sam3Model = 'facebook/sam3';
   static const String defaultModel = 'facebook/sam3';
 
-  static const List<String> availableDevices = ['cpu', 'cuda'];
+  static const List<String> availableDevices = ['cpu', 'cuda', 'mps'];
   static const String defaultDevice = 'cuda';
 
   static const Map<String, String> modelDescriptions = {
