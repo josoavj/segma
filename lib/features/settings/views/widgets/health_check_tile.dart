@@ -39,15 +39,29 @@ class HealthCheckTile extends ConsumerWidget {
       ),
       data: (health) {
         final status = health['status'] as String? ?? 'unknown';
-        final isHealthy = status == 'healthy';
+        final modelLoaded = health['model_loaded'] as bool? ?? false;
+        final backendReachable = status == 'healthy' || status == 'degraded';
+        final isHealthy = backendReachable && modelLoaded;
+        final indicatorColor = isHealthy
+            ? scheme.tertiary
+            : backendReachable
+                ? scheme.secondary
+                : scheme.error;
         return SettingsTile(
-          title: 'Vérifier la connexion',
-          subtitle: isHealthy ? 'Connecté' : 'Déconnecté',
+          title: 'État du backend local',
+          subtitle: isHealthy
+              ? 'Connecté, modèle prêt'
+              : backendReachable
+                  ? 'Backend joignable, modèle indisponible'
+                  : 'Backend inaccessible',
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color:
-                  isHealthy ? scheme.tertiaryContainer : scheme.errorContainer,
+              color: isHealthy
+                  ? scheme.tertiaryContainer
+                  : backendReachable
+                      ? scheme.secondaryContainer
+                      : scheme.errorContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -57,19 +71,25 @@ class HealthCheckTile extends ConsumerWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: isHealthy ? scheme.tertiary : scheme.error,
+                    color: indicatorColor,
                     shape: BoxShape.circle,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  isHealthy ? 'Actif' : 'Inactif',
+                  isHealthy
+                      ? 'Prêt'
+                      : backendReachable
+                          ? 'Modèle'
+                          : 'Inactif',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: isHealthy
                         ? scheme.onTertiaryContainer
-                        : scheme.onErrorContainer,
+                        : backendReachable
+                            ? scheme.onSecondaryContainer
+                            : scheme.onErrorContainer,
                   ),
                 ),
               ],
@@ -77,8 +97,9 @@ class HealthCheckTile extends ConsumerWidget {
           ),
           onTap: () {
             ref.invalidate(healthCheckProvider);
-            final type =
-                isHealthy ? NotificationType.success : NotificationType.error;
+            final type = isHealthy || backendReachable
+                ? NotificationType.success
+                : NotificationType.error;
             ref.read(notificationServiceProvider.notifier).show(
                   'Status: $status',
                   type: type,
