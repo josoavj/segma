@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/features/segmentation/view_models/segmentation_view_model.dart';
 import 'package:segma/core/notifications/notification_service.dart';
