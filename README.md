@@ -1,6 +1,21 @@
-# SEGMA - Image Segmentation with SAM 3
+<p align="center">
+  <img src="https://github.com/josoavj/segma/blob/main/assets/logo/main.png" alt="Segma Logo" width="150"/>
+</p>
 
-SEGMA est une solution de pointe pour la segmentation d'images, combinant la puissance et l'interface fluide de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue?style=for-the-badge" alt="Desktop Platforms">
+  <img src="https://img.shields.io/badge/Version-1.0.0-green?style=for-the-badge" alt="Version">
+</p>
+
+<h1 align="center">SEGMA</h1>
+
+<p align="center">
+  <strong>Image Segmentation with SAM 3</strong>
+</p>
+
+<p align="center">
+  SEGMA est une solution pour la segmentation d'images, combinant la puissance et l'interface fluide de **Flutter** pour l'interface utilisateur et de **SAM 3 (Segment Anything Model 3)** de Meta pour l'intelligence artificielle.
+</p>
 
 ## Fonctionnalités Clés
 
