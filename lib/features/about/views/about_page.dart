@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 
@@ -53,7 +53,7 @@ class AboutPage extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
                 child: Image.asset(
-                  'assets/logo/Segma.png',
+                  'assets/logo/segma.png',
                   width: 200,
                   height: 160,
                   fit: BoxFit.cover,
