@@ -1,6 +1,6 @@
 name: segma
-description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Image segmentation platform using SAM3"
+publish_to: 'none'
 
 version: 1.0.0
 
@@ -21,7 +21,7 @@ dependencies:
 
   # API & Network
   dio: ^5.3.1
-  google_fonts: ^8.2.1
+  google_fonts: ^9.0.0
 
   # Utils & Encoding
   intl: ^0.20.2
@@ -29,6 +29,7 @@ dependencies:
   shared_preferences: ^2.2.2
   flutter_launcher_icons: ^0.14.4
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -58,6 +59,6 @@ flutter:
   assets:
     - assets/logo/
     - assets/logo/main.png
-    - assets/logo/Segma.png
+    - assets/logo/segma.png
 
 
