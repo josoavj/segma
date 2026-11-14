@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/app/shell/view_models/navigation_view_model.dart';
 
@@ -124,10 +124,26 @@ class ModernSidebar extends ConsumerWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.image_search,
-              color: scheme.onPrimary,
-              size: 24,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Image.asset(
+                'assets/logo/main.png',
+                width: 30,
+                height: 30,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: scheme.surfaceContainer,
+                    child: Center(
+                      child: Icon(
+                        Icons.image_search,
+                        size: 30,
+                        color: scheme.primary,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -166,7 +182,27 @@ class ModernSidebar extends ConsumerWidget {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(Icons.image_search, color: scheme.onPrimary, size: 24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: Image.asset(
+            'assets/logo/main.png',
+            width: 20,
+            height: 20,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: scheme.surfaceContainer,
+                child: Center(
+                  child: Icon(
+                    Icons.image_search,
+                    size: 20,
+                    color: scheme.primary,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
