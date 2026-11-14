@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:segma/features/home/models/image_model.dart';
 import 'package:segma/features/segmentation/models/segmentation_model.dart';
