@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/josoavj/segma/blob/main/assets/logo/main.png" alt="Segma Logo" width="150"/>
+  <img src="https://github.com/josoavj/segma/blob/master/assets/logo/main.png" alt="Segma Logo" width="100"/>
 </p>
 
 <p align="center">
