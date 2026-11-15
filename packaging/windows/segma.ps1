@@ -65,8 +65,8 @@ function Setup {
       Write-Host "!! Aucun GPU NVIDIA détecté : la segmentation sera lente (CPU)."
     }
   }
-  Run $VenvPy @('-m', 'pip', 'install', 'torch', 'torchvision', '--index-url', $index)
   Run $VenvPy @('-m', 'pip', 'install', '-r', $Req)
+  Run $VenvPy @('-m', 'pip', 'install', '--force-reinstall', 'torch==2.7.0', 'torchvision==0.22.0', '--index-url', $index)
   if ($Sam3Spec) { Run $VenvPy @('-m', 'pip', 'install', $Sam3Spec) }
   (Get-FileHash $Req -Algorithm SHA256).Hash | Set-Content $HashFile
 }
