@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=SEGMA
+GenericName=Segmentation d'images
+Comment=Segmentation d'images avec SAM 3
+Exec=/usr/bin/segma
+Icon=segma
+Terminal=false
+Categories=Graphics;2DGraphics;Utility;
+StartupNotify=true
