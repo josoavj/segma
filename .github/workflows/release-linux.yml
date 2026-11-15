@@ -1,0 +1,83 @@
+name: Release Linux
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: segma   # nom du binaire Flutter (= "name:" dans pubspec.yaml)
+
+jobs:
+  linux:
+    name: Build Linux (tar.gz + .deb)
+    runs-on: ubuntu-22.04   # glibc ancienne = meilleure compatibilité
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rsync
+
+      - name: Version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.0-dev"; fi
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+
+      - name: Icônes (assets/logo/main.png)
+        run: |
+          python3 -m pip install pillow
+          python3 packaging/make_icons.py assets/logo/main.png build/icons
+
+      - name: Flutter build
+        run: |
+          flutter config --enable-linux-desktop
+          flutter pub get
+          flutter build linux --release
+
+      - name: Assemblage
+        run: |
+          NAME="segma-${VERSION}-linux-x64"
+          STAGE="build/stage/$NAME"
+          mkdir -p "$STAGE/app" dist
+          cp -r build/linux/x64/release/bundle/. "$STAGE/app/"
+          rsync -a --exclude '__pycache__' --exclude '*.pyc' --exclude '.venv' --exclude '.env' backend/ "$STAGE/backend/"
+          install -m755 packaging/linux/segma.sh "$STAGE/segma.sh"
+          cp .env.example LICENSE "$STAGE/"
+          cp build/icons/segma-256.png "$STAGE/segma.png"
+          chmod 755 "$STAGE/app/${APP_NAME}"
+          echo "STAGE=$STAGE" >> "$GITHUB_ENV"
+          tar -czf "dist/$NAME.tar.gz" -C build/stage "$NAME"
+
+      - name: Paquet .deb
+        run: bash packaging/linux/build-deb.sh "$VERSION" "$STAGE" build/icons dist
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum *.tar.gz *.deb > SHA256SUMS-linux.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: segma-linux
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publier sur la release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRE=""; [[ "$GITHUB_REF_NAME" == *-* ]] && PRE="--prerelease"
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes $PRE || true
+          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
