@@ -56,8 +56,8 @@ setup() {
       echo "!! Aucun GPU NVIDIA détecté : la segmentation sera lente (CPU)."
     fi
   fi
-  step "$VENV/bin/python" -m pip install torch torchvision --index-url "$index"
   step "$VENV/bin/python" -m pip install -r "$REQ"
+  step "$VENV/bin/python" -m pip install --force-reinstall --index-url "$index" torch==2.7.0 torchvision==0.22.0
   if [ -n "$SAM3_SPEC" ]; then step "$VENV/bin/python" -m pip install "$SAM3_SPEC"; fi
   req_hash > "$DATA_DIR/.setup-hash"
   notify "Configuration terminée."
