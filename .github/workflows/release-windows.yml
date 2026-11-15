@@ -1,0 +1,96 @@
+name: Release Windows
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: segma   # nom du binaire Flutter (= "name:" dans pubspec.yaml)
+
+jobs:
+  windows:
+    name: Build Windows (zip + installateur .exe)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Version
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.TrimStart('v') } else { $v = '0.0.0-dev' }
+          $num = if ($v -match '^\d+\.\d+\.\d+') { $Matches[0] } else { '0.0.0' }
+          "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "NUMERIC_VERSION=$num" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Icônes (assets/logo/main.png)
+        run: |
+          python -m pip install pillow
+          python packaging/make_icons.py assets/logo/main.png build/icons
+          # L'exécutable Flutter embarque directement le logo
+          New-Item -ItemType Directory -Force windows/runner/resources | Out-Null
+          Copy-Item build/icons/segma.ico windows/runner/resources/app_icon.ico -Force
+
+      - name: Flutter build
+        run: |
+          flutter config --enable-windows-desktop
+          flutter pub get
+          flutter build windows --release
+
+      - name: Assemblage + zip portable
+        run: |
+          $name  = "segma-$env:VERSION-windows-x64"
+          $stage = "build/stage/$name"
+          New-Item -ItemType Directory -Force "$stage/app", "dist" | Out-Null
+          Copy-Item -Recurse -Force "build/windows/x64/runner/Release/*" "$stage/app/"
+          Copy-Item -Recurse -Force backend "$stage/backend"
+          Get-ChildItem "$stage/backend" -Recurse -Force -Directory |
+            Where-Object { $_.Name -in '__pycache__', '.venv' } | Remove-Item -Recurse -Force
+          Get-ChildItem "$stage/backend" -Recurse -Force -File -Filter '.env' | Remove-Item -Force
+          Copy-Item packaging/windows/segma.ps1, packaging/windows/segma.bat, .env.example, LICENSE $stage
+          Copy-Item build/icons/segma.ico "$stage/segma.ico"
+          "STAGE=$((Resolve-Path $stage).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Compress-Archive -Path $stage -DestinationPath "dist/$name.zip"
+
+      - name: Installateur Inno Setup (.exe)
+        run: |
+          choco install innosetup -y --no-progress
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          & $iscc "/DAppVersion=$env:VERSION" "/DNumericVersion=$env:NUMERIC_VERSION" `
+                  "/DStageDir=$env:STAGE" "/DOutDir=$((Resolve-Path dist).Path)" packaging/windows/segma.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC a échoué" }
+
+      - name: Checksums
+        run: |
+          Get-ChildItem dist -File | Where-Object { $_.Name -notlike 'SHA256*' } | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content dist/SHA256SUMS-windows.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: segma-windows
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publier sur la release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRE=""; [[ "$GITHUB_REF_NAME" == *-* ]] && PRE="--prerelease"
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes $PRE ||
+              gh release view "$GITHUB_REF_NAME" >/dev/null
+          fi
+          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
