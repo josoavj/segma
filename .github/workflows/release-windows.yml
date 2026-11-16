@@ -36,7 +36,9 @@ jobs:
 
       - name: Version
         run: |
-          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.TrimStart('v') } else { $v = '0.0.0-dev' }
+          $tag = $env:RELEASE_TAG
+          if ($tag -notmatch '^v\d+\.\d+\.\d+([.-][A-Za-z0-9.-]+)?$') { throw "Tag invalide: $tag" }
+          $v = $tag.Substring(1)
           $num = if ($v -match '^\d+\.\d+\.\d+') { $Matches[0] } else { '0.0.0' }
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "NUMERIC_VERSION=$num" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -96,14 +98,14 @@ jobs:
           if-no-files-found: error
 
       - name: Publier sur la release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: env.RELEASE_TAG != ''
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          PRE=""; [[ "$GITHUB_REF_NAME" == *-* ]] && PRE="--prerelease"
-          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes $PRE ||
-              gh release view "$GITHUB_REF_NAME" >/dev/null
+          PRE=""; [[ "$RELEASE_TAG" == *-* ]] && PRE="--prerelease"
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --generate-notes $PRE ||
+              gh release view "$RELEASE_TAG" >/dev/null
           fi
-          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          gh release upload "$RELEASE_TAG" dist/* --clobber
