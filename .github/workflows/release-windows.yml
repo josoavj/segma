@@ -14,7 +14,8 @@ permissions:
   contents: write
 
 env:
-  APP_NAME: segma   # nom du binaire Flutter (= "name:" dans pubspec.yaml)
+  APP_NAME: segma
+  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 
 jobs:
   windows:
