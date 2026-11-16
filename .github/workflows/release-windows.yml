@@ -33,18 +33,21 @@ jobs:
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "NUMERIC_VERSION=$num" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      - name: Nettoyage Flutter
+        run: flutter clean
+
       - name: Icônes (assets/logo/main.png)
         run: |
           python -m pip install pillow
-          python packaging/make_icons.py assets/logo/main.png build/icons
+          $iconDir = Join-Path $env:RUNNER_TEMP 'segma-icons'
+          python packaging/make_icons.py assets/logo/main.png $iconDir
           # L'exécutable Flutter embarque directement le logo
           New-Item -ItemType Directory -Force windows/runner/resources | Out-Null
-          Copy-Item build/icons/segma.ico windows/runner/resources/app_icon.ico -Force
+          Copy-Item (Join-Path $iconDir 'segma.ico') windows/runner/resources/app_icon.ico -Force
 
       - name: Flutter build (diagnostic)
         run: |
           flutter config --enable-windows-desktop
-          flutter clean
           flutter pub get
           flutter build windows --release -v
           if ($LASTEXITCODE -ne 0) { throw "Flutter build Windows a échoué (code $LASTEXITCODE)" }
@@ -60,7 +63,7 @@ jobs:
             Where-Object { $_.Name -in '__pycache__', '.venv' } | Remove-Item -Recurse -Force
           Get-ChildItem "$stage/backend" -Recurse -Force -File -Filter '.env' | Remove-Item -Force
           Copy-Item packaging/windows/segma.ps1, packaging/windows/segma.bat, .env.example, LICENSE $stage
-          Copy-Item build/icons/segma.ico "$stage/segma.ico"
+          Copy-Item (Join-Path $env:RUNNER_TEMP 'segma-icons/segma.ico') "$stage/segma.ico"
           "STAGE=$((Resolve-Path $stage).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Compress-Archive -Path $stage -DestinationPath "dist/$name.zip"
 
