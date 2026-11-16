@@ -4,6 +4,11 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag à publier, par exemple v1.0.0'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -20,6 +25,8 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
 
       - uses: subosito/flutter-action@v2
         with:
