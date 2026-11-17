@@ -55,9 +55,10 @@ jobs:
           New-Item -ItemType Directory -Force windows/runner/resources | Out-Null
           Copy-Item (Join-Path $iconDir 'segma.ico') windows/runner/resources/app_icon.ico -Force
 
-      - name: Flutter build (diagnostic)
+      - name: Flutter build Windows
         run: |
           flutter config --enable-windows-desktop
+          flutter clean
           flutter pub get
           flutter build windows --release -v
           if ($LASTEXITCODE -ne 0) { throw "Flutter build Windows a échoué (code $LASTEXITCODE)" }
