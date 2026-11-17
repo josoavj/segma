@@ -43,8 +43,10 @@ jobs:
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "NUMERIC_VERSION=$num" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Nettoyage Flutter
-        run: flutter clean
+      - name: Nettoyage Flutter et activation du Windows-desktop
+        run: |
+          flutter config --enable-windows-desktop
+          flutter clean
 
       - name: Icônes (assets/logo/main.png)
         run: |
@@ -58,7 +60,6 @@ jobs:
       - name: Flutter build Windows
         run: |
           flutter config --enable-windows-desktop
-          flutter clean
           flutter pub get
           flutter build windows --release -v
           if ($LASTEXITCODE -ne 0) { throw "Flutter build Windows a échoué (code $LASTEXITCODE)" }
