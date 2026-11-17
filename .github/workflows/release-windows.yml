@@ -59,9 +59,8 @@ jobs:
 
       - name: Flutter build Windows
         run: |
-          flutter config --enable-windows-desktop
           flutter pub get
-          flutter build windows --release -v
+          flutter build windows --release --build-name=$env:VERSION --build-number=$env:NUMERIC_VERSION -v
           if ($LASTEXITCODE -ne 0) { throw "Flutter build Windows a échoué (code $LASTEXITCODE)" }
 
       - name: Assemblage + zip portable
@@ -72,10 +71,11 @@ jobs:
           Copy-Item -Recurse -Force "build/windows/x64/runner/Release/*" "$stage/app/"
           Copy-Item -Recurse -Force backend "$stage/backend"
           Get-ChildItem "$stage/backend" -Recurse -Force -Directory |
-            Where-Object { $_.Name -in '__pycache__', '.venv' } | Remove-Item -Recurse -Force
-          Get-ChildItem "$stage/backend" -Recurse -Force -File -Filter '.env' | Remove-Item -Force
-          Copy-Item packaging/windows/segma.ps1, packaging/windows/segma.bat, .env.example, LICENSE $stage
-          Copy-Item (Join-Path $env:RUNNER_TEMP 'segma-icons/segma.ico') "$stage/segma.ico"
+            Where-Object { $_.Name -in '__pycache__', '.venv', '.idea', 'data' } | Remove-Item -Recurse -Force
+          Get-ChildItem "$stage/backend" -Recurse -Force -File |
+            Where-Object { $_.Name -eq '.env' -or $_.Extension -eq '.pyc' } | Remove-Item -Force
+          Copy-Item -Path packaging/windows/segma.ps1, packaging/windows/segma.bat, .env.example, LICENSE -Destination $stage -Force
+          Copy-Item (Join-Path $env:RUNNER_TEMP 'segma-icons/segma.ico') "$stage/segma.ico" -Force
           "STAGE=$((Resolve-Path $stage).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Compress-Archive -Path $stage -DestinationPath "dist/$name.zip"
 
@@ -83,6 +83,13 @@ jobs:
         run: |
           choco install innosetup -y --no-progress
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue)?.Source
+          }
+          if (-not (Test-Path $iscc)) {
+            $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe'
+          }
+          if (-not $iscc -or -not (Test-Path $iscc)) { throw "ISCC.exe introuvable" }
           & $iscc "/DAppVersion=$env:VERSION" "/DNumericVersion=$env:NUMERIC_VERSION" `
                   "/DStageDir=$env:STAGE" "/DOutDir=$((Resolve-Path dist).Path)" packaging/windows/segma.iss
           if ($LASTEXITCODE -ne 0) { throw "ISCC a échoué" }
