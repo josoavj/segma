@@ -18,8 +18,7 @@ $AppExe   = Join-Path $Root 'app\segma.exe'
 $Req      = Join-Path $Root 'backend\requirements.txt'
 $HashFile = Join-Path $DataDir '.setup-hash'
 $EnvFile  = Join-Path $DataDir '.env'
-# À aligner sur ce que fait scripts/init_project.sh pour installer SAM 3 :
-$Sam3Spec = if ($null -ne $env:SAM3_SPEC) { $env:SAM3_SPEC } else { 'git+https://github.com/facebookresearch/sam3.git' }
+$Sam3Spec = if ($null -ne $env:SAM3_SPEC) { $env:SAM3_SPEC } else { '' }
 New-Item -ItemType Directory -Force $DataDir | Out-Null
 
 function Run($exe, [string[]]$arguments) {
@@ -48,10 +47,22 @@ function Setup {
     if (Get-Command winget -ErrorAction SilentlyContinue) {
       Write-Host "Python >= 3.10 introuvable : installation de Python 3.12 via winget..."
       winget install -e --id Python.Python.3.12 --accept-source-agreements --accept-package-agreements
-      throw "Python vient d'être installé : relancez SEGMA."
+      throw "Python vient d'être installé : relancez SEGMA pour appliquer les variables d'environnement."
     }
     throw "Python >= 3.10 introuvable. Installez Python 3.12 (https://www.python.org/downloads/) puis relancez SEGMA."
   }
+
+  # Vérification de Git (requis pour installer les dépendances git+https)
+  if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+      Write-Host "Git introuvable (requis pour certaines dépendances) : installation via winget..."
+      winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements
+      Write-Host "Git installé. Si l'installation échoue, relancez SEGMA."
+    } else {
+      Write-Host "!! Git n'est pas détecté. Si l'installation échoue, installez Git (https://git-scm.com/download/win)." -ForegroundColor Yellow
+    }
+  }
+
   Write-Host "==> Première configuration (quelques minutes, ne fermez pas cette fenêtre)..."
   Run $py.Exe (@($py.Args) + @('-m', 'venv', $Venv))
   Run $VenvPy @('-m', 'pip', 'install', '--upgrade', 'pip')
@@ -65,9 +76,18 @@ function Setup {
       Write-Host "!! Aucun GPU NVIDIA détecté : la segmentation sera lente (CPU)."
     }
   }
-  Run $VenvPy @('-m', 'pip', 'install', '-r', $Req)
-  Run $VenvPy @('-m', 'pip', 'install', '--force-reinstall', 'torch==2.7.0', 'torchvision==0.22.0', '--index-url', $index)
-  if ($Sam3Spec) { Run $VenvPy @('-m', 'pip', 'install', $Sam3Spec) }
+
+  Write-Host "==> Installation de PyTorch et torchvision..."
+  Run $VenvPy @('-m', 'pip', 'install', 'torch==2.7.0', 'torchvision==0.22.0', '--index-url', $index)
+
+  Write-Host "==> Installation des dépendances SEGMA..."
+  Run $VenvPy @('-m', 'pip', 'install', '-r', $Req, '--extra-index-url', $index)
+
+  if ($Sam3Spec) {
+    Write-Host "==> Installation de la spécification SAM 3 personnalisée ($Sam3Spec)..."
+    Run $VenvPy @('-m', 'pip', 'install', $Sam3Spec)
+  }
+
   (Get-FileHash $Req -Algorithm SHA256).Hash | Set-Content $HashFile
 }
 
@@ -98,18 +118,18 @@ $backend = Start-Process -FilePath $VenvPy `
 try {
   $ready = $false
   for ($i = 0; $i -lt 180 -and -not $ready; $i++) {
-    if ($backend.HasExited) { throw "Le backend s'est arrêté, voir $DataDir\backend.err.log" }
+    if ($backend.HasExited) { throw "Le backend s'est arrêté inopinément, voir $DataDir\backend.err.log" }
     try {
       Invoke-WebRequest "http://127.0.0.1:$Port/docs" -UseBasicParsing -TimeoutSec 1 | Out-Null
       $ready = $true
     } catch { Start-Sleep -Seconds 1 }
   }
-  if (-not $ready) { throw "Le backend ne répond pas, voir $DataDir\backend.err.log" }
+  if (-not $ready) { throw "Le backend ne répond pas sur le port $Port (délai dépassé), voir $DataDir\backend.err.log" }
 
   if ($HideConsole) {
     Add-Type -Namespace Win32 -Name Native -MemberDefinition @'
-[DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
-[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 '@
     [Win32.Native]::ShowWindow([Win32.Native]::GetConsoleWindow(), 0) | Out-Null
   }
