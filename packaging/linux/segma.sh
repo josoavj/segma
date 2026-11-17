@@ -11,8 +11,8 @@ PORT="${SEGMA_PORT:-8000}"
 APP_BIN="$ROOT/app/${SEGMA_BIN:-segma}"
 REQ="$ROOT/backend/requirements.txt"
 ENV_FILE="$DATA_DIR/.env"
-# À aligner sur ce que fait scripts/init_project.sh pour installer SAM 3 :
-SAM3_SPEC="${SAM3_SPEC-git+https://github.com/facebookresearch/sam3.git}"
+# Spécification optionnelle pour SAM 3 (laissez vide si inclus dans requirements.txt) :
+SAM3_SPEC="${SAM3_SPEC:-}"
 
 mkdir -p "$DATA_DIR"
 HEADLESS=0; [ -t 1 ] || HEADLESS=1          # lancé depuis le menu (pas de terminal)
@@ -56,8 +56,8 @@ setup() {
       echo "!! Aucun GPU NVIDIA détecté : la segmentation sera lente (CPU)."
     fi
   fi
-  step "$VENV/bin/python" -m pip install -r "$REQ"
-  step "$VENV/bin/python" -m pip install --force-reinstall --index-url "$index" torch==2.7.0 torchvision==0.22.0
+  step "$VENV/bin/python" -m pip install torch==2.7.0 torchvision==0.22.0 --index-url "$index"
+  step "$VENV/bin/python" -m pip install -r "$REQ" --extra-index-url "$index"
   if [ -n "$SAM3_SPEC" ]; then step "$VENV/bin/python" -m pip install "$SAM3_SPEC"; fi
   req_hash > "$DATA_DIR/.setup-hash"
   notify "Configuration terminée."
